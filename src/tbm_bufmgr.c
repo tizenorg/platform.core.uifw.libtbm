@@ -959,6 +959,8 @@ tbm_bufmgr_deinit (tbm_bufmgr bufmgr)
 
     dlclose (bufmgr->module_data);
 
+    LIST_DEL (&bufmgr->link);
+
     free (bufmgr);
     bufmgr = NULL;
 }
