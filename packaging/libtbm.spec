@@ -48,7 +48,7 @@ rm -rf %{buildroot}
 %defattr(-,root,root,-)
 /usr/share/license/%{name}
 %{_libdir}/libtbm.so.*
-#%{_libdir}/libdrm_slp.so.*
+%{_libdir}/libdrm_slp.so.*
 
 %files devel
 %defattr(-,root,root,-)
@@ -56,5 +56,6 @@ rm -rf %{buildroot}
 %{_includedir}/tbm_bufmgr.h
 %{_includedir}/tbm_bufmgr_backend.h
 %{_libdir}/libtbm.so
+%{_libdir}/libdrm_slp.so
 %{_libdir}/pkgconfig/libtbm.pc
 

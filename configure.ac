@@ -59,6 +59,7 @@ AC_SUBST(LIBTBM_LIBS)
 
 AC_OUTPUT([
     src/Makefile
+    drm_slp/Makefile
 	Makefile
 	libtbm.pc])
 
