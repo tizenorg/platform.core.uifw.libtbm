@@ -2,7 +2,7 @@ Name:           libtbm
 Version:        1.0.4
 Release:        2
 License:        MIT
-Summary:        the library for Tizen Buffer Manager
+Summary:        Tizen Buffer Manager Library
 Group:          System/Libraries
 Source0:        %{name}-%{version}.tar.gz
 
@@ -10,15 +10,18 @@ BuildRequires:  pkgconfig(pthread-stubs)
 BuildRequires:  pkgconfig(libdrm)
 
 %description
-Description: %{summary}
+The library for Tizen Buffer Manager.
 
 %package devel
-Summary:        the library for Tizen Buffer Manager
+Summary:        Tizen Buffer Manager Library - Development
 Group:          Development/Libraries
-Requires:       libdrm2
+Requires:       libtbm = %{version}
+Requires:       pkgconfig(libdrm)
 
 %description devel
-the library for Tizen Buffer Manager
+The library for Tizen Buffer Manager.
+
+Development Files.
 
 %prep
 %setup -q
