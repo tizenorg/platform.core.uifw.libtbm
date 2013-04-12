@@ -805,7 +805,7 @@ tbm_bufmgr
 tbm_bufmgr_init (int fd)
 {
     char *env;
-    tbm_bufmgr bufmgr;
+    tbm_bufmgr bufmgr = NULL;
 
 #ifdef DEBUG
     env = getenv("GEM_DEBUG");
