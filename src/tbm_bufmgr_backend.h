@@ -192,11 +192,20 @@ struct _tbm_bufmgr_backend
     */
     int           (*bo_unlock)         (tbm_bo bo);
 
+    /**
+    * @brief lock the buffer object with a device and an opt.
+    * @param[in] bo : the buffer object
+    * @param[in] device : the device type to get a handle
+    * @param[in] option : the option to access the buffer object
+    * @return 1 if this function succeeds, otherwise 0.
+    * @remark This function pointer could be null. (default: use the tizen global lock)
+    */
+    int           (*bo_lock2)           (tbm_bo bo, int device, int opt);
+
     /* Padding for future extension */
     void (*reserved1)    (void);
     void (*reserved2)    (void);
     void (*reserved3)    (void);
-    void (*reserved4)    (void);
 };
 
 /**

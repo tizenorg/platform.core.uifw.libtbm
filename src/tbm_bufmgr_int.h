@@ -35,6 +35,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <pthread.h>
 #include "tbm_bufmgr_backend.h"
 
+#define TBM_LOG(...)  fprintf (stderr, __VA_ARGS__)
+
 typedef union _tbm_bo_cache_state tbm_bo_cache_state;
 
 struct list_head

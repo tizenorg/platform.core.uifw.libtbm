@@ -43,7 +43,7 @@ typedef struct _tbm_bo *tbm_bo;
 
 /* TBM_DEVICE_TYPE */
 #define TBM_DEVICE_DEFAULT   0  /**< device type to get the default handle    */
-#define TBM_DEVICE_CPU       1  /**< device type to get the virtual pointer   */
+#define TBM_DEVICE_CPU       1  /**< device type to get the virtual memory    */
 #define TBM_DEVICE_2D        2  /**< device type to get the 2D memory handle  */
 #define TBM_DEVICE_3D        3  /**< device type to get the 3D memory handle  */
 #define TBM_DEVICE_MM        4  /**< device type to get the multimedia handle */
@@ -51,6 +51,7 @@ typedef struct _tbm_bo *tbm_bo;
 /* TBM_OPTION */
 #define TBM_OPTION_READ      (1 << 0) /**< access option to read  */
 #define TBM_OPTION_WRITE     (1 << 1) /**< access option to write */
+#define TBM_OPTION_VENDOR    (0xffff0000) /**< vendor specific option: it depends on the backend */
 
 /**
  * @brief tbm_bo_handle
@@ -70,11 +71,16 @@ typedef union _tbm_bo_handle
  */
 enum TBM_BO_FLAGS
 {
-    TBM_BO_DEFAULT = 0,          /**< physically non-contiguous memory */
-    TBM_BO_SCANOUT = (1<<0),     /**< physically contiguous memory     */
-    TBM_BO_NONCACHABLE = (1<<1), /**< non-cachable memory              */
-    TBM_BO_WC = (1<<2),          /**< write-combine memory             */
+    TBM_BO_DEFAULT = 0,            /**< default memory: it depends on the backend         */
+    TBM_BO_SCANOUT = (1<<0),       /**< scanout memory                                    */
+    TBM_BO_NONCACHABLE = (1<<1),   /**< non-cachable memory                               */
+    TBM_BO_WC = (1<<2),            /**< write-combine memory                              */
+    TBM_BO_VENDOR = (0xffff0000), /**< vendor specific memory: it depends on the backend */
 };
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Functions for buffer manager */
 
@@ -214,6 +220,10 @@ int tbm_bo_set_user_data    (tbm_bo bo, unsigned long key, void* data);
  * @return 1 if this function succeeds, otherwise 0.
  */
 int tbm_bo_get_user_data    (tbm_bo bo, unsigned long key, void** data);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _TBM_BUFMGR_H_ */
 

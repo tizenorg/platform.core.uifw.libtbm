@@ -8,12 +8,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef __TBM_BUFMGR_GLOCK_H__
-#define __TBM_BUFMGR_GLOCK_H__
+#ifndef __TBM_BUFMGR_TGL_H__
+#define __TBM_BUFMGR_TGL_H__
 
 #include <linux/ioctl.h>
 
 static char tgl_devfile[] = "/dev/slp_global_lock";
+static char tgl_devfile1[] = "/dev/tgl";
 
 #define TGL_IOC_BASE				0x32
 
@@ -45,4 +46,4 @@ typedef enum {
 #define TGL_IOC_SET_DATA			_IOW(TGL_IOC_BASE, _TGL_SET_DATA, struct tgl_user_data *)
 #define TGL_IOC_GET_DATA			_IOW(TGL_IOC_BASE, _TGL_GET_DATA, struct tgl_user_data *)
 
-#endif /* __TBM_BUFMGR_GLOCK_H__ */
+#endif /* __TBM_BUFMGR_TGL_H__ */

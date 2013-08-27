@@ -35,6 +35,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <stdlib.h>
 #include "drm_slp_bufmgr.h"
 #include "tbm_bufmgr.h"
+#include "tbm_bufmgr_int.h"
 
 drm_slp_bufmgr
 drm_slp_bufmgr_init(int fd, void *arg)
@@ -44,7 +45,7 @@ drm_slp_bufmgr_init(int fd, void *arg)
     bufmgr = tbm_bufmgr_init (fd);
     if (!bufmgr)
     {
-        fprintf (stderr, "[libdrm_slp:%d]: error bufmgr is null\n", getpid());
+        TBM_LOG ("[libdrm_slp:%d]: error bufmgr is null\n", getpid());
         return NULL;
     }
 
@@ -71,7 +72,7 @@ drm_slp_bo_import(drm_slp_bufmgr bufmgr, unsigned int key)
     bo = tbm_bo_import ((tbm_bufmgr)bufmgr, key);
     if (!bo)
     {
-        fprintf (stderr, "[libdrm_slp:%d]: error bo is null\n", getpid());
+        TBM_LOG ("[libdrm_slp:%d]: error bo is null\n", getpid());
         return NULL;
     }
 
@@ -87,7 +88,7 @@ drm_slp_bo_map(drm_slp_bo bo, int device, int opt)
     bo_handle = tbm_bo_map ((tbm_bo)bo, device, opt);
     if (bo_handle.ptr == NULL)
     {
-        fprintf (stderr, "[libdrm_slp:%d]: error bo_handle is null\n", getpid());
+        TBM_LOG ("[libdrm_slp:%d]: error bo_handle is null\n", getpid());
         return 0;
     }
 
@@ -103,7 +104,7 @@ drm_slp_bo_map(drm_slp_bo bo, int device, int opt)
             ret = (unsigned long)bo_handle.ptr;
             break;
         default:
-            fprintf (stderr, "[libdrm_slp:%d]: error wrong device type\n", getpid());
+            TBM_LOG ("[libdrm_slp:%d]: error wrong device type\n", getpid());
             return 0;
     }
 

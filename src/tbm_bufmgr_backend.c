@@ -65,7 +65,7 @@ tbm_backend_init (tbm_bufmgr bufmgr, tbm_bufmgr_backend backend)
 
     if (!bufmgr)
     {
-        fprintf (stderr, "[libtbm:%d] "
+        TBM_LOG ("[libtbm:%d] "
             "error (%s): fail to init tbm backend... bufmgr is null\n",
             getpid(), __FUNCTION__);
         return 0;
@@ -73,7 +73,7 @@ tbm_backend_init (tbm_bufmgr bufmgr, tbm_bufmgr_backend backend)
 
     if (!backend)
     {
-        fprintf (stderr, "[libtbm:%d] "
+        TBM_LOG ("[libtbm:%d] "
             "error (%s): fail to init tbm backend... backend is null\n",
             getpid(), __FUNCTION__);
         return 0;
@@ -85,7 +85,7 @@ tbm_backend_init (tbm_bufmgr bufmgr, tbm_bufmgr_backend backend)
     {
         if (!backend->bo_cache_flush)
         {
-            fprintf (stderr, "[libtbm:%d] "
+            TBM_LOG ("[libtbm:%d] "
                 "error (%s): TBM_FLAG_CACHE_CTRL_TBM needs backend->bo_cache_flush\n",
                 getpid(), __FUNCTION__);
             return 0;
@@ -93,18 +93,18 @@ tbm_backend_init (tbm_bufmgr bufmgr, tbm_bufmgr_backend backend)
     }
 
     /* log for tbm flags */
-    fprintf (stderr, "[libtbm:%d] ", getpid());
-    fprintf (stderr, "cache_crtl:");
+    TBM_LOG ("[libtbm:%d] ", getpid());
+    TBM_LOG ("cache_crtl:");
     if (flags&TBM_CACHE_CTRL_BACKEND)
-        fprintf (stderr, "BACKEND ");
+        TBM_LOG ("BACKEND ");
     else
-        fprintf (stderr, "TBM ");
-    fprintf (stderr, "lock_crtl:");
+        TBM_LOG ("TBM ");
+    TBM_LOG ("lock_crtl:");
     if (flags&TBM_LOCK_CTRL_BACKEND)
-        fprintf (stderr, "BACKEND ");
+        TBM_LOG ("BACKEND ");
     else
-        fprintf (stderr, "TBM ");
-    fprintf (stderr, "\n");
+        TBM_LOG ("TBM ");
+    TBM_LOG ("\n");
 
     bufmgr->backend = backend;
 
