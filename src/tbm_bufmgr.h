@@ -5,6 +5,7 @@ libtbm
 Copyright 2012 Samsung Electronics co., Ltd. All Rights Reserved.
 
 Contact: SooChan Lim <sc1.lim@samsung.com>, Sangjin Lee <lsj119@samsung.com>
+Boram Park <boram1288.park@samsung.com>, Changyeon Lee <cyeon.lee@samsung.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the
@@ -31,6 +32,13 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef _TBM_BUFMGR_H_
 #define _TBM_BUFMGR_H_
 
+/**
+ * @internal
+ * @addtogroup CAPI_UI_TBM_BUFMGR_MODULE
+ * @{
+ */
+
+#include <tbm_type.h>
 #include <stdint.h>
 
 /**
@@ -38,24 +46,89 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * \brief Tizen Buffer Manager
  */
 
-typedef struct _tbm_bufmgr *tbm_bufmgr;
-typedef struct _tbm_bo *tbm_bo;
-
-/* TBM_DEVICE_TYPE */
-#define TBM_DEVICE_DEFAULT   0  /**< device type to get the default handle    */
-#define TBM_DEVICE_CPU       1  /**< device type to get the virtual memory    */
-#define TBM_DEVICE_2D        2  /**< device type to get the 2D memory handle  */
-#define TBM_DEVICE_3D        3  /**< device type to get the 3D memory handle  */
-#define TBM_DEVICE_MM        4  /**< device type to get the multimedia handle */
-
-/* TBM_OPTION */
-#define TBM_OPTION_READ      (1 << 0) /**< access option to read  */
-#define TBM_OPTION_WRITE     (1 << 1) /**< access option to write */
-#define TBM_OPTION_VENDOR    (0xffff0000) /**< vendor specific option: it depends on the backend */
+/**
+ * @brief Definition for the tizen buffer manager
+ * @since_tizen 2.3
+ */
+typedef struct _tbm_bufmgr * tbm_bufmgr;
 
 /**
- * @brief tbm_bo_handle
- *  abstraction of the memory handle by TBM_DEVICE_TYPE
+ * @brief Definition for the tizen buffer object
+ * @since_tizen 2.3
+ */
+typedef struct _tbm_bo *tbm_bo;
+/**
+ * @brief Definition for the key associated with the buffer object
+ * @since_tizen 2.3
+ */
+typedef uint32_t tbm_key;
+/**
+ * @brief Definition for the file descripter of the system buffer manager
+ * @since_tizen 2.3
+ */
+typedef int32_t tbm_fd;
+
+
+/* TBM_DEVICE_TYPE */
+
+/**
+ * @brief Definition for the device type to get the default handle
+ * @since_tizen 2.3
+ */
+#define TBM_DEVICE_DEFAULT   0
+/**
+ * @brief Definition for the device type to get the virtual memory
+ * @since_tizen 2.3
+ */
+#define TBM_DEVICE_CPU       1
+/**
+ * @brief Definition for the device type to get the 2D memory handle
+ * @since_tizen 2.3
+ */
+#define TBM_DEVICE_2D        2
+/**
+ * @brief Definition for the device type to get the 3D memory handle
+ * @since_tizen 2.3
+ */
+#define TBM_DEVICE_3D        3
+/**
+ * @brief Definition for the device type to get the multimedia handle
+ * @since_tizen 2.3
+ */
+#define TBM_DEVICE_MM        4
+
+/**
+ * @brief Definition for the cache invalidate
+ * @since_tizen 2.3
+ */
+#define TBM_CACHE_INV            0x01
+/**
+ * @brief Definition for the cache clean
+ * @since_tizen 2.3
+ */
+#define TBM_CACHE_CLN            0x02
+
+/* TBM_OPTION */
+
+/**
+ * @brief Definition for the access option to read
+ * @since_tizen 2.3
+ */
+#define TBM_OPTION_READ      (1 << 0)
+/**
+ * @brief Definition for the access option to write
+ * @since_tizen 2.3
+ */
+#define TBM_OPTION_WRITE     (1 << 1)
+/**
+ * @brief Definition for the vendor specific option that depends on the backend
+ * @since_tizen 2.3
+ */
+#define TBM_OPTION_VENDOR    (0xffff0000)
+
+/**
+ * @brief tbm_bo_handle abstraction of the memory handle by TBM_DEVICE_TYPE
+ * @since_tizen 2.3
  */
 typedef union _tbm_bo_handle
 {
@@ -68,6 +141,7 @@ typedef union _tbm_bo_handle
 
 /**
  * @brief Enumeration of bo memory type
+ * @since_tizen 2.3
  */
 enum TBM_BO_FLAGS
 {
@@ -85,145 +159,710 @@ extern "C" {
 /* Functions for buffer manager */
 
 /**
- * @brief initialize the buffer manager.
+ * @brief Initializes the buffer manager.
+ * @details If fd is lower than zero, fd is get drm fd in tbm_bufmgr_init function\n
+ * The user can decide the lock type and cache flush type with the environment variables, which are BUFMGR_LOCK_TYPE and BUFMGR_MAP_CACHE.\n
+ * \n
+ * BUFMGR_LOCK default is once\n
+ * once : The previous bo which is locked is unlock when the new bo is trying to be locked\n
+ * always : The new bo is locked until the previous bo which is locked is unlocked\n
+ * never : Every bo is never locked.\n
+ * \n
+ * BUFMGR_MAP_CACHE default is true\n
+ * true : use map cache flushing\n
+ * false : to use map cache flushing
+ * @since_tizen 2.3
  * @param[in] fd : file descripter of the system buffer manager
  * @return a buffer manager
+ * @retval #tbm_bufmgr
+ * @see tbm_bufmgr_deinit();
+ * @par Example
+   @code
+   #include <tbm_bufmgr.h>
+   int bufmgr_fd;
+
+
+   setenv("BUFMGR_LOCK_TYPE", "once", 1);
+   setenv("BUFMGR_MAP_CACHE", "true", 1);
+
+   tbm_bufmgr bufmgr;
+   bufmgr = tbm_bufmgr_init (bufmgr_fd);
+
+   ....
+
+   tbm_bufmgr_deinit (bufmgr);
+   @endcode
  */
 tbm_bufmgr tbm_bufmgr_init   (int fd);
 
 /**
- * @brief deinitialize the buffer manager.
+ * @brief Deinitializes the buffer manager.
+ * @since_tizen 2.3
  * @param[in] bufmgr : the buffer manager
+ * @see tbm_bufmgr_init()
+ * @par Example
+   @code
+   #include <tbm_bufmgr.h>
+
+   int bufmgr_fd;
+   tbm_bufmgr bufmgr;
+   bufmgr = tbm_bufmgr_init (bufmgr_fd);
+
+   ....
+
+   tbm_bufmgr_deinit (bufmgr);
+   @endcode
  */
 void       tbm_bufmgr_deinit (tbm_bufmgr bufmgr);
 
 /* Functions for bo */
 
 /**
- * @brief allocate the buffer object
+ * @brief Allocates the buffer object.
+ * @details This function create tbm_bo and set reference count to 1.\n
+ * The user can craete tbm_bo with memory type flag #TBM_BO_FLAGS\n\n
+ * #TBM_BO_DEFAULT indecates default memory: it depends on the backend\n
+ * #TBM_BO_SCANOUT indecates scanout memory\n
+ * #TBM_BO_NONCACHABLE indecates non-cachable memory\n
+ * #TBM_BO_WC indecates write-combine memory\n
+ * #TBM_BO_VENDOR indecates vendor specific memory: it depends on the tbm backend
+ * @since_tizen 2.3
  * @param[in] bufmgr : the buffer manager
  * @param[in] size : the size of buffer object
  * @param[in] flags : the flags of memory type
  * @return a buffer object
+ * @retval #tbm_bo
+ * @par Example
+   @code
+   #include <tbm_bufmgr.h>
+
+   int bufmgr_fd;
+   tbm_bufmgr bufmgr;
+   tbm_bo;
+
+   bufmgr = tbm_bufmgr_init (bufmgr_fd);
+   bo = tbm_bo_alloc (bufmgr, 128 * 128, TBM_BO_DEFAULT);
+
+   ....
+
+   tbm_bufmgr_deinit (bufmgr);
+   @endcode
  */
 tbm_bo        tbm_bo_alloc      (tbm_bufmgr bufmgr, int size, int flags);
 
 /**
- * @brief increase the reference count of bo.
+ * @brief Increases the reference count of bo.
+ * @since_tizen 2.3
  * @param[in] bo : the buffer object
  * @return a buffer object
+ * @retval #tbm_bo
+ * @see tbm_bo_unref()
+ * @par Example
+   @code
+   #include <tbm_bufmgr.h>
+
+   int bufmgr_fd;
+   tbm_bufmgr bufmgr;
+   tbm_bo bo;
+
+   bufmgr = tbm_bufmgr_init (bufmgr_fd);
+   bo = tbm_bo_alloc (bufmgr, 128 * 128, TBM_BO_DEFAULT);
+
+   ...
+
+   bo = tbm_bo_ref (bo);
+
+   ....
+
+   tbm_bufmgr_deinit (bufmgr);
+   @endcode
  */
 tbm_bo        tbm_bo_ref        (tbm_bo bo);
 
 /**
- * @brief increase the reference count of bo.
+ * @brief Decreases the reference count of bo
+ * @since_tizen 2.3
  * @param[in] bo : the buffer object
+ * @see tbm_bo_ref()
+ * @see tbm_bo_alloc()
+ * @par Example
+   @code
+   #include <tbm_bufmgr.h>
+
+   int bufmgr_fd;
+   tbm_bufmgr bufmgr;
+   tbm_bo bo;
+
+   bufmgr = tbm_bufmgr_init (bufmgr_fd);
+   bo = tbm_bo_alloc (bufmgr, 128 * 128, TBM_BO_DEFAULT);
+
+   ...
+
+   tbm_bo_unref (bo);
+   tbm_bufmgr_deinit (bufmgr);
+   @endcode
  */
 void          tbm_bo_unref      (tbm_bo bo);
 
 /**
- * @brief map the buffer object according to the device type and the option.
+ * @brief Maps the buffer object according to the device type and the option.
+ * @details Cache flushing and Locking is executed, while tbm_bo is mapping in the proper condition according to the device type and the access option.\n
+ * If the cache flush type of bufmgr set true, the map cache flushing is executed
+ * If the lock type of bufmgr set once, the previous bo which is locked is unlock when the new bo is trying to be locked.\n
+ * If the lock type of bufmgr set always, the new bo is locked until the previous bo which is locked is unlocked.\n
+ * If the lock type of bufmgr set never, Every bo is never locked.\n\n
+ * #TBM_DEVICE_DEFAULT indecates the default handle.\n
+ * #TBM_DEVICE_2D indecates the 2D memory handle.\n
+ * #TBM_DEVICE_3D indecates the 3D memory handle.\n
+ * #TBM_DEVICE_CPU indecates the virtual memory handle.\n
+ * #TBM_DEVICE_MM indecates the multimedia handle.\n\n
+ * #TBM_OPTION_READ indecates the accss option to read.\n
+ * #TBM_OPTION_WRITE indecates the access option to write.\n
+ * #TBM_OPTION_VENDOR indecates the vendor specific option that depends on the backend.
+ * @since_tizen 2.3
  * @param[in] bo : the buffer object
  * @param[in] device : the device type to get a handle
- * @param[in] option : the option to access the buffer object
+ * @param[in] opt : the option to access the buffer object
  * @return the handle of the buffer object
+ * @retval #tbm_bo
+ * @see tbm_bo_unmap()
+ * @par Example
+   @code
+   #include <tbm_bufmgr.h>
+
+   int bufmgr_fd;
+   tbm_bufmgr bufmgr;
+   tbm_bo bo;
+   tbm_bo_handle handle;
+
+   bufmgr = tbm_bufmgr_init (bufmgr_fd);
+   bo = tbm_bo_alloc (bufmgr, 128 * 128, TBM_BO_DEFAULT);
+
+   ...
+
+   handle = tbm_bo_map (bo, TBM_DEVICE_2D, TBM_OPTION_READ|TBM_OPTION_WRITE);
+
+   ...
+
+   tbm_bo_unmap (bo);
+   tbm_bo_unref (bo);
+   tbm_bufmgr_deinit (bufmgr);
+   @endcode
  */
 tbm_bo_handle tbm_bo_map        (tbm_bo bo, int device, int opt);
 
 /**
- * @brief unmap the buffer object.
+ * @brief Unmaps the buffer object.
+ * @since_tizen 2.3
  * @param[in] bo : the buffer object
  * @return 1 if this function succeeds, otherwise 0.
+ * @see tbm_bo_map()
+ * @par Example
+   @code
+   #include <tbm_bufmgr.h>
+
+   int bufmgr_fd;
+   tbm_bufmgr bufmgr;
+   tbm_bo bo
+   tbm_bo_handle handle;
+
+   bufmgr = tbm_bufmgr_init (bufmgr_fd);
+   bo = tbm_bo_alloc (bufmgr, 128 * 128, TBM_BO_DEFAULT);
+
+   ...
+
+   handle = tbm_bo_map (bo, TBM_DEVICE_2D, TBM_OPTION_READ|TBM_OPTION_WRITE);
+
+   ...
+
+   tbm_bo_unmap (bo);
+   tbm_bo_unref (bo);
+   tbm_bufmgr_deinit (bufmgr);
+   @endcode
  */
 int           tbm_bo_unmap      (tbm_bo bo);
 
 /**
- * @brief get the tbm_bo_handle according to the device type.
+ * @brief Gets the tbm_bo_handle according to the device type.
+ * @details The tbm_bo_handle can be get without the map of the tbm_bo.\n
+ * In this case, TBM does not guarantee the lock and the cache flush of the tbm_bo.\n\n
+ * #TBM_DEVICE_DEFAULT indecates the default handle.\n
+ * #TBM_DEVICE_2D indecates the 2D memory handle.\n
+ * #TBM_DEVICE_3D indecates the 3D memory handle.\n
+ * #TBM_DEVICE_CPU indecates the virtual memory handle.\n
+ * #TBM_DEVICE_MM indecates the multimedia handle.
+ * @since_tizen 2.3
  * @param[in] bo : the buffer object
  * @param[in] device : the device type to get a handle
  * @return the handle of the buffer object
- */
+ * @retval #tbm_bo_handle
+ * @par Example
+   @code
+   #include <tbm_bufmgr.h>
+
+   int bufmgr_fd;
+   tbm_bufmgr bufmgr;
+   tbm_bo bo;
+   tbm_bo_handle handle;
+
+   bufmgr = tbm_bufmgr_init (bufmgr_fd);
+   bo = tbm_bo_alloc (bufmgr, 128 * 128, TBM_BO_DEFAULT);
+
+   ...
+
+   handle = tbm_bo_get_handle (bo, TBM_DEVICE_2D);
+
+   ...
+
+   tbm_bo_unref (bo);
+   tbm_bufmgr_deinit (bufmgr);
+   @endcode
+  */
 tbm_bo_handle tbm_bo_get_handle (tbm_bo bo, int device);
 
 /**
- * @brief export the buffer object
+ * @brief Exports the buffer object by key.
+ * @details The tbm_bo can be exported to the anther process with the unique key associated with the the tbm_bo.
+ * @since_tizen 2.3
  * @param[in] bo : the buffer object
  * @return key associated with the buffer object
- */
-unsigned int  tbm_bo_export     (tbm_bo bo);
+ * @retval #tbm_key
+ * @see tbm_bo_import()
+ * @par Example
+   @code
+   #include <tbm_bufmgr.h>
+
+   int bufmgr_fd;
+   tbm_bufmgr bufmgr;
+   tbm_bo;
+   tbm_key key;
+
+   bufmgr = tbm_bufmgr_init (bufmgr_fd);
+   bo = tbm_bo_alloc (bufmgr, 128 * 128, TBM_BO_DEFAULT);
+   key = tbm_bo_export (bo);
+
+   ...
+
+   tbm_bo_unref (bo);
+   tbm_bufmgr_deinit (bufmgr);
+   @endcode
+  */
+tbm_key  tbm_bo_export     (tbm_bo bo);
 
 /**
- * @brief import the buffer object associated with the key.
+ * @brief Exports the buffer object by fd.
+ * @details The tbm_bo can be exported to the anther process with the unique fd associated with the the tbm_bo.
+ * @since_tizen 2.3
+ * @param[in] bo : the buffer object
+ * @return fd associated with the buffer object
+ * @retval #tbm_fd
+ * @see tbm_bo_import_fd()
+ * @par Example
+   @code
+   #include <tbm_bufmgr.h>
+
+   int bufmgr_fd;
+   tbm_fd bo_fd;
+   tbm_bufmgr bufmgr;
+   tbm_bo;
+
+   bufmgr = tbm_bufmgr_init (bufmgr_fd);
+   bo = tbm_bo_alloc (bufmgr, 128 * 128, TBM_BO_DEFAULT);
+   bo_fd = tbm_bo_export (bo);
+
+   ...
+
+   tbm_bo_unref (bo);
+   tbm_bufmgr_deinit (bufmgr);
+   @endcode
+  */
+tbm_fd tbm_bo_export_fd (tbm_bo bo);
+
+/**
+ * @brief Imports the buffer object associated with the key.
+ * @details The reference count of the tbm_bo is 1.
+ * @since_tizen 2.3
  * @param[in] bufmgr : the buffer manager
  * @param[in] key : the key associated with the buffer object
  * @return a buffer object
- */
-tbm_bo        tbm_bo_import     (tbm_bufmgr bufmgr, unsigned int key);
+ * @retval #tbm_bo
+ * @see tbm_bo_export()
+ * @par Example
+   @code
+   #include <tbm_bufmgr.h>
+
+   int bufmgr_fd;
+   int bo_key;
+   tbm_bufmgr bufmgr;
+   tbm_bo;
+
+   ...
+
+   bufmgr = tbm_bufmgr_init (bufmgr_fd);
+   bo = tbm_bo_import (key);
+
+   ...
+
+   tbm_bo_unref (bo);
+   tbm_bufmgr_deinit (bufmgr);
+   @endcode
+  */
+tbm_bo        tbm_bo_import     (tbm_bufmgr bufmgr, tbm_key key);
 
 /**
- * @brief get the size of a bo.
+ * @brief Imports the buffer object associated with the fd.
+ * @details The reference count of the tbm_bo is 1.
+ * @since_tizen 2.3
+ * @param[in] bufmgr : the buffer manager
+ * @param[in] fd : the fd associated with the buffer object
+ * @return a buffer object
+ * @retval #tbm_bo
+ * @see tbm_bo_export_fd()
+ * @par Example
+   @code
+   #include <tbm_bufmgr.h>
+
+   int bufmgr_fd;
+   tbm_fd bo_fd;
+   tbm_bufmgr bufmgr;
+   tbm_bo bo;
+
+   ...
+
+   bufmgr = tbm_bufmgr_init (bufmgr_fd);
+   bo = tbm_bo_import (bo_fd);
+
+   ...
+
+   tbm_bo_unref (bo);
+   tbm_bufmgr_deinit (bufmgr);
+   @endcode
+  */
+tbm_bo        tbm_bo_import_fd  (tbm_bufmgr bufmgr, tbm_fd fd);
+
+/**
+ * @brief Gets the size of a bo.
+ * @since_tizen 2.3
  * @param[in] bo : the buffer object
  * @return 1 if this function succeeds, otherwise 0.
- */
+ * @see tbm_bo_alloc()
+ * @par Example
+   @code
+   #include <tbm_bufmgr.h>
+
+   int bufmgr_fd;
+   tbm_bufmgr bufmgr;
+   tbm_bo;
+   int size;
+
+   bufmgr = tbm_bufmgr_init (bufmgr_fd);
+   bo = tbm_bo_alloc (bufmgr, 128 * 128, TBM_BO_DEFAULT);
+   size = tbm_bo_size (bo);
+
+   ...
+
+   tbm_bo_unref (bo);
+   tbm_bufmgr_deinit (bufmgr);
+   @endcode
+  */
 int           tbm_bo_size       (tbm_bo bo);
 
 /**
- * @brief get the state where the buffer object is locked.
+ * @brief Gets the state where the buffer object is locked.
+ * @since_tizen 2.3
  * @param[in] bo : the buffer object
- * @return 1 if this function succeeds, otherwise 0.
- */
+ * @return 1 if this bo is locked, otherwise 0.
+ * @see tbm_bo_map()
+ * @see tbm_bo_unmap()
+ * @par Example
+   @code
+   #include <tbm_bufmgr.h>
+
+   int bufmgr_fd;
+   tbm_bufmgr bufmgr;
+   tbm_bo bo;
+
+   bufmgr = tbm_bufmgr_init (bufmgr_fd);
+   bo = tbm_bo_alloc (bufmgr, 128 * 128, TBM_BO_DEFAULT);
+
+   ...
+
+   if (tbm_bo_locked (bo))
+   {
+
+   ...
+
+   tbm_bo_unref (bo);
+   tbm_bufmgr_deinit (bufmgr);
+   @endcode
+*/
 int           tbm_bo_locked     (tbm_bo bo);
 
 /**
- * @brief swap the buffer object.
+ * @brief Swaps the buffer object.
+ * @since_tizen 2.3
  * @param[in] bo1 : the buffer object
  * @param[in] bo2 : the buffer object
  * @return 1 if this function succeeds, otherwise 0.
+ * @par Example
+   @code
+   #include <tbm_bufmgr.h>
+
+   int bufmgr_fd;
+   tbm_bufmgr bufmgr;
+   tbm_bo bo1;
+   tbm_bo bo2;
+   int ret;
+
+   bufmgr = tbm_bufmgr_init (bufmgr_fd);
+   bo1 = tbm_bo_alloc (bufmgr, 128 * 128, TBM_BO_DEFAULT);
+   bo2 = tbm_bo_alloc (bufmgr, 256 * 256, TBM_BO_DEFAULT);
+
+   ...
+
+   ret = tbm_bo_swap (bo1, bo2);
+
+   ...
+
+   tbm_bo_unref (bo1);
+   tbm_bo_unref (bo2);
+   tbm_bufmgr_deinit (bufmgr);
+   @endcode
  */
 int           tbm_bo_swap       (tbm_bo bo1, tbm_bo bo2);
 
 
-/* Functions for userdata of bo */
-typedef void (*tbm_data_free)(void *);
+/**
+ * @brief Called when the user data is deleted in buffer object.
+ * @since_tizen 2.3
+ * @param[in] user_data User_data to be passed to callback function
+ * @pre The callback must be registered using tbm_bo_add_user_data().\n
+ * tbm_bo_delete_user_data() must be called to invoke this callback.
+ * @see tbm_bo_add_user_data()
+ * @see tbm_bo_delete_user_data()
+ */
+typedef void (*tbm_data_free)(void *user_data);
 
 /**
- * @brief add a user_data to the buffer object
+ * @brief Adds a user_data to the buffer object.
+ * @since_tizen 2.3
  * @param[in] bo : the buffer object
- * @param[in] key : the key associated with the user_date
+ * @param[in] key : the key associated with the user_data
  * @param[in] data_free_func : the function pointer to free the user_data
  * @return 1 if this function succeeds, otherwise 0.
+ * @post tbm_data_free() will be called under certain conditions, after calling tbm_bo_delete_user_data().
+ * @see tbm_data_free()
+ * @see tbm_bo_set_user_data()
+ * @see tbm_bo_get_user_data()
+ * @see tbm_bo_delete_user_data()
+ * @par Example
+   @code
+   #include <tbm_bufmgr.h>
+
+   void example_data_free (void *user_data)
+   {
+       char *data = (char*) user_data;
+       free(data);
+   }
+
+   int main()
+   {
+       int bufmgr_fd;
+       tbm_bufmgr bufmgr;
+       tbm_bo bo;
+       char *user_data;
+       char *get_data;
+       int ret;
+
+       bufmgr = tbm_bufmgr_init (bufmgr_fd);
+       bo = tbm_bo_alloc (bufmgr, 128 * 128, TBM_BO_DEFAULT);
+       user_data = (char*) malloc (sizeof(char) * 128);
+
+       ...
+
+       tbm_bo_add_user_data (bo, 1, example_data_free);
+       tbm_bo_set_user_data (bo, 1, user_data);
+
+       ...
+
+       ret = tbm_bo_get_user_data (bo, 1, &get_data);
+       tbm_bo_delete_user_data (bo, 1);
+
+       ...
+
+       tbm_bo_unref (bo);
+       tbm_bufmgr_deinit (bufmgr);
+   }
+   @endcode
  */
+
 int tbm_bo_add_user_data    (tbm_bo bo, unsigned long key, tbm_data_free data_free_func);
 
 /**
- * @brief delete the user_data in the buffer object.
+ * @brief Deletes the user_data in the buffer object.
+ * @since_tizen 2.3
  * @param[in] bo : the buffer object
  * @param[in] key : the key associated with the user_date
  * @return 1 if this function succeeds, otherwise 0.
+ * @see tbm_bo_add_user_data()
+ * @see tbm_bo_get_user_data()
+ * @see tbm_bo_delete_user_data()
+ * @par Example
+   @code
+   #include <tbm_bufmgr.h>
+
+   void example_data_free (void *user_data)
+   {
+       char *data = (char*) user_data;
+       free(data);
+   }
+
+   int main()
+   {
+       int bufmgr_fd;
+       tbm_bufmgr bufmgr;
+       tbm_bo bo;
+       char *user_data;
+       char *get_data;
+       int ret;
+
+       bufmgr = tbm_bufmgr_init (bufmgr_fd);
+       bo = tbm_bo_alloc (bufmgr, 128 * 128, TBM_BO_DEFAULT);
+       user_data = (char*) malloc (sizeof(char) * 128);
+
+       ...
+
+       tbm_bo_add_user_data (bo, 1, example_data_free);
+       tbm_bo_set_user_data (bo, 1, user_data);
+
+       ...
+
+       ret = tbm_bo_get_user_data (bo, 1, &get_data);
+       tbm_bo_delete_user_data (bo, 1);
+
+       ...
+
+       tbm_bo_unref (bo);
+       tbm_bufmgr_deinit (bufmgr);
+   }
+   @endcode
  */
 int tbm_bo_delete_user_data (tbm_bo bo, unsigned long key);
 
 /**
- * @brief set a user_date to the buffer object.
+ * @brief Sets a user_date to the buffer object.
+ * @since_tizen 2.3
  * @param[in] bo : the buffer object
  * @param[in] key : the key associated with the user_date
  * @param[in] data : a pointer of the user_data
  * @return 1 if this function succeeds, otherwise 0.
+ * @see tbm_bo_add_user_data()
+ * @see tbm_bo_set_user_data()
+ * @see tbm_bo_delete_user_data()
+ * @par Example
+   @code
+   #include <tbm_bufmgr.h>
+
+   void example_data_free (void *user_data)
+   {
+       char *data = (char*) user_data;
+       free(data);
+   }
+
+   int main()
+   {
+       int bufmgr_fd;
+       tbm_bufmgr bufmgr;
+       tbm_bo bo;
+       char *user_data;
+       char *get_data;
+       int ret;
+
+       bufmgr = tbm_bufmgr_init (bufmgr_fd);
+       bo = tbm_bo_alloc (bufmgr, 128 * 128, TBM_BO_DEFAULT);
+       user_data = (char*) malloc (sizeof(char) * 128);
+
+       ...
+
+       tbm_bo_add_user_data (bo, 1, example_data_free);
+       tbm_bo_set_user_data (bo, 1, user_data);
+
+       ...
+
+       ret = tbm_bo_get_user_data (bo, 1, &get_data);
+       tbm_bo_delete_user_data (bo, 1);
+
+       ...
+
+       tbm_bo_unref (bo);
+       tbm_bufmgr_deinit (bufmgr);
+   }
+   @endcode
  */
 int tbm_bo_set_user_data    (tbm_bo bo, unsigned long key, void* data);
 
 /**
- * @brief get a user_date from the buffer object with the key.
+ * @brief Gets a user_data from the buffer object with the key.
+ * @since_tizen 2.3
  * @param[in] bo : the buffer object
  * @param[in] key : the key associated with the user_date
  * @param[out] data : to get the user data
  * @return 1 if this function succeeds, otherwise 0.
+ * @see tbm_bo_add_user_data()
+ * @see tbm_bo_set_user_data()
+ * @see tbm_bo_get_user_data()
+ * @par Example
+   @code
+   #include <tbm_bufmgr.h>
+
+   void example_data_free (void *user_data)
+   {
+       char *data = (char*) user_data;
+       free(data);
+   }
+
+   int main()
+   {
+       int bufmgr_fd;
+       tbm_bufmgr bufmgr;
+       tbm_bo bo;
+       char *user_data;
+       char *get_data;
+       int ret;
+
+       bufmgr = tbm_bufmgr_init (bufmgr_fd);
+       bo = tbm_bo_alloc (bufmgr, 128 * 128, TBM_BO_DEFAULT);
+       user_data = (char*) malloc (sizeof(char) * 128);
+
+       ...
+
+       tbm_bo_add_user_data (bo, 1, example_data_free);
+       tbm_bo_set_user_data (bo, 1, user_data);
+
+       ...
+
+       ret = tbm_bo_get_user_data (bo, 1, &get_data);
+       tbm_bo_delete_user_data (bo, 1);
+
+       ...
+
+       tbm_bo_unref (bo);
+       tbm_bufmgr_deinit (bufmgr);
+   }
+   @endcode
  */
 int tbm_bo_get_user_data    (tbm_bo bo, unsigned long key, void** data);
+
+int tbm_bo_cache_flush  (tbm_bo bo, int flags);
+
 
 #ifdef __cplusplus
 }
 #endif
+
+/**
+* @}
+*/
 
 #endif /* _TBM_BUFMGR_H_ */
 

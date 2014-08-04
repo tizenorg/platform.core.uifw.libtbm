@@ -83,7 +83,7 @@ unsigned int
 drm_slp_bo_map(drm_slp_bo bo, int device, int opt)
 {
     tbm_bo_handle bo_handle;
-    unsigned long ret = 0;
+    unsigned int ret = 0;
 
     bo_handle = tbm_bo_map ((tbm_bo)bo, device, opt);
     if (bo_handle.ptr == NULL)
@@ -98,10 +98,10 @@ drm_slp_bo_map(drm_slp_bo bo, int device, int opt)
         case TBM_DEVICE_2D:
         case TBM_DEVICE_3D:
         case TBM_DEVICE_MM:
-            ret = (unsigned long)bo_handle.u32;
+            ret = (unsigned int)bo_handle.u32;
             break;
         case TBM_DEVICE_CPU:
-            ret = (unsigned long)bo_handle.ptr;
+            ret = (unsigned int)bo_handle.ptr;
             break;
         default:
             TBM_LOG ("[libdrm_slp:%d]: error wrong device type\n", getpid());

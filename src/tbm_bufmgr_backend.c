@@ -5,6 +5,7 @@ libtbm
 Copyright 2012 Samsung Electronics co., Ltd. All Rights Reserved.
 
 Contact: SooChan Lim <sc1.lim@samsung.com>, Sangjin Lee <lsj119@samsung.com>
+Boram Park <boram1288.park@samsung.com>, Changyeon Lee <cyeon.lee@samsung.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the

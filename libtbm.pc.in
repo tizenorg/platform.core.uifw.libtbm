@@ -6,6 +6,7 @@ includedir=@includedir@
 Name: libtbm
 Description: the library for Tizen Buffer Manager
 Version: @PACKAGE_VERSION@
-Requires: libdrm
-Libs: -L${libdir} -ltbm @LIBTBM_LIBS@
-Cflags: -I${includedir} @LIBTBM_CFLAGS@
+Requires: libdrm, capi-base-common
+Libs: -L${libdir} -ltbm
+Cflags: -I${includedir}
+

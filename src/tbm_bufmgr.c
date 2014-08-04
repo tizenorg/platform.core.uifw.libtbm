@@ -5,6 +5,7 @@ libtbm
 Copyright 2012 Samsung Electronics co., Ltd. All Rights Reserved.
 
 Contact: SooChan Lim <sc1.lim@samsung.com>, Sangjin Lee <lsj119@samsung.com>
+Boram Park <boram1288.park@samsung.com>, Changyeon Lee <cyeon.lee@samsung.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the
@@ -30,78 +31,24 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "config.h"
 
-#include <unistd.h>
-#include <limits.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <sys/ioctl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <dlfcn.h>
-#include <dirent.h>
-#include <string.h>
-#include <errno.h>
-#include <pthread.h>
 #include "tbm_bufmgr.h"
-#include "tbm_bufmgr_tgl.h"
-#include "tbm_bufmgr_backend.h"
 #include "tbm_bufmgr_int.h"
+#include "tbm_bufmgr_backend.h"
+#include "tbm_bufmgr_tgl.h"
 #include "list.h"
+#include <X11/Xmd.h>
+#include <dri2.h>
+#include <xf86drm.h>
 
 #define DEBUG
 #ifdef DEBUG
-static int bDebug = 0;
+int bDebug = 0;
 #define DBG(...) if(bDebug&0x1) TBM_LOG (__VA_ARGS__)
 #define DBG_LOCK(...) if(bDebug&0x2) TBM_LOG (__VA_ARGS__)
 #else
 #define DBG(...)
 #define DBG_LOCK(...)
 #endif
-
-/* check condition */
-#define TBM_RETURN_IF_FAIL(cond) {\
-    if (!(cond)) {\
-        TBM_LOG ("[%s] : '%s' failed.\n", __FUNCTION__, #cond);\
-        return;\
-    }\
-}
-#define TBM_RETURN_VAL_IF_FAIL(cond, val) {\
-    if (!(cond)) {\
-        TBM_LOG ("[%s] : '%s' failed.\n", __FUNCTION__, #cond);\
-        return val;\
-    }\
-}
-
-/* check flags */
-#define RETURN_CHECK_FLAG(cond) {\
-    if ((cond)) {\
-        return;\
-    }\
-}
-#define RETURN_VAL_CHECK_FLAG(cond, val) {\
-    if ((cond)) {\
-        return val;\
-    }\
-}
-
-
-/* check validation */
-#define TBM_BUFMGR_IS_VALID(mgr) (mgr && \
-                           mgr->link.next &&\
-                           mgr->link.next->prev == &mgr->link)
-#define TBM_BO_IS_VALID(bo) (bo && \
-                         TBM_BUFMGR_IS_VALID(bo->bufmgr) && \
-                         bo->item_link.next && \
-                         bo->item_link.next->prev == &bo->item_link)
-
-#define TBM_ALL_CTRL_BACKEND_VALID(flags) \
-        ((flags&TBM_CACHE_CTRL_BACKEND) &&\
-        (flags&TBM_LOCK_CTRL_BACKEND))
-#define TBM_CACHE_CTRL_BACKEND_VALID(flags) \
-        (flags&TBM_CACHE_CTRL_BACKEND)
-#define TBM_LOCK_CTRL_BACKEND_VALID(flags) \
-        (flags&TBM_LOCK_CTRL_BACKEND)
 
 #define PREFIX_LIB    "libtbm_"
 #define SUFFIX_LIB    ".so"
@@ -152,9 +99,8 @@ typedef struct
     struct list_head item_link;
 } tbm_user_data;
 
-/* list of bufmgr */
-static struct list_head *gBufMgrs = NULL;
-
+pthread_mutex_t gLock = PTHREAD_MUTEX_INITIALIZER;
+tbm_bufmgr gBufMgr = NULL;
 
 static inline int
 _tgl_init (int fd, unsigned int key)
@@ -449,7 +395,10 @@ _tbm_bo_set_state (tbm_bo bo, int device, int opt)
         if (opt & TBM_OPTION_WRITE)
             bo->cache_state.data.isDirtied = DEVICE_CA;
         else
-            bo->cache_state.data.isDirtied = DEVICE_NONE;
+        {
+            if( bo->cache_state.data.isDirtied != DEVICE_CA )
+                bo->cache_state.data.isDirtied = DEVICE_NONE;
+        }
     }
     else
     {
@@ -463,17 +412,20 @@ _tbm_bo_set_state (tbm_bo bo, int device, int opt)
         if (opt & TBM_OPTION_WRITE)
             bo->cache_state.data.isDirtied = DEVICE_CO;
         else
-            bo->cache_state.data.isDirtied = DEVICE_NONE;
+        {
+            if( bo->cache_state.data.isDirtied != DEVICE_CO )
+                bo->cache_state.data.isDirtied = DEVICE_NONE;
+        }
     }
 
     if (need_flush)
     {
-        /* call backend cache flush */
-        bufmgr->backend->bo_cache_flush (bo, need_flush);
-
         /* set global cache flush count */
         if (need_flush & TBM_CACHE_ALL)
             _tgl_set_data (bufmgr->lock_fd, GLOBAL_KEY, (unsigned int)(++cntFlush));
+
+        /* call backend cache flush */
+        bufmgr->backend->bo_cache_flush (bo, need_flush);
 
         DBG ("[libtbm:%d] \tcache(%d,%d,%d)....flush:0x%x, cntFlush(%d)\n", getpid(),
              bo->cache_state.data.isCacheable,
@@ -783,6 +735,15 @@ _tbm_bufmgr_load_module (tbm_bufmgr bufmgr, int fd, const char *file)
                 dlclose (module_data);
                 return 0;
             }
+
+            if (!bufmgr->backend || !bufmgr->backend->priv)
+            {
+                TBM_LOG ("[libtbm:%d] "
+                        "Error: module(%s) wrong operation. Check backend or backend's priv.\n",
+                        getpid(), file);
+                dlclose (module_data);
+                return 0;
+            }
         }
         else
         {
@@ -846,11 +807,100 @@ static int _tbm_load_module (tbm_bufmgr bufmgr, int fd)
     return ret;
 }
 
+static int
+_tbm_bufmgr_get_drm_fd()
+{
+    int screen;
+    Display *display;
+    int dri2Major, dri2Minor;
+    int eventBase, errorBase;
+    drm_magic_t magic;
+    char *driver_name, *device_name;
+    int fd;
+
+    display = XOpenDisplay(NULL);
+    if (!display)
+    {
+        TBM_LOG ("[libtbm:%d] Fail XOpenDisplay\n", getpid());
+        return -1;
+    }
+
+    screen = DefaultScreen(display);
+
+    if (!DRI2QueryExtension (display, &eventBase, &errorBase))
+    {
+        TBM_LOG ("[libtbm:%d] Fail DRI2QueryExtention\n", getpid());
+        XCloseDisplay(display);
+        return -1;
+    }
+
+    if (!DRI2QueryVersion (display, &dri2Major, &dri2Minor))
+    {
+        TBM_LOG ("[libtbm:%d] Fail DRI2QueryVersion\n", getpid());
+        XCloseDisplay(display);
+        return -1;
+    }
+
+    if (!DRI2Connect (display, RootWindow(display, screen), &driver_name, &device_name))
+    {
+        TBM_LOG ("[libtbm:%d] Fail DRI2Connect\n", getpid());
+        XCloseDisplay(display);
+        return -1;
+    }
+
+    fd = open (device_name, O_RDWR);
+    if (fd < 0)
+    {
+        TBM_LOG ("[libtbm:%d] cannot open drm device (%s)\n", getpid(), device_name);
+        free (driver_name);
+        free (device_name);
+        XCloseDisplay(display);
+        return -1;
+    }
+
+    if (drmGetMagic (fd, &magic))
+    {
+        TBM_LOG ("[libtbm:%d] Fail drmGetMagic\n", getpid());
+        free (driver_name);
+        free (device_name);
+        close(fd);
+        XCloseDisplay(display);
+        return -1;
+    }
+
+    if (!DRI2Authenticate(display, RootWindow(display, screen), magic))
+    {
+        TBM_LOG ("[libtbm:%d] Fail DRI2Authenticate\n", getpid());
+        free (driver_name);
+        free (device_name);
+        close(fd);
+        XCloseDisplay(display);
+        return -1;
+    }
+
+    if(!drmAuthMagic(fd, magic))
+    {
+        TBM_LOG ("[libtbm:%d] Fail drmAuthMagic\n", getpid());
+        free (driver_name);
+        free (device_name);
+        close(fd);
+        XCloseDisplay(display);
+        return -1;
+    }
+
+    free (driver_name);
+    free (device_name);
+    XCloseDisplay(display);
+    return fd;
+}
+
 tbm_bufmgr
 tbm_bufmgr_init (int fd)
 {
     char *env;
-    tbm_bufmgr bufmgr = NULL;
+    int fd_flag = 0;
+
+    pthread_mutex_lock (&gLock);
 
 #ifdef DEBUG
     env = getenv("GEM_DEBUG");
@@ -864,97 +914,112 @@ tbm_bufmgr_init (int fd)
 #endif
 
     /* initialize buffer manager */
-    if (fd < 0)
-        return NULL;
+    if (gBufMgr)
+    {
+        TBM_LOG ("[libtbm:%d] use previous gBufMgr\n", getpid());
+        gBufMgr->ref_count++;
+        TBM_LOG ("[libtbm:%d] bufmgr ref: fd=%d, ref_count:%d\n",
+                    getpid(), gBufMgr->fd, gBufMgr->ref_count);
+        pthread_mutex_unlock (&gLock);
+        return gBufMgr;
+    }
 
-    if(gBufMgrs == NULL)
+    if (fd < 0)
     {
-        gBufMgrs = malloc(sizeof(struct list_head));
-        LIST_INITHEAD(gBufMgrs);
-    }
-    else
-    {
-        LIST_FOR_EACH_ENTRY(bufmgr, gBufMgrs, link)
+        fd = _tbm_bufmgr_get_drm_fd();
+        if (fd < 0)
         {
-            if(bufmgr->fd == fd)
-            {
-                bufmgr->ref_count++;
-                TBM_LOG ("[libtbm:%d] bufmgr ref: fd=%d, ref_count:%d\n",
-                        getpid(), fd, bufmgr->ref_count);
-                return bufmgr;
-            }
+            TBM_LOG ("[libtbm:%d] Fail get drm fd\n", getpid());
+            pthread_mutex_unlock (&gLock);
+            return NULL;
         }
-        bufmgr = NULL;
+        fd_flag = 1;
     }
+
     TBM_LOG ("[libtbm:%d] bufmgr init: fd=%d\n", getpid(), fd);
 
     /* allocate bufmgr */
-    bufmgr = calloc (1, sizeof(struct _tbm_bufmgr));
-    if (!bufmgr)
+    gBufMgr = calloc (1, sizeof(struct _tbm_bufmgr));
+    if (!gBufMgr)
+    {
+        pthread_mutex_unlock (&gLock);
         return NULL;
+    }
 
     /* load bufmgr priv from env */
-    if (!_tbm_load_module(bufmgr, fd))
+    if (!_tbm_load_module(gBufMgr, fd))
     {
         TBM_LOG ("[libtbm:%d] "
                 "error : Fail to load bufmgr backend\n",
                 getpid());
-        free (bufmgr);
-        bufmgr = NULL;
+        free (gBufMgr);
+        gBufMgr = NULL;
+        pthread_mutex_unlock (&gLock);
         return NULL;
     }
 
-    bufmgr->ref_count = 1;
-    bufmgr->fd = fd;
+    gBufMgr->fd_flag = fd_flag;
+    gBufMgr->fd = fd;
+    gBufMgr->ref_count = 1;
 
-    TBM_LOG ("[libtbm:%d] create tizen bufmgr: ref_count:%d\n",
-         getpid(), bufmgr->ref_count);
+    TBM_LOG ("[libtbm:%d] create tizen bufmgr: ref_count:%d\n", getpid(), gBufMgr->ref_count);
 
-    if (pthread_mutex_init (&bufmgr->lock, NULL) != 0)
+    if (pthread_mutex_init (&gBufMgr->lock, NULL) != 0)
     {
-        bufmgr->backend->bufmgr_deinit (bufmgr);
-        free (bufmgr);
-        bufmgr = NULL;
+        gBufMgr->backend->bufmgr_deinit (gBufMgr->backend->priv);
+        tbm_backend_free (gBufMgr->backend);
+        dlclose (gBufMgr->module_data);
+        free (gBufMgr);
+        gBufMgr = NULL;
+        pthread_mutex_unlock (&gLock);
         return NULL;
     }
 
     /* intialize the tizen global status */
-    if (!_tbm_bufmgr_init_state (bufmgr))
+    if (!_tbm_bufmgr_init_state (gBufMgr))
     {
         TBM_LOG ("[libtbm:%d] "
                 "error: Fail to init state\n",
                 getpid());
-        bufmgr->backend->bufmgr_deinit (bufmgr);
-        free (bufmgr);
-        bufmgr = NULL;
+        gBufMgr->backend->bufmgr_deinit (gBufMgr->backend->priv);
+        tbm_backend_free (gBufMgr->backend);
+        pthread_mutex_destroy (&gBufMgr->lock);
+        dlclose (gBufMgr->module_data);
+        free (gBufMgr);
+        gBufMgr = NULL;
+        pthread_mutex_unlock (&gLock);
         return NULL;
     }
 
     /* setup the lock_type */
     env = getenv ("BUFMGR_LOCK_TYPE");
     if (env && !strcmp (env, "always"))
-        bufmgr->lock_type = LOCK_TRY_ALWAYS;
+        gBufMgr->lock_type = LOCK_TRY_ALWAYS;
     else if(env && !strcmp(env, "none"))
-        bufmgr->lock_type = LOCK_TRY_NEVER;
+        gBufMgr->lock_type = LOCK_TRY_NEVER;
+    else if(env && !strcmp(env, "once"))
+         gBufMgr->lock_type = LOCK_TRY_ONCE;
     else
-        bufmgr->lock_type = LOCK_TRY_ONCE;
+        gBufMgr->lock_type = LOCK_TRY_ALWAYS;
+
     DBG ("[libtbm:%d] BUFMGR_LOCK_TYPE=%s\n", getpid(), env?env:"default:once");
 
     /* setup the map_cache */
     env = getenv ("BUFMGR_MAP_CACHE");
     if (env && !strcmp (env, "false"))
-        bufmgr->use_map_cache = 0;
+        gBufMgr->use_map_cache = 0;
     else
-        bufmgr->use_map_cache = 1;
+        gBufMgr->use_map_cache = 1;
     DBG ("[libtbm:%d] BUFMGR_MAP_CACHE=%s\n", getpid(), env?env:"default:true");
 
     /* intialize bo_list */
-    LIST_INITHEAD (&bufmgr->bo_list);
+    LIST_INITHEAD (&gBufMgr->bo_list);
 
-    /* add bufmgr to the gBufMgrs */
-    LIST_ADD(&bufmgr->link, gBufMgrs);
+    /* intialize surf_list */
+    LIST_INITHEAD (&gBufMgr->surf_list);
 
-    return bufmgr;
+    pthread_mutex_unlock (&gLock);
+    return gBufMgr;
 }
 
 void
@@ -965,12 +1030,18 @@ tbm_bufmgr_deinit (tbm_bufmgr bufmgr)
     tbm_bo bo = NULL;
     tbm_bo tmp = NULL;
 
+    tbm_surface_h surf = NULL;
+    tbm_surface_h tmp_surf = NULL;
+
+    pthread_mutex_lock (&gLock);
+
     bufmgr->ref_count--;
     if (bufmgr->ref_count > 0)
     {
         TBM_LOG ("[libtbm:%d] "
-                "tizen bufmgr destroy: bufmgr:%p, ref_cnt:%d\n",
+                "tizen bufmgr destroy: bufmgr:%p, ref_count:%d\n",
                 getpid(), bufmgr, bufmgr->ref_count);
+        pthread_mutex_unlock (&gLock);
         return;
     }
 
@@ -987,6 +1058,18 @@ tbm_bufmgr_deinit (tbm_bufmgr bufmgr)
         }
     }
 
+    /* destroy surf_list */
+    if(!LIST_IS_EMPTY (&bufmgr->surf_list))
+    {
+        LIST_FOR_EACH_ENTRY_SAFE (surf, tmp_surf, &bufmgr->surf_list, item_link)
+        {
+            TBM_LOG ("[libtbm:%d] "
+                    "Destroy surf(%p) \n",
+                    getpid(), surf);
+            tbm_surface_destroy(surf);
+        }
+    }
+
     /* destroy the tizen global status */
     _tbm_bufmgr_destroy_state (bufmgr);
 
@@ -999,17 +1082,19 @@ tbm_bufmgr_deinit (tbm_bufmgr bufmgr)
     pthread_mutex_destroy (&bufmgr->lock);
 
     TBM_LOG ("[libtbm:%d] "
-            "tizen bufmgr destroy: bufmgr:%p, ref_cnt:%d\n",
-            getpid(), bufmgr, bufmgr->ref_count);
+            "tizen bufmgr destroy: bufmgr:%p\n",
+            getpid(), bufmgr);
 
     dlclose (bufmgr->module_data);
 
-    LIST_DEL (&bufmgr->link);
+    if(bufmgr->fd_flag)
+        close(bufmgr->fd);
 
     free (bufmgr);
     bufmgr = NULL;
-}
 
+    pthread_mutex_unlock (&gLock);
+}
 
 int
 tbm_bo_size (tbm_bo bo)
@@ -1020,7 +1105,9 @@ tbm_bo_size (tbm_bo bo)
     int size;
 
     pthread_mutex_lock(&bufmgr->lock);
+
     size = bufmgr->backend->bo_size(bo);
+
     pthread_mutex_unlock(&bufmgr->lock);
 
     return size;
@@ -1147,6 +1234,14 @@ tbm_bo_import (tbm_bufmgr bufmgr, unsigned int key)
     return bo;
 }
 
+tbm_bo
+tbm_bo_import_fd  (tbm_bufmgr bufmgr, tbm_fd fd)
+{
+    tbm_bo bo = NULL;
+
+    return bo;
+}
+
 unsigned int
 tbm_bo_export (tbm_bo bo)
 {
@@ -1163,6 +1258,15 @@ tbm_bo_export (tbm_bo bo)
 
     return ret;
 }
+
+tbm_fd
+tbm_bo_export_fd (tbm_bo bo)
+{
+    tbm_fd fd = 0;
+
+    return fd;
+}
+
 
 tbm_bo_handle
 tbm_bo_get_handle (tbm_bo bo, int device)
@@ -1380,4 +1484,38 @@ tbm_bo_delete_user_data (tbm_bo bo, unsigned long key)
     return 1;
 }
 
+int
+tbm_bo_cache_flush(tbm_bo bo, int flags)
+{
+    tbm_bufmgr bufmgr = bo->bufmgr;
 
+    bufmgr->backend->bo_cache_flush (bo, flags);
+
+    RETURN_VAL_CHECK_FLAG (TBM_CACHE_CTRL_BACKEND_VALID(bufmgr->backend->flags), 1);
+
+    unsigned short cntFlush = 0;
+    unsigned int is_locked;
+
+    /* get cache state of a bo */
+    bo->cache_state.val = _tgl_get_data (bufmgr->lock_fd, bo->tgl_key, &is_locked);
+
+    if (!bo->cache_state.data.isCacheable)
+        return 1;
+
+    /* get global cache flush count */
+    cntFlush = (unsigned short)_tgl_get_data (bufmgr->lock_fd, GLOBAL_KEY, NULL);
+
+    bo->cache_state.data.isDirtied = DEVICE_NONE;
+    bo->cache_state.data.isCached = 0;
+
+    /* set global cache flush count */
+    _tgl_set_data (bufmgr->lock_fd, GLOBAL_KEY, (unsigned int)(++cntFlush));
+
+    DBG ("[libtbm:%d] \tcache(%d,%d,%d)....  cntFlush(%d)\n", getpid(),
+             bo->cache_state.data.isCacheable,
+             bo->cache_state.data.isCached,
+             bo->cache_state.data.isDirtied,
+             cntFlush);
+
+    return 1;
+}

@@ -13,9 +13,11 @@ libtbm_la_LDFLAGS = -version-number 1:0:0 -no-undefined
 libtbm_la_LIBADD = @LIBTBM_LIBS@ @PTHREADSTUBS_LIBS@ @CLOCK_LIB@ -ldl
 
 libtbm_la_SOURCES = \
+	tbm_surface_internal.c \
+	tbm_surface.c \
 	tbm_bufmgr_backend.c \
 	tbm_bufmgr.c
 
 libtbmincludedir=$(includedir)
-libtbminclude_HEADERS = tbm_bufmgr.h tbm_bufmgr_backend.h
+libtbminclude_HEADERS = tbm_bufmgr.h tbm_surface.h tbm_bufmgr_backend.h tbm_type.h tbm_surface_internal.h
 

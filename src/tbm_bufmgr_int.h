@@ -5,6 +5,7 @@ libtbm
 Copyright 2012 Samsung Electronics co., Ltd. All Rights Reserved.
 
 Contact: SooChan Lim <sc1.lim@samsung.com>, Sangjin Lee <lsj119@samsung.com>
+Boram Park <boram1288.park@samsung.com>, Changyeon Lee <cyeon.lee@samsung.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the
@@ -31,9 +32,68 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef _TBM_BUFMGR_INT_H_
 #define _TBM_BUFMGR_INT_H_
 
-#include <tbm_bufmgr.h>
+#include <unistd.h>
+#include <limits.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <dlfcn.h>
+#include <dirent.h>
+#include <string.h>
+#include <errno.h>
 #include <pthread.h>
-#include "tbm_bufmgr_backend.h"
+#include <tbm_bufmgr.h>
+#include <tbm_surface.h>
+#include <tbm_bufmgr_backend.h>
+
+/* check condition */
+#define TBM_RETURN_IF_FAIL(cond) {\
+    if (!(cond)) {\
+        TBM_LOG ("[%s] : '%s' failed.\n", __FUNCTION__, #cond);\
+        return;\
+    }\
+}
+#define TBM_RETURN_VAL_IF_FAIL(cond, val) {\
+    if (!(cond)) {\
+        TBM_LOG ("[%s] : '%s' failed.\n", __FUNCTION__, #cond);\
+        return val;\
+    }\
+}
+
+/* check flags */
+#define RETURN_CHECK_FLAG(cond) {\
+    if ((cond)) {\
+        return;\
+    }\
+}
+#define RETURN_VAL_CHECK_FLAG(cond, val) {\
+    if ((cond)) {\
+        return val;\
+    }\
+}
+
+
+/* check validation */
+#define TBM_BUFMGR_IS_VALID(mgr) (mgr)
+#define TBM_BO_IS_VALID(bo) (bo && \
+                         TBM_BUFMGR_IS_VALID(bo->bufmgr) && \
+                         bo->item_link.next && \
+                         bo->item_link.next->prev == &bo->item_link)
+#define TBM_SURFACE_IS_VALID(surf) (surf && \
+                         TBM_BUFMGR_IS_VALID(surf->bufmgr) && \
+                         surf->item_link.next && \
+                         surf->item_link.next->prev == &surf->item_link)
+
+#define TBM_ALL_CTRL_BACKEND_VALID(flags) \
+        ((flags&TBM_CACHE_CTRL_BACKEND) &&\
+        (flags&TBM_LOCK_CTRL_BACKEND))
+#define TBM_CACHE_CTRL_BACKEND_VALID(flags) \
+        (flags&TBM_CACHE_CTRL_BACKEND)
+#define TBM_LOCK_CTRL_BACKEND_VALID(flags) \
+        (flags&TBM_LOCK_CTRL_BACKEND)
 
 #define TBM_LOG(...)  fprintf (stderr, __VA_ARGS__)
 
@@ -57,30 +117,29 @@ union _tbm_bo_cache_state
 };
 
 /**
- * @brief tbm buffer object
- *  buffer object of Tizen Buffer Manager
+ * @brief tbm_bo : buffer object of Tizen Buffer Manager
  */
 struct _tbm_bo
 {
-    tbm_bufmgr bufmgr; /**< tbm buffer manager */
+    tbm_bufmgr bufmgr; /* tbm buffer manager */
 
-    int ref_cnt;       /**< ref count of bo */
+    int ref_cnt;       /* ref count of bo */
 
-    int flags;         /**< TBM_BO_FLAGS :bo memory type */
+    int flags;         /* TBM_BO_FLAGS :bo memory type */
 
-    unsigned int tgl_key; /**< global key for tizen global lock */
+    unsigned int tgl_key; /*global key for tizen global lock */
 
     /* for cache control */
-    unsigned int map_cnt; /**< device map count */
-    tbm_bo_cache_state cache_state; /**< cache state */
+    unsigned int map_cnt; /* device map count */
+    tbm_bo_cache_state cache_state; /*cache state */
 
-    int lock_cnt; /**< lock count of bo */
+    int lock_cnt; /* lock count of bo */
 
-    struct list_head user_data_list; /**< list of the user_date in bo */
+    struct list_head user_data_list; /* list of the user_date in bo */
 
-    void *priv; /**< bo private */
+    void *priv; /* bo private */
 
-    struct list_head item_link; /**< link of bo */
+    struct list_head item_link; /* link of bo */
 };
 
 /**
@@ -89,25 +148,44 @@ struct _tbm_bo
  */
 struct _tbm_bufmgr
 {
-    int ref_count; /**< ref count of bufmgr */
+    pthread_mutex_t lock; /* mutex lock */
 
-    pthread_mutex_t lock; /**< mutex lock */
+    int ref_count; /*reference count */
 
-    int fd;  /**< bufmgr fd */
+    int fd;  /* bufmgr fd */
 
-    int lock_fd; /**< fd of tizen global lock */
+    int fd_flag; /* flag set 1 when bufmgr fd open in tbm_bufmgr_init*/
 
-    int lock_type; /**< lock_type of bufmgr */
+    int lock_fd; /* fd of tizen global lock */
 
-    int use_map_cache; /**< flag to use the map_cahce */
+    int lock_type; /* lock_type of bufmgr */
 
-    struct list_head bo_list; /**< list of bos belonging to bufmgr */
+    int use_map_cache; /* flag to use the map_cahce */
+
+    struct list_head bo_list; /* list of bos belonging to bufmgr */
+
+    struct list_head surf_list; /* list of surfaces belonging to bufmgr */
 
     void *module_data;
 
-    tbm_bufmgr_backend backend; /**< bufmgr backend */
+    tbm_bufmgr_backend backend; /* bufmgr backend */
+};
 
-    struct list_head link; /**< link of bufmgr */
+/**
+ * @brief tbm_surface : structure for tizen buffer surface
+ *
+ */
+struct _tbm_surface {
+    tbm_bufmgr bufmgr;  /* tbm buffer manager */
+
+    tbm_surface_info_s info;  /* tbm surface information */
+
+    int flags;
+
+    int num_bos;  /* the number of buffer objects */
+    tbm_bo bos[4];   /* the array of buffer objects */
+
+    struct list_head item_link; /* link of surface */
 };
 
 #endif  /* _TBM_BUFMGR_INT_H_ */

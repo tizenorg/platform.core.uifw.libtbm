@@ -5,6 +5,7 @@ libtbm
 Copyright 2012 Samsung Electronics co., Ltd. All Rights Reserved.
 
 Contact: SooChan Lim <sc1.lim@samsung.com>, Sangjin Lee <lsj119@samsung.com>
+Boram Park <boram1288.park@samsung.com>, Changyeon Lee <cyeon.lee@samsung.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the
@@ -202,10 +203,47 @@ struct _tbm_bufmgr_backend
     */
     int           (*bo_lock2)           (tbm_bo bo, int device, int opt);
 
+    /**
+    * @brief query the formats list and the num to be supported by backend.
+    * @param[out] *formats : format array list. this array has to be allocated by backend funtion
+    * @param[out] *num : the number of the formats to be supported by backend
+    * @return 1 if this function succeeds, otherwise 0.
+    */
+    int           (*surface_supported_format) (uint32_t **formats, uint32_t *num);
+
+    /**
+    * @brief get the size of the surface with a format.
+    * @param[in] surface : the surface
+    * @param[in] width : the width of the surface
+    * @param[in] height : the height of the surface
+    * @param[in] format : the format of the surface
+    * @return size of the surface if this function succeeds, otherwise 0.
+    */
+    int           (*surface_get_size)   (tbm_surface_h surface, int width, int height, tbm_format format);
+
+    /**
+    * @brief get the plane data of the surface.
+    * @param[in] surface : the surface
+    * @param[in] width : the width of the surface
+    * @param[in] height : the height of the surface
+    * @param[in] format : the format of the surface
+    * @param[in] plane_idx : the format of the surface
+    * @param[out] size : the size of the plane
+    * @param[out] offset : the offset of the plane
+    * @param[out] pitch : the pitch of the plane
+    * @return 1 if this function succeeds, otherwise 0.
+    */
+    int           (*surface_get_plane_data)   (tbm_surface_h surface, int width, int height, tbm_format format, int plane_idx, uint32_t *size, uint32_t *offset, uint32_t *pitch);
+
     /* Padding for future extension */
     void (*reserved1)    (void);
     void (*reserved2)    (void);
     void (*reserved3)    (void);
+    void (*reserved4)    (void);
+    void (*reserved5)    (void);
+    void (*reserved6)    (void);
+    void (*reserved7)    (void);
+    void (*reserved8)    (void);
 };
 
 /**
