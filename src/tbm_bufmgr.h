@@ -32,12 +32,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef _TBM_BUFMGR_H_
 #define _TBM_BUFMGR_H_
 
-/**
- * @internal
- * @addtogroup CAPI_UI_TBM_BUFMGR_MODULE
- * @{
- */
-
 #include <tbm_type.h>
 #include <stdint.h>
 
@@ -859,10 +853,6 @@ int tbm_bo_cache_flush  (tbm_bo bo, int flags);
 #ifdef __cplusplus
 }
 #endif
-
-/**
-* @}
-*/
 
 #endif /* _TBM_BUFMGR_H_ */
 

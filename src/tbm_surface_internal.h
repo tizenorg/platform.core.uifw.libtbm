@@ -33,12 +33,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef _TBM_SURFACE_INTERNAL_H_
 #define _TBM_SURFACE_INTERNAL_H_
 
-/**
- * @internal
- * @addtogroup CAPI_UI_TBM_SURFACE_MODULE
- * @{
- */
-
 #include <tbm_bufmgr.h>
 
 #ifdef __cplusplus
@@ -253,10 +247,6 @@ int tbm_surface_internal_get_plane_data (tbm_surface_h surface, int plane_idx, u
 #ifdef __cplusplus
 }
 #endif
-
-/**
-* @}
-*/
 
 #endif /* _TBM_SURFACE_INTERNAL_H_ */
 

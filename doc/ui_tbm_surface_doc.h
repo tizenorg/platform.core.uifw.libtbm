@@ -5,13 +5,10 @@
 /**
  * @defgroup CAPI_UI_TBM_SURFACE_MODULE TBM Surface
  * @brief The tbm_surface stands for the surface in the tizen.
- * @ingroup CAPI_UI_TBM_MODULE
+ * @ingroup CAPI_UI_FRAMEWORK
  *
  * @section CAPI_UI_TBM_SURFACE_MODULE_HEADER Required Header
  *   \#include <tbm_surface.h>
- * @internal
- *   \#include <tbm_surface_internal.h>
- * @endinternal
  * @section CAPI_UI_TBM_SURFACE_MODULE_OVERVIEW Overview
  * TBM Surface API provides user interface for The TBM Surface.\n
  * The user can get pointer of plane in the surface.\n
