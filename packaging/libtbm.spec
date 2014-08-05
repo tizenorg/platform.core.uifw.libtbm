@@ -5,7 +5,6 @@ License:        MIT
 Summary:        The library for Tizen Buffer Manager
 Group:          System/Libraries
 Source0:        %{name}-%{version}.tar.gz
-Source1001: 	libtbm.manifest
 
 BuildRequires:  pkgconfig(pthread-stubs)
 BuildRequires:  pkgconfig(libdrm)
@@ -30,7 +29,6 @@ Development Files.
 
 %prep
 %setup -q
-cp %{SOURCE1001} .
 
 %build
 
@@ -54,14 +52,13 @@ rm -rf %{buildroot}
 
 
 %files
-%manifest %{name}.manifest
+%manifest libtbm.manifest
 %defattr(-,root,root,-)
 /usr/share/license/%{name}
 %{_libdir}/libtbm.so.*
 %{_libdir}/libdrm_slp.so.*
 
 %files devel
-%manifest %{name}.manifest
 %defattr(-,root,root,-)
 %dir %{_includedir}
 %{_includedir}/tbm_bufmgr.h
