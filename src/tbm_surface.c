@@ -99,7 +99,9 @@ tbm_surface_create (int width, int height, tbm_format format)
 {
     if (!(width > 0) || !(height > 0))
     {
-        //set_last_result (TBM_SURFACE_ERROR_INVALID_PARAMETER);
+#ifdef HAVE_CAPI_0_1_1
+        set_last_result (TBM_SURFACE_ERROR_INVALID_PARAMETER);
+#endif
         return NULL;
     }
 
@@ -113,11 +115,15 @@ tbm_surface_create (int width, int height, tbm_format format)
     surf = tbm_surface_internal_create_with_flags (gBufMgr, width, height, format, TBM_BO_DEFAULT);
     if (!surf)
     {
-        //set_last_result (TBM_SURFACE_ERROR_INVALID_OPERATION);
+#ifdef HAVE_CAPI_0_1_1
+        set_last_result (TBM_SURFACE_ERROR_INVALID_OPERATION);
+#endif
         return NULL;
     }
 
-    //set_last_result (TBM_SURFACE_ERROR_NONE);
+#ifdef HAVE_CAPI_0_1_1
+    set_last_result (TBM_SURFACE_ERROR_NONE);
+#endif
     return surf;
 }
 
@@ -216,13 +222,17 @@ tbm_surface_get_format (tbm_surface_h surface)
 {
     if (surface)
     {
-        //set_last_result (TBM_SURFACE_ERROR_INVALID_PARAMETER);
+#ifdef HAVE_CAPI_0_1_1
+        set_last_result (TBM_SURFACE_ERROR_INVALID_PARAMETER);
+#endif
         return 0;
     }
 
     struct _tbm_surface *surf = (struct _tbm_surface *)surface;
 
-    //set_last_result (TBM_SURFACE_ERROR_NONE);
+#ifdef HAVE_CAPI_0_1_1
+    set_last_result (TBM_SURFACE_ERROR_NONE);
+#endif
     return surf->info.format;
 }
 
