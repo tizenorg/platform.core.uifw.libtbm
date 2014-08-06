@@ -65,7 +65,7 @@ extern "C" {
    tbm_surface_bufmgr_deinit (bufmgr);
    @endcode
  */
-int tbm_surface_internal_query_supported_formats (tbm_bufmgr bufmgr, uint32_t **formats, uint32_t *num);
+int tbm_surface_internal_query_supported_formats (uint32_t **formats, uint32_t *num);
 
 /**
  * @brief Creates the tbm_surface with memory type.
@@ -103,7 +103,7 @@ int tbm_surface_internal_query_supported_formats (tbm_bufmgr bufmgr, uint32_t **
    tbm_surface_bufmgr_deinit (bufmgr);
    @endcode
  */
-tbm_surface_h tbm_surface_internal_create_with_flags (tbm_bufmgr bufmgr, int width, int height, int format, int flags);
+tbm_surface_h tbm_surface_internal_create_with_flags (int width, int height, int format, int flags);
 
 /**
  * @brief Creates the tbm_surface with buffer objects.
@@ -140,7 +140,14 @@ tbm_surface_h tbm_surface_internal_create_with_flags (tbm_bufmgr bufmgr, int wid
    tbm_surface_bufmgr_deinit (bufmgr);
    @endcode
  */
-tbm_surface_h tbm_surface_internal_create_with_bos (tbm_bufmgr bufmgr, int width, int height, int format, tbm_bo *bos, int num);
+tbm_surface_h tbm_surface_internal_create_with_bos (int width, int height, int format, tbm_bo *bos, int num);
+
+
+/**
+ * @brief Destroy the tbm surface
+    TODO:
+ */
+void tbm_surface_internal_destroy (tbm_surface_h surface);
 
 /**
  * @brief Gets the number of buffer objects associated with the tbm_surface.

@@ -34,8 +34,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "tbm_bufmgr_int.h"
 #include "tbm_surface_internal.h"
 
-extern tbm_bufmgr gBufMgr;
-
 static int
 _tbm_surface_get_info (struct _tbm_surface *surf, int opt, tbm_surface_info_s *info, int map)
 {
@@ -83,12 +81,7 @@ _tbm_surface_get_info (struct _tbm_surface *surf, int opt, tbm_surface_info_s *i
 int
 tbm_surface_query_formats (uint32_t **formats, uint32_t *num)
 {
-    if (!gBufMgr)
-    {
-        gBufMgr = tbm_bufmgr_init (-1);
-    }
-
-    if (!tbm_surface_internal_query_supported_formats (gBufMgr, formats, num))
+    if (!tbm_surface_internal_query_supported_formats (formats, num))
         return TBM_SURFACE_ERROR_INVALID_OPERATION;
 
     return TBM_SURFACE_ERROR_NONE;
@@ -107,12 +100,7 @@ tbm_surface_create (int width, int height, tbm_format format)
 
     struct _tbm_surface *surf = NULL;
 
-    if (!gBufMgr)
-    {
-        gBufMgr = tbm_bufmgr_init (-1);
-    }
-
-    surf = tbm_surface_internal_create_with_flags (gBufMgr, width, height, format, TBM_BO_DEFAULT);
+    surf = tbm_surface_internal_create_with_flags (width, height, format, TBM_BO_DEFAULT);
     if (!surf)
     {
 #ifdef HAVE_CAPI_0_1_1
@@ -131,22 +119,10 @@ tbm_surface_create (int width, int height, tbm_format format)
 int
 tbm_surface_destroy (tbm_surface_h surface)
 {
-    struct _tbm_surface *surf = NULL;
-    int i;
-
     if (!surface)
         return TBM_SURFACE_ERROR_INVALID_PARAMETER;
 
-    surf = (struct _tbm_surface *)surface;
-
-    for (i = 0; i < surf->num_bos; i++)
-    {
-        tbm_bo_unref (surf->bos[i]);
-        surf->bos[i] = NULL;
-    }
-
-    free (surf);
-    surf = NULL;
+    tbm_surface_internal_destroy (surface);
 
     return TBM_SURFACE_ERROR_NONE;
 }

@@ -33,6 +33,10 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "tbm_bufmgr.h"
 #include "tbm_bufmgr_int.h"
 #include "tbm_surface_internal.h"
+#include "list.h"
+
+static tbm_bufmgr g_surface_bufmgr = NULL;
+struct list_head g_surface_list; /* list of surfaces belonging to bufmgr */
 
 static int _tbm_surface_internal_get_num_planes (tbm_format format)
 {
@@ -204,13 +208,33 @@ static int _tbm_surface_internal_get_bpp (tbm_format format)
     return bpp;
 }
 
+static void
+_init_surface_bufmgr()
+{
+    g_surface_bufmgr = tbm_bufmgr_init (-1);
+}
+
+static void
+_deinit_surface_bufmgr()
+{
+    if (!g_surface_bufmgr)
+        return;
+
+    tbm_bufmgr_deinit (g_surface_bufmgr);
+    g_surface_bufmgr = NULL;
+}
+
 
 int
-tbm_surface_internal_query_supported_formats (tbm_bufmgr bufmgr, uint32_t **formats, uint32_t *num)
+tbm_surface_internal_query_supported_formats (uint32_t **formats, uint32_t *num)
 {
-    TBM_RETURN_VAL_IF_FAIL (bufmgr, 0);
+    if (!g_surface_bufmgr)
+    {
+        _init_surface_bufmgr();
+        LIST_INITHEAD (&g_surface_list);
+    }
 
-    struct _tbm_bufmgr *mgr = (struct _tbm_bufmgr*)bufmgr;
+    struct _tbm_bufmgr *mgr = g_surface_bufmgr;
     int ret = 0;
 
     pthread_mutex_lock (&mgr->lock);
@@ -223,13 +247,19 @@ tbm_surface_internal_query_supported_formats (tbm_bufmgr bufmgr, uint32_t **form
 }
 
 tbm_surface_h
-tbm_surface_internal_create_with_flags (tbm_bufmgr bufmgr, int width, int height, int format, int flags)
+tbm_surface_internal_create_with_flags (int width, int height, int format, int flags)
 {
-    TBM_RETURN_VAL_IF_FAIL (bufmgr, NULL);
     TBM_RETURN_VAL_IF_FAIL (width > 0, NULL);
     TBM_RETURN_VAL_IF_FAIL (height > 0, NULL);
 
-    struct _tbm_bufmgr *mgr = (struct _tbm_bufmgr*)bufmgr;
+    if (!g_surface_bufmgr)
+    {
+        _init_surface_bufmgr();
+        LIST_INITHEAD (&g_surface_list);
+    }
+
+    struct _tbm_bufmgr *mgr = g_surface_bufmgr;
+
 
     TBM_RETURN_VAL_IF_FAIL (TBM_BUFMGR_IS_VALID(mgr), NULL);
 
@@ -243,7 +273,7 @@ tbm_surface_internal_create_with_flags (tbm_bufmgr bufmgr, int width, int height
     if (!surf)
         return NULL;
 
-    surf->bufmgr = bufmgr;
+    surf->bufmgr = mgr;
     surf->info.width = width;
     surf->info.height = height;
     surf->info.format = format;
@@ -269,22 +299,34 @@ tbm_surface_internal_create_with_flags (tbm_bufmgr bufmgr, int width, int height
     {
         free (surf);
         surf = NULL;
+
+        if(LIST_IS_EMPTY (&g_surface_list))
+        {
+            _deinit_surface_bufmgr ();
+            LIST_DELINIT (&g_surface_list);
+        }
     }
 
-//    LIST_ADD (&surf->item_link, &mgr->surf_list);
+    LIST_ADD (&surf->item_link, &g_surface_list);
 
     return surf;
 }
 
 tbm_surface_h
-tbm_surface_internal_create_with_bos (tbm_bufmgr bufmgr, int width, int height, int format, tbm_bo *bos, int num)
+tbm_surface_internal_create_with_bos (int width, int height, int format, tbm_bo *bos, int num)
 {
-    TBM_RETURN_VAL_IF_FAIL (bufmgr, NULL);
     TBM_RETURN_VAL_IF_FAIL (width > 0, NULL);
     TBM_RETURN_VAL_IF_FAIL (height > 0, NULL);
     TBM_RETURN_VAL_IF_FAIL (bos, NULL);
 
-    struct _tbm_bufmgr *mgr = (struct _tbm_bufmgr*)bufmgr;
+    if (!g_surface_bufmgr)
+    {
+        _init_surface_bufmgr();
+        LIST_INITHEAD (&g_surface_list);
+    }
+
+
+    struct _tbm_bufmgr *mgr = g_surface_bufmgr;
 
     TBM_RETURN_VAL_IF_FAIL (TBM_BUFMGR_IS_VALID(mgr), NULL);
 
@@ -298,7 +340,7 @@ tbm_surface_internal_create_with_bos (tbm_bufmgr bufmgr, int width, int height, 
     if (!surf)
         return NULL;
 
-    surf->bufmgr = bufmgr;
+    surf->bufmgr = mgr;
     surf->info.width = width;
     surf->info.height = height;
     surf->info.format = format;
@@ -321,13 +363,13 @@ tbm_surface_internal_create_with_bos (tbm_bufmgr bufmgr, int width, int height, 
     surf->num_bos = num;
     for (i = 0; i < num; i++)
     {
-        bos[i] = tbm_bo_alloc (mgr, surf->info.size, TBM_BO_DEFAULT);
-        if (!bos[i])
+        if (bos[i] == NULL)
             goto bail1;
-        surf->bos[i] = bos[i];
+
+        surf->bos[i] = tbm_bo_ref(bos[i]);
     }
 
-//    LIST_ADD (&surf->item_link, &mgr->surf_list);
+    LIST_ADD (&surf->item_link, &g_surface_list);
 
     return surf;
 bail1:
@@ -335,14 +377,50 @@ bail1:
     {
         if (surf->bos[i])
         {
-            free (surf->bos[i]);
+            tbm_bo_unref (surf->bos[i]);
             surf->bos[i] = NULL;
         }
     }
 
     free (surf);
     surf = NULL;
+
+    if(LIST_IS_EMPTY (&g_surface_list))
+    {
+        _deinit_surface_bufmgr ();
+        LIST_DELINIT (&g_surface_list);
+    }
+
     return NULL;
+}
+
+
+void
+tbm_surface_internal_destroy (tbm_surface_h surface)
+{
+    int i;
+
+    if (!surface)
+        return;
+
+    surface = (struct _tbm_surface *)surface;
+
+    for (i = 0; i < surface->num_bos; i++)
+    {
+        tbm_bo_unref (surface->bos[i]);
+        surface->bos[i] = NULL;
+    }
+
+    LIST_DEL (&surface->item_link);
+
+    free (surface);
+    surface = NULL;
+
+    if(LIST_IS_EMPTY (&g_surface_list))
+    {
+        _deinit_surface_bufmgr ();
+        LIST_DELINIT (&g_surface_list);
+    }
 }
 
 
@@ -376,6 +454,7 @@ tbm_surface_internal_get_size (tbm_surface_h surface)
     struct _tbm_bufmgr *mgr = surf->bufmgr;
     int size = 0;
 
+    TBM_RETURN_VAL_IF_FAIL (mgr != NULL, 0);
     TBM_RETURN_VAL_IF_FAIL (surf->info.width > 0, 0);
     TBM_RETURN_VAL_IF_FAIL (surf->info.height > 0, 0);
     TBM_RETURN_VAL_IF_FAIL (surf->info.format > 0, 0);
@@ -399,6 +478,7 @@ tbm_surface_internal_get_plane_data (tbm_surface_h surface, int plane_idx, uint3
     struct _tbm_bufmgr *mgr = surf->bufmgr;
     int ret = 0;
 
+    TBM_RETURN_VAL_IF_FAIL (mgr != NULL, 0);
     TBM_RETURN_VAL_IF_FAIL (surf->info.width > 0, 0);
     TBM_RETURN_VAL_IF_FAIL (surf->info.height > 0, 0);
     TBM_RETURN_VAL_IF_FAIL (surf->info.format > 0, 0);
