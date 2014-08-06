@@ -76,6 +76,22 @@ typedef enum
 #define TBM_SURF_OPTION_WRITE     (1 << 1)
 
 /**
+ * @brief Definition for the tbm plane infomation struct.
+ * @since_tizen 2.3
+ */
+typedef struct _tbm_surface_plane
+{
+    unsigned char *ptr; /**< plane pointer */
+    uint32_t size; /**< plane size */
+    uint32_t offset; /**< plane offset */
+    uint32_t stride; /**< plane stride */
+
+    void *reserved1; /**< reserved pointer1 */
+    void *reserved2; /**< reserved pointer2 */
+    void *reserved3; /**< reserved pointer3 */
+} tbm_surface_plane_s;
+
+/**
  * @brief Definition for the tbm surface infomation struct.
  * @since_tizen 2.3
  */
@@ -88,21 +104,11 @@ typedef struct _tbm_surface_info
     uint32_t size; /**< tbm surface size */
 
     uint32_t num_planes; /**< the number of planes */
+    tbm_surface_plane_s planes[TBM_SURF_PLANE_MAX]; /**< array of planes */
 
-    struct {
-        unsigned char *ptr; /**< plane pointer */
-        uint32_t size; /**< plane size */
-        uint32_t offset; /**< plane offset */
-        uint32_t stride; /**< plane stride */
-
-        void *reserved1;
-        void *reserved2;
-        void *reserved3;
-    } planes[TBM_SURF_PLANE_MAX]; /**< array of planes */
-
-    void *reserved4;
-    void *reserved5;
-    void *reserved6;
+    void *reserved4; /**< reserved pointer4 */
+    void *reserved5; /**< reserved pointer5 */
+    void *reserved6; /**< reserved pointer6 */
 } tbm_surface_info_s;
 
 #define __tbm_fourcc_code(a,b,c,d) ((uint32_t)(a) | ((uint32_t)(b) << 8) | \
