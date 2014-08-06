@@ -279,9 +279,70 @@ tbm_surface_internal_create_with_flags (tbm_bufmgr bufmgr, int width, int height
 tbm_surface_h
 tbm_surface_internal_create_with_bos (tbm_bufmgr bufmgr, int width, int height, int format, tbm_bo *bos, int num)
 {
-    tbm_surface_h surf = NULL;
+    TBM_RETURN_VAL_IF_FAIL (bufmgr, NULL);
+    TBM_RETURN_VAL_IF_FAIL (width > 0, NULL);
+    TBM_RETURN_VAL_IF_FAIL (height > 0, NULL);
+    TBM_RETURN_VAL_IF_FAIL (bos, NULL);
+
+    struct _tbm_bufmgr *mgr = (struct _tbm_bufmgr*)bufmgr;
+
+    TBM_RETURN_VAL_IF_FAIL (TBM_BUFMGR_IS_VALID(mgr), NULL);
+
+    struct _tbm_surface *surf = NULL;
+    uint32_t size = 0;
+    uint32_t offset = 0;
+    uint32_t stride = 0;
+    int i;
+
+    surf = calloc (1, sizeof(struct _tbm_surface));
+    if (!surf)
+        return NULL;
+
+    surf->bufmgr = bufmgr;
+    surf->info.width = width;
+    surf->info.height = height;
+    surf->info.format = format;
+    surf->info.bpp = _tbm_surface_internal_get_bpp (format);
+    surf->info.size = tbm_surface_internal_get_size (surf);
+    surf->info.num_planes = _tbm_surface_internal_get_num_planes(format);
+
+    /* get size, stride and offset */
+    for (i = 0; i < surf->info.num_planes; i++)
+    {
+        tbm_surface_internal_get_plane_data (surf, i, &size, &offset, &stride);
+        surf->info.planes[i].size = size;
+        surf->info.planes[i].offset = offset;
+        surf->info.planes[i].stride = stride;
+    }
+
+    surf->flags = TBM_BO_DEFAULT;
+
+    /* create only one bo */
+    surf->num_bos = num;
+    for (i = 0; i < num; i++)
+    {
+        bos[i] = tbm_bo_alloc (mgr, surf->info.size, TBM_BO_DEFAULT);
+        if (!bos[i])
+            goto bail1;
+        surf->bos[i] = bos[i];
+    }
+
+//    LIST_ADD (&surf->item_link, &mgr->surf_list);
 
     return surf;
+bail1:
+    for (i = 0; i < num; i++)
+    {
+        if (surf->bos[i])
+        {
+            free (surf->bos[i]);
+            surf->bos[i] = NULL;
+        }
+    }
+
+    free (surf);
+    surf = NULL;
+    return NULL;
 }
 
 
