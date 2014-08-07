@@ -1092,6 +1092,7 @@ tbm_bufmgr_deinit (tbm_bufmgr bufmgr)
 
     free (bufmgr);
     bufmgr = NULL;
+    gBufMgr = NULL;
 
     pthread_mutex_unlock (&gLock);
 }
