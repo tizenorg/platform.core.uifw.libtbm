@@ -19,7 +19,6 @@ Description: %{summary}
 Summary:        Tizen Buffer Manager Library - Development
 Group:          Development/Libraries
 Requires:       libtbm = %{version}
-Requires:       pkgconfig(libdrm)
 Requires:       pkgconfig(capi-base-common)
 
 %description devel
