@@ -62,7 +62,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define SET_ABI_VERSION(maj, min) \
         ((((maj) << 16) & ABI_MAJOR_MASK) | ((min) & ABI_MINOR_MASK))
 
-#define TBM_ABI_VERSION	SET_ABI_VERSION(1, 0) /**< current abi vertion  */
+#define TBM_ABI_VERSION	SET_ABI_VERSION(1, 1) /**< current abi vertion  */
 
 /* TBM_CACHE */
 #define TBM_CACHE_INV       0x01 /**< cache invalidate  */
