@@ -36,11 +36,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "tbm_bufmgr_backend.h"
 #include "tbm_bufmgr_tgl.h"
 #include "list.h"
-#ifdef HAVE_X11
-#include <X11/Xmd.h>
-#include <dri2.h>
-#include <xf86drm.h>
-#endif
 
 #define DEBUG
 #ifdef DEBUG
@@ -809,95 +804,6 @@ static int _tbm_load_module (tbm_bufmgr bufmgr, int fd)
     return ret;
 }
 
-#ifdef HAVE_X11
-static int
-_tbm_bufmgr_get_drm_fd_x11()
-{
-    int screen;
-    Display *display;
-    int dri2Major, dri2Minor;
-    int eventBase, errorBase;
-    drm_magic_t magic;
-    char *driver_name, *device_name;
-    int fd;
-
-    display = XOpenDisplay(NULL);
-    if (!display)
-    {
-        TBM_LOG ("[libtbm:%d] Fail XOpenDisplay\n", getpid());
-        return -1;
-    }
-
-    screen = DefaultScreen(display);
-
-    if (!DRI2QueryExtension (display, &eventBase, &errorBase))
-    {
-        TBM_LOG ("[libtbm:%d] Fail DRI2QueryExtention\n", getpid());
-        XCloseDisplay(display);
-        return -1;
-    }
-
-    if (!DRI2QueryVersion (display, &dri2Major, &dri2Minor))
-    {
-        TBM_LOG ("[libtbm:%d] Fail DRI2QueryVersion\n", getpid());
-        XCloseDisplay(display);
-        return -1;
-    }
-
-    if (!DRI2Connect (display, RootWindow(display, screen), &driver_name, &device_name))
-    {
-        TBM_LOG ("[libtbm:%d] Fail DRI2Connect\n", getpid());
-        XCloseDisplay(display);
-        return -1;
-    }
-
-    fd = open (device_name, O_RDWR);
-    if (fd < 0)
-    {
-        TBM_LOG ("[libtbm:%d] cannot open drm device (%s)\n", getpid(), device_name);
-        free (driver_name);
-        free (device_name);
-        XCloseDisplay(display);
-        return -1;
-    }
-
-    if (drmGetMagic (fd, &magic))
-    {
-        TBM_LOG ("[libtbm:%d] Fail drmGetMagic\n", getpid());
-        free (driver_name);
-        free (device_name);
-        close(fd);
-        XCloseDisplay(display);
-        return -1;
-    }
-
-    if (!DRI2Authenticate(display, RootWindow(display, screen), magic))
-    {
-        TBM_LOG ("[libtbm:%d] Fail DRI2Authenticate\n", getpid());
-        free (driver_name);
-        free (device_name);
-        close(fd);
-        XCloseDisplay(display);
-        return -1;
-    }
-
-    if(!drmAuthMagic(fd, magic))
-    {
-        TBM_LOG ("[libtbm:%d] Fail drmAuthMagic\n", getpid());
-        free (driver_name);
-        free (device_name);
-        close(fd);
-        XCloseDisplay(display);
-        return -1;
-    }
-
-    free (driver_name);
-    free (device_name);
-    XCloseDisplay(display);
-    return fd;
-}
-#endif
-
 tbm_bufmgr
 tbm_bufmgr_init (int fd)
 {
@@ -931,7 +837,9 @@ tbm_bufmgr_init (int fd)
     if (fd < 0)
     {
 #ifdef HAVE_X11
-        fd = _tbm_bufmgr_get_drm_fd_x11();
+        fd = tbm_bufmgr_get_drm_fd_x11();
+#elif HAVE_WAYLAND
+        fd = tbm_bufmgr_get_drm_fd_wayland();
 #endif
         if (fd < 0)
         {

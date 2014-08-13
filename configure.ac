@@ -36,6 +36,14 @@ AC_FUNC_ALLOCA
 # Enable quiet compiles on automake 1.11.
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
+dnl Make sure the pkg-config macros are defined
+m4_ifndef([PKG_PROG_PKG_CONFIG],
+    [m4_fatal([Could not locate the pkg-config autoconf macros.
+  These are usually located in /usr/share/aclocal/pkg.m4. If your macros
+  are in a different location, try setting the environment variable
+  ACLOCAL="aclocal -I/other/macro/dir" before running autoreconf.])])
+PKG_PROG_PKG_CONFIG()
+
 # set the dir for the tbm module
 DEFAULT_BUFMGR_MODULE_PATH="/usr/lib/bufmgr"
 AC_ARG_WITH(bufmgr-module-path, AS_HELP_STRING([--with-bufmgr-module-path=PATH], [tbm bufmgr module dir]),
@@ -56,17 +64,34 @@ AC_CHECK_FUNCS([clock_gettime], [CLOCK_LIB=],
                              [AC_MSG_ERROR([Couldn't find clock_gettime])])])
 AC_SUBST([CLOCK_LIB])
 
-PKG_CHECK_MODULES(PTHREADSTUBS, pthread-stubs)
-PKG_CHECK_MODULES(LIBDRM, libdrm)
-PKG_CHECK_MODULES(LIBDRI2, libdri2)
-PKG_CHECK_MODULES(X11, x11)
+
+if test "x$TBM_PLATFORM" = "xX11"; then
+    PKG_CHECK_MODULES(LIBDRI2, libdri2)
+    PKG_CHECK_MODULES(X11, x11)
+    LIBTBM_CFLAGS="$LIBDRI2_CFLAGS $X11_CFLAGS"
+    LIBTBM_LIBS="$LIBDRI2_LIBS $X11_LIBS"
+fi
+
+if test "x$TBM_PLATFORM" = "xWAYLAND"; then
+    PKG_CHECK_MODULES(WAYLAND_CLIENT, wayland-client)
+    LIBTBM_CFLAGS="$WAYLAND_CLIENT_CFLAGS"
+    LIBTBM_LIBS="$WAYLAND_CLIENT_LIBS"
+
+	WAYLAND_PREFIX=`$PKG_CONFIG --variable=prefix wayland-client`
+    AC_PATH_PROG([WAYLAND_SCANNER], [wayland-scanner],,
+		    [${WAYLAND_PREFIX}/bin$PATH_SEPARATOR$PATH])
+fi
+
 PKG_CHECK_MODULES(CAPI, [capi-base-common >= 0.1.1], [capi_0.1.1=yes], [capi_0.1.1=no])
 if test x"$capi_0.1.1" = xyes; then
 	AC_DEFINE(HAVE_CAPI_0_1_1,1,[The version of capi-base-common is over 0.1.1])
 fi
 
-LIBTBM_CFLAGS="$PTHREADSTUBS_CFLAGS $LIBDRM_CFLAGS $LIBDRI2_CFLAGS $X11_CFLAGS $CAPI_CFLAGS"
-LIBTBM_LIBS="$PTHREADSTUBS_LIBS $LIBDRM_LIBS $LIBDRI2_LIBS $X11_LIBS $CAPI_LIBS"
+PKG_CHECK_MODULES(LIBDRM, libdrm)
+PKG_CHECK_MODULES(PTHREADSTUBS, pthread-stubs)
+
+LIBTBM_CFLAGS+="$LIBTBM_CFALGS $LIBDRM_CFLAGS $PTHREADSTUBS_CFLAGS $CAPI_CFLAGS"
+LIBTBM_LIBS+="$LIBTBM_LIBS $LIBDRM_LIBS $PTHREADSTUBS_LIBS $CAPI_LIBS"
 AC_SUBST(LIBTBM_CFLAGS)
 AC_SUBST(LIBTBM_LIBS)
 
@@ -76,8 +101,12 @@ else
 	AC_DEFINE(HAVE_WAYLAND,1,[The window system is WAYLAND.])
 fi
 
+AM_CONDITIONAL(HAVE_TBM_PLATFORM_X11, test "x$TBM_PLATFORM" = "xX11")
+AM_CONDITIONAL(HAVE_TBM_PLATFORM_WAYLAND, test "x$TBM_PLATFORM" = "xWAYLAND")
+
 AC_OUTPUT([
     src/Makefile
+	src/wayland-drm/Makefile
     drm_slp/Makefile
 	Makefile
 	libtbm.pc])

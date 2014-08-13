@@ -1,4 +1,4 @@
-#%bcond_with x
+%bcond_with x
 %bcond_with wayland
 
 Name:           libtbm
@@ -9,9 +9,12 @@ Summary:        The library for Tizen Buffer Manager
 Group:          System/Libraries
 Source0:        %{name}-%{version}.tar.gz
 
-BuildRequires:  pkgconfig(pthread-stubs)
 BuildRequires:  pkgconfig(libdrm)
+BuildRequires:  pkgconfig(pthread-stubs)
 %if %{with wayland}
+BuildRequires:  pkgconfig
+BuildRequires:  pkgconfig(wayland-client)
+#BuildRequires:  pkgconfig(wayland-drm)
 %else
 BuildRequires:  pkgconfig(x11)
 BuildRequires:  pkgconfig(libdri2)
@@ -66,10 +69,7 @@ rm -rf %{buildroot}
 %defattr(-,root,root,-)
 /usr/share/license/%{name}
 %{_libdir}/libtbm.so.*
-%if %{with wayland}
-%else
 %{_libdir}/libdrm_slp.so.*
-%endif
 
 %files devel
 %defattr(-,root,root,-)
@@ -80,9 +80,6 @@ rm -rf %{buildroot}
 %{_includedir}/tbm_bufmgr_backend.h
 %{_includedir}/tbm_type.h
 %{_libdir}/libtbm.so
-%if %{with wayland}
-%else
 %{_libdir}/libdrm_slp.so
-%endif
 %{_libdir}/pkgconfig/libtbm.pc
 

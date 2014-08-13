@@ -188,4 +188,7 @@ struct _tbm_surface {
     struct list_head item_link; /* link of surface */
 };
 
+int tbm_bufmgr_get_drm_fd_x11(void);
+int tbm_bufmgr_get_drm_fd_wayland(void);
+
 #endif  /* _TBM_BUFMGR_INT_H_ */
