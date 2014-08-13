@@ -36,9 +36,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "tbm_bufmgr_backend.h"
 #include "tbm_bufmgr_tgl.h"
 #include "list.h"
+#ifdef HAVE_X11
 #include <X11/Xmd.h>
 #include <dri2.h>
 #include <xf86drm.h>
+#endif
 
 #define DEBUG
 #ifdef DEBUG
@@ -807,8 +809,9 @@ static int _tbm_load_module (tbm_bufmgr bufmgr, int fd)
     return ret;
 }
 
+#ifdef HAVE_X11
 static int
-_tbm_bufmgr_get_drm_fd()
+_tbm_bufmgr_get_drm_fd_x11()
 {
     int screen;
     Display *display;
@@ -893,6 +896,7 @@ _tbm_bufmgr_get_drm_fd()
     XCloseDisplay(display);
     return fd;
 }
+#endif
 
 tbm_bufmgr
 tbm_bufmgr_init (int fd)
@@ -926,7 +930,9 @@ tbm_bufmgr_init (int fd)
 
     if (fd < 0)
     {
-        fd = _tbm_bufmgr_get_drm_fd();
+#ifdef HAVE_X11
+        fd = _tbm_bufmgr_get_drm_fd_x11();
+#endif
         if (fd < 0)
         {
             TBM_LOG ("[libtbm:%d] Fail get drm fd\n", getpid());

@@ -41,6 +41,13 @@ DEFAULT_BUFMGR_MODULE_PATH="/usr/lib/bufmgr"
 AC_ARG_WITH(bufmgr-module-path, AS_HELP_STRING([--with-bufmgr-module-path=PATH], [tbm bufmgr module dir]),
 				[ BUFMGR_MODULE_PATH="$withval" ],
 				[ BUFMGR_MODULE_PATH="${DEFAULT_BUFMGR_MODULE_PATH}" ])
+
+# set the window system platform where the bufmgr initializes
+AC_ARG_WITH(tbm-platform, AS_HELP_STRING([--with-tbm-platform=WINSYS], [tbm platform (default: X11)]),
+				[ TBM_PLATFORM="$withval" ],
+				[ TBM_PLATFORM="X11" ])
+AC_SUBST(TBM_PLATFORM)
+
 #AC_DEFINE(BUFMGR_MODULE_DIR, "${BUFMGR_MODULE_PATH}", [Directory for the modules of tbm_bufmgr])
 AC_DEFINE_UNQUOTED(BUFMGR_MODULE_DIR, "${BUFMGR_MODULE_PATH}", [Directory for the modules of tbm_bufmgr])
 
@@ -63,6 +70,12 @@ LIBTBM_LIBS="$PTHREADSTUBS_LIBS $LIBDRM_LIBS $LIBDRI2_LIBS $X11_LIBS $CAPI_LIBS"
 AC_SUBST(LIBTBM_CFLAGS)
 AC_SUBST(LIBTBM_LIBS)
 
+if test "x$TBM_PLATFORM" = "xX11"; then
+	AC_DEFINE(HAVE_X11,1,[The window system is X11.])
+else
+	AC_DEFINE(HAVE_WAYLAND,1,[The window system is WAYLAND.])
+fi
+
 AC_OUTPUT([
     src/Makefile
     drm_slp/Makefile
@@ -75,5 +88,6 @@ echo "LDFLAGS           : $LDFLAGS"
 echo "LIBTBM_CFLAGS     : $LIBTBM_CFLAGS"
 echo "LIBTBM_LIBS       : $LIBTBM_LIBS"
 echo "BUFMGR_MODULE_DIR : $BUFMGR_MODULE_PATH"
+echo "TBM_PLATFORM      : $TBM_PLATFORM"
 echo ""
 
