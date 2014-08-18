@@ -847,9 +847,6 @@ int tbm_bo_set_user_data    (tbm_bo bo, unsigned long key, void* data);
  */
 int tbm_bo_get_user_data    (tbm_bo bo, unsigned long key, void** data);
 
-int tbm_bo_cache_flush  (tbm_bo bo, int flags);
-
-
 #ifdef __cplusplus
 }
 #endif

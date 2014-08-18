@@ -1399,38 +1399,3 @@ tbm_bo_delete_user_data (tbm_bo bo, unsigned long key)
     return 1;
 }
 
-int
-tbm_bo_cache_flush(tbm_bo bo, int flags)
-{
-    tbm_bufmgr bufmgr = bo->bufmgr;
-
-    bufmgr->backend->bo_cache_flush (bo, flags);
-
-    RETURN_VAL_CHECK_FLAG (TBM_CACHE_CTRL_BACKEND_VALID(bufmgr->backend->flags), 1);
-
-    unsigned short cntFlush = 0;
-    unsigned int is_locked;
-
-    /* get cache state of a bo */
-    bo->cache_state.val = _tgl_get_data (bufmgr->lock_fd, bo->tgl_key, &is_locked);
-
-    if (!bo->cache_state.data.isCacheable)
-        return 1;
-
-    /* get global cache flush count */
-    cntFlush = (unsigned short)_tgl_get_data (bufmgr->lock_fd, GLOBAL_KEY, NULL);
-
-    bo->cache_state.data.isDirtied = DEVICE_NONE;
-    bo->cache_state.data.isCached = 0;
-
-    /* set global cache flush count */
-    _tgl_set_data (bufmgr->lock_fd, GLOBAL_KEY, (unsigned int)(++cntFlush));
-
-    DBG ("[libtbm:%d] \tcache(%d,%d,%d)....  cntFlush(%d)\n", getpid(),
-             bo->cache_state.data.isCacheable,
-             bo->cache_state.data.isCached,
-             bo->cache_state.data.isDirtied,
-             cntFlush);
-
-    return 1;
-}
