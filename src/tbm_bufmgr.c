@@ -790,9 +790,12 @@ static int _tbm_load_module (tbm_bufmgr bufmgr, int fd)
                 if (!ret && strstr (namelist[n]->d_name, PREFIX_LIB))
                 {
                     p = strstr (namelist[n]->d_name, SUFFIX_LIB);
-                    if (!strcmp (p, SUFFIX_LIB))
+                    if (p != NULL)
                     {
-                        ret = _tbm_bufmgr_load_module (bufmgr, fd, namelist[n]->d_name);
+                        if (!strcmp (p, SUFFIX_LIB))
+                        {
+                            ret = _tbm_bufmgr_load_module (bufmgr, fd, namelist[n]->d_name);
+                        }
                     }
                 }
                 free(namelist[n]);

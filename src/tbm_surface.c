@@ -196,7 +196,7 @@ tbm_surface_get_height (tbm_surface_h surface)
 tbm_format
 tbm_surface_get_format (tbm_surface_h surface)
 {
-    if (surface)
+    if (!surface)
     {
 #ifdef HAVE_CAPI_0_1_1
         set_last_result (TBM_SURFACE_ERROR_INVALID_PARAMETER);

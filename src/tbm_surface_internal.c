@@ -304,6 +304,7 @@ tbm_surface_internal_create_with_flags (int width, int height, int format, int f
         {
             _deinit_surface_bufmgr ();
             LIST_DELINIT (&g_surface_list);
+            return NULL;
         }
     }
 
@@ -487,7 +488,10 @@ tbm_surface_internal_get_plane_data (tbm_surface_h surface, int plane_idx, uint3
 
     ret = mgr->backend->surface_get_plane_data (surf, surf->info.width, surf->info.height, surf->info.format, plane_idx, size, offset, pitch);
     if (!ret)
+    {
+        pthread_mutex_unlock (&mgr->lock);
         return 0;
+    }
 
     pthread_mutex_unlock (&mgr->lock);
 
