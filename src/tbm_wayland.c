@@ -114,7 +114,7 @@ static struct display *
 create_display(void)
 {
 	struct display *display;
-    int magic;
+    drm_magic_t magic;
 
 	display = malloc(sizeof *display);
 	if (display == NULL) {

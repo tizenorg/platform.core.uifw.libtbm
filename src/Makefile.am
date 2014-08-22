@@ -27,7 +27,7 @@ endif
 if HAVE_TBM_PLATFORM_WAYLAND
     AM_CFLAGS += \
 	    -I$(top_srcdir)/src/wayland-drm
-    libtbm_la_LIBADD += $(top_builddir)/src/egl/wayland/wayland-drm/libwayland-drm.la
+    libtbm_la_LIBADD += $(top_builddir)/src/wayland-drm/libwayland-drm.la
     libtbm_la_SOURCES += \
 	    tbm_wayland.c
 endif
