@@ -101,8 +101,15 @@ else
 	AC_DEFINE(HAVE_WAYLAND,1,[The window system is WAYLAND.])
 fi
 
+HOST_CPU_X86_64=no
+case $host_cpu in
+  x86_64*|amd64*)
+    HOST_CPU_X86_64=yes
+esac
+
 AM_CONDITIONAL(HAVE_TBM_PLATFORM_X11, test "x$TBM_PLATFORM" = "xX11")
 AM_CONDITIONAL(HAVE_TBM_PLATFORM_WAYLAND, test "x$TBM_PLATFORM" = "xWAYLAND")
+AM_CONDITIONAL(HOST_CPU_X86_64, test "x$HOST_CPU_X86_64" = "xyes")
 
 AC_OUTPUT([
     src/Makefile
