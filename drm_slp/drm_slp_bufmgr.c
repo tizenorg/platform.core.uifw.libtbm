@@ -101,7 +101,7 @@ drm_slp_bo_map(drm_slp_bo bo, int device, int opt)
             ret = (unsigned int)bo_handle.u32;
             break;
         case TBM_DEVICE_CPU:
-            ret = (unsigned int)bo_handle.ptr;
+            ret = (void *)bo_handle.ptr;
             break;
         default:
             TBM_LOG ("[libdrm_slp:%d]: error wrong device type\n", getpid());
