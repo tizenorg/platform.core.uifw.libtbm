@@ -43,7 +43,7 @@ void           drm_slp_bufmgr_destroy(drm_slp_bufmgr bufmgr);
 /*Functions for bo*/
 void         drm_slp_bo_unref(drm_slp_bo bo);
 drm_slp_bo drm_slp_bo_import(drm_slp_bufmgr bufmgr, unsigned int key);
-unsigned int drm_slp_bo_map(drm_slp_bo bo, int device, int opt);
+void *drm_slp_bo_map(drm_slp_bo bo, int device, int opt);
 int          drm_slp_bo_unmap(drm_slp_bo bo, int device);
 
 #endif /* _DRM_SLP_BUFMGR_H_ */
