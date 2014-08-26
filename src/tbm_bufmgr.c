@@ -551,6 +551,27 @@ _tbm_bo_unlock (tbm_bo bo)
              bo, bo->tgl_key, old, bo->lock_cnt);
 }
 
+static int
+_tbm_bo_is_valid(tbm_bo bo)
+{
+    tbm_bo old_data=NULL, tmp = NULL;;
+
+    if( bo == NULL )
+        return 0;
+
+    if(!LIST_IS_EMPTY (&gBufMgr->bo_list))
+    {
+		LIST_FOR_EACH_ENTRY_SAFE (old_data, tmp, &gBufMgr->bo_list, item_link)
+		{
+			if(old_data == bo)
+			{
+				return 1;
+			}
+		}
+
+    }
+    return 0;
+}
 
 static void
 _tbm_bo_ref (tbm_bo bo)
@@ -1017,7 +1038,7 @@ tbm_bufmgr_deinit (tbm_bufmgr bufmgr)
 int
 tbm_bo_size (tbm_bo bo)
 {
-    TBM_RETURN_VAL_IF_FAIL (TBM_BO_IS_VALID(bo), 0);
+    TBM_RETURN_VAL_IF_FAIL (_tbm_bo_is_valid(bo), 0);
 
     tbm_bufmgr bufmgr = bo->bufmgr;
     int size;
@@ -1034,7 +1055,7 @@ tbm_bo_size (tbm_bo bo)
 tbm_bo
 tbm_bo_ref (tbm_bo bo)
 {
-    TBM_RETURN_VAL_IF_FAIL(TBM_BO_IS_VALID(bo), NULL);
+    TBM_RETURN_VAL_IF_FAIL(_tbm_bo_is_valid(bo), NULL);
 
     tbm_bufmgr bufmgr = bo->bufmgr;
 
@@ -1050,7 +1071,7 @@ tbm_bo_ref (tbm_bo bo)
 void
 tbm_bo_unref (tbm_bo bo)
 {
-    TBM_RETURN_IF_FAIL(TBM_BO_IS_VALID(bo));
+    TBM_RETURN_IF_FAIL(_tbm_bo_is_valid(bo));
 
     tbm_bufmgr bufmgr = bo->bufmgr;
 
@@ -1163,7 +1184,7 @@ tbm_bo_import_fd  (tbm_bufmgr bufmgr, tbm_fd fd)
 unsigned int
 tbm_bo_export (tbm_bo bo)
 {
-    TBM_RETURN_VAL_IF_FAIL (TBM_BO_IS_VALID(bo), 0);
+    TBM_RETURN_VAL_IF_FAIL (_tbm_bo_is_valid(bo), 0);
 
     tbm_bufmgr bufmgr;
     int ret;
@@ -1189,7 +1210,7 @@ tbm_bo_export_fd (tbm_bo bo)
 tbm_bo_handle
 tbm_bo_get_handle (tbm_bo bo, int device)
 {
-    TBM_RETURN_VAL_IF_FAIL (TBM_BO_IS_VALID(bo), (tbm_bo_handle)0);
+    TBM_RETURN_VAL_IF_FAIL (_tbm_bo_is_valid(bo), (tbm_bo_handle)0);
 
     tbm_bufmgr bufmgr;
     tbm_bo_handle bo_handle;
@@ -1206,7 +1227,7 @@ tbm_bo_get_handle (tbm_bo bo, int device)
 tbm_bo_handle
 tbm_bo_map (tbm_bo bo, int device, int opt)
 {
-    TBM_RETURN_VAL_IF_FAIL (TBM_BO_IS_VALID(bo), (tbm_bo_handle)0);
+    TBM_RETURN_VAL_IF_FAIL (_tbm_bo_is_valid(bo), (tbm_bo_handle)0);
 
     tbm_bufmgr bufmgr;
     tbm_bo_handle bo_handle;
@@ -1235,7 +1256,7 @@ tbm_bo_map (tbm_bo bo, int device, int opt)
 int
 tbm_bo_unmap (tbm_bo bo)
 {
-    TBM_RETURN_VAL_IF_FAIL (TBM_BO_IS_VALID(bo), 0);
+    TBM_RETURN_VAL_IF_FAIL (_tbm_bo_is_valid(bo), 0);
 
     tbm_bufmgr bufmgr;
     int ret;
@@ -1263,8 +1284,8 @@ tbm_bo_unmap (tbm_bo bo)
 int
 tbm_bo_swap (tbm_bo bo1, tbm_bo bo2)
 {
-    TBM_RETURN_VAL_IF_FAIL (TBM_BO_IS_VALID(bo1), 0);
-    TBM_RETURN_VAL_IF_FAIL (TBM_BO_IS_VALID(bo2), 0);
+    TBM_RETURN_VAL_IF_FAIL (_tbm_bo_is_valid(bo1), 0);
+    TBM_RETURN_VAL_IF_FAIL (_tbm_bo_is_valid(bo2), 0);
 
     void* temp;
     unsigned int tmp_key;
@@ -1290,7 +1311,7 @@ tbm_bo_swap (tbm_bo bo1, tbm_bo bo2)
 int
 tbm_bo_locked (tbm_bo bo)
 {
-    TBM_RETURN_VAL_IF_FAIL (TBM_BO_IS_VALID(bo), 0);
+    TBM_RETURN_VAL_IF_FAIL (_tbm_bo_is_valid(bo), 0);
 
     tbm_bufmgr bufmgr;
 
@@ -1316,7 +1337,7 @@ tbm_bo_locked (tbm_bo bo)
 int
 tbm_bo_add_user_data (tbm_bo bo, unsigned long key, tbm_data_free data_free_func)
 {
-    TBM_RETURN_VAL_IF_FAIL(TBM_BO_IS_VALID(bo), 0);
+    TBM_RETURN_VAL_IF_FAIL(_tbm_bo_is_valid(bo), 0);
 
     tbm_user_data *data;
 
@@ -1342,7 +1363,7 @@ tbm_bo_add_user_data (tbm_bo bo, unsigned long key, tbm_data_free data_free_func
 int
 tbm_bo_set_user_data (tbm_bo bo, unsigned long key, void* data)
 {
-    TBM_RETURN_VAL_IF_FAIL(TBM_BO_IS_VALID(bo), 0);
+    TBM_RETURN_VAL_IF_FAIL(_tbm_bo_is_valid(bo), 0);
 
     tbm_user_data *old_data;
 
@@ -1364,7 +1385,7 @@ tbm_bo_set_user_data (tbm_bo bo, unsigned long key, void* data)
 int
 tbm_bo_get_user_data (tbm_bo bo, unsigned long key, void** data)
 {
-    TBM_RETURN_VAL_IF_FAIL(TBM_BO_IS_VALID(bo), 0);
+    TBM_RETURN_VAL_IF_FAIL(_tbm_bo_is_valid(bo), 0);
 
     tbm_user_data* old_data;
 
@@ -1386,7 +1407,7 @@ tbm_bo_get_user_data (tbm_bo bo, unsigned long key, void** data)
 int
 tbm_bo_delete_user_data (tbm_bo bo, unsigned long key)
 {
-    TBM_RETURN_VAL_IF_FAIL(TBM_BO_IS_VALID(bo), 0);
+    TBM_RETURN_VAL_IF_FAIL(_tbm_bo_is_valid(bo), 0);
 
     tbm_user_data *old_data = (void *)0;
 
