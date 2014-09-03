@@ -169,7 +169,7 @@ destroy_display(struct display *display)
 }
 
 int
-tbm_bufmgr_get_drm_fd_wl()
+tbm_bufmgr_get_drm_fd_wayland()
 {
 	struct display *display = NULL;
 
