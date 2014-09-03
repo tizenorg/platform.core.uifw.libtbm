@@ -14,7 +14,6 @@ BuildRequires:  pkgconfig(pthread-stubs)
 %if %{with wayland}
 BuildRequires:  pkgconfig
 BuildRequires:  pkgconfig(wayland-client)
-#BuildRequires:  pkgconfig(wayland-drm)
 %else
 BuildRequires:  pkgconfig(x11)
 BuildRequires:  pkgconfig(libdri2)
