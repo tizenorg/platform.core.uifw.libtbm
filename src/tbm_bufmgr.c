@@ -502,7 +502,7 @@ _tbm_bo_lock (tbm_bo bo, int device, int opt)
     DBG_LOCK ("[libtbm:%d] >> LOCK bo:%p(%d, %d->%d)\n", getpid(),
             bo, bo->tgl_key, old, bo->lock_cnt);
 
-    return 1;
+    return ret;
 }
 
 static void
@@ -1238,9 +1238,27 @@ tbm_bo_map (tbm_bo bo, int device, int opt)
 
     bo_handle = bufmgr->backend->bo_get_handle (bo, device);
 
-    _tbm_bo_lock (bo, device, opt);
+    if (!_tbm_bo_lock (bo, device, opt))
+    {
+        TBM_LOG ("[libtbm:%d] "
+                        "error %s:%d fail to lock bo:%p)\n",
+                        getpid(), __FUNCTION__, __LINE__, bo);
+
+        pthread_mutex_unlock (&bufmgr->lock);
+        return (tbm_bo_handle)NULL;
+    }
 
     bo_handle = bufmgr->backend->bo_map (bo, device, opt);
+    if (bo_handle.ptr == NULL)
+    {
+        TBM_LOG ("[libtbm:%d] "
+                        "error %s:%d fail to map bo:%p\n",
+                        getpid(), __FUNCTION__, __LINE__, bo);
+
+        _tbm_bo_unlock(bo);
+        pthread_mutex_unlock (&bufmgr->lock);
+        return (tbm_bo_handle)NULL;
+    }
 
     if (bufmgr->use_map_cache == 1 && bo->map_cnt == 0)
         _tbm_bo_set_state (bo, device, opt);
@@ -1265,8 +1283,12 @@ tbm_bo_unmap (tbm_bo bo)
 
     pthread_mutex_lock (&bufmgr->lock);
 
-
     ret = bufmgr->backend->bo_unmap (bo);
+    if (!ret)
+    {
+        pthread_mutex_unlock (&bufmgr->lock);
+        return ret;
+    }
 
     /* decrease the map_count */
     bo->map_cnt--;
