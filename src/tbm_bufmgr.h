@@ -509,6 +509,7 @@ tbm_bo        tbm_bo_import     (tbm_bufmgr bufmgr, tbm_key key);
  * @since_tizen 2.3
  * @param[in] bufmgr : the buffer manager
  * @param[in] fd : the fd associated with the buffer object
+ * @param[in] size : the size of associated with the buffer object
  * @return a buffer object
  * @retval #tbm_bo
  * @see tbm_bo_export_fd()
@@ -524,7 +525,7 @@ tbm_bo        tbm_bo_import     (tbm_bufmgr bufmgr, tbm_key key);
    ...
 
    bufmgr = tbm_bufmgr_init (bufmgr_fd);
-   bo = tbm_bo_import (bo_fd);
+   bo = tbm_bo_import_fd (bo_fd, size);
 
    ...
 

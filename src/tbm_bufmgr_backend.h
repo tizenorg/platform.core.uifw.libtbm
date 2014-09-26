@@ -131,6 +131,16 @@ struct _tbm_bufmgr_backend
     */
     void *       (*bo_import)         (tbm_bo bo, unsigned int key);
 
+
+    /**
+    * @brief import the buffer object associated with the key.
+    * @param[in] bo : the buffer object
+    * @param[in] fd : the prime fd associated with the buffer object
+    * @param[in] size : the guess size of the buffer object
+    * @return pointer of the bo private.
+    */
+    void *       (*bo_import_fd)         (tbm_bo bo, tbm_fd fd);
+
     /**
     * @brief export the buffer object
     * @param[in] bo : the buffer object
