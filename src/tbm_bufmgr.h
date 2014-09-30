@@ -524,7 +524,7 @@ tbm_bo        tbm_bo_import     (tbm_bufmgr bufmgr, tbm_key key);
    ...
 
    bufmgr = tbm_bufmgr_init (bufmgr_fd);
-   bo = tbm_bo_import (bo_fd);
+   bo = tbm_bo_import_fd (bo_fd);
 
    ...
 

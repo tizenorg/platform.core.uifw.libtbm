@@ -1176,7 +1176,44 @@ tbm_bo_import (tbm_bufmgr bufmgr, unsigned int key)
 tbm_bo
 tbm_bo_import_fd  (tbm_bufmgr bufmgr, tbm_fd fd)
 {
+    TBM_RETURN_VAL_IF_FAIL(TBM_BUFMGR_IS_VALID(bufmgr), NULL);
+
     tbm_bo bo = NULL;
+    void * bo_priv = NULL;
+
+    bo = calloc (1, sizeof(struct _tbm_bo));
+    if(!bo)
+        return NULL;
+
+    bo->bufmgr = bufmgr;
+
+    pthread_mutex_lock (&bufmgr->lock);
+
+    bo_priv = bufmgr->backend->bo_import_fd(bo, fd);
+    if (!bo_priv)
+    {
+        free (bo);
+        pthread_mutex_unlock (&bufmgr->lock);
+        return NULL;
+    }
+
+    bo->ref_cnt = 1;
+    bo->tgl_key = INITIAL_KEY;
+    bo->priv = bo_priv;
+
+    /* init bo state */
+    if (!_tbm_bo_init_state (bo, CACHE_OP_IMPORT))
+    {
+        _tbm_bo_unref (bo);
+        pthread_mutex_unlock (&bufmgr->lock);
+        return NULL;
+    }
+
+    LIST_INITHEAD (&bo->user_data_list);
+
+    LIST_ADD (&bo->item_link, &bufmgr->bo_list);
+
+    pthread_mutex_unlock (&bufmgr->lock);
 
     return bo;
 }
@@ -1201,9 +1238,18 @@ tbm_bo_export (tbm_bo bo)
 tbm_fd
 tbm_bo_export_fd (tbm_bo bo)
 {
-    tbm_fd fd = 0;
+    TBM_RETURN_VAL_IF_FAIL (_tbm_bo_is_valid(bo), 0);
 
-    return fd;
+    tbm_bufmgr bufmgr;
+    int ret;
+
+    bufmgr = bo->bufmgr;
+
+    pthread_mutex_lock (&bufmgr->lock);
+    ret = bufmgr->backend->bo_export_fd (bo);
+    pthread_mutex_unlock (&bufmgr->lock);
+
+    return ret;
 }
 
 

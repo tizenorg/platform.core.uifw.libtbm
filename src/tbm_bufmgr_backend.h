@@ -235,6 +235,21 @@ struct _tbm_bufmgr_backend
     */
     int           (*surface_get_plane_data)   (tbm_surface_h surface, int width, int height, tbm_format format, int plane_idx, uint32_t *size, uint32_t *offset, uint32_t *pitch);
 
+    /**
+    * @brief import the buffer object associated with the prime fd.
+    * @param[in] bo : the buffer object
+    * @param[in] fd : the prime fd associated with the buffer object
+    * @return pointer of the bo private.
+    */
+    void *       (*bo_import_fd)         (tbm_bo bo, tbm_fd fd);
+
+    /**
+    * @brief export the buffer object
+    * @param[in] bo : the buffer object
+    * @return tbm_fd associated with the buffer object
+    */
+    tbm_fd		(*bo_export_fd)         (tbm_bo bo);
+
     /* Padding for future extension */
     void (*reserved1)    (void);
     void (*reserved2)    (void);
@@ -242,8 +257,6 @@ struct _tbm_bufmgr_backend
     void (*reserved4)    (void);
     void (*reserved5)    (void);
     void (*reserved6)    (void);
-    void (*reserved7)    (void);
-    void (*reserved8)    (void);
 };
 
 /**
