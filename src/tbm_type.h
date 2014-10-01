@@ -41,11 +41,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <stdint.h>
 
 /**
- * @brief Definition for the tizen buffer surface
+ * @brief Definition for the Tizen buffer surface.
  */
 typedef struct _tbm_surface * tbm_surface_h;
 /**
- * @brief Definition for the tizen buffer surface foramt
+ * @brief Definition for the Tizen buffer surface format.
  */
 typedef uint32_t tbm_format;
 
