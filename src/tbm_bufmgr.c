@@ -1289,7 +1289,9 @@ tbm_bo_map (tbm_bo bo, int device, int opt)
         TBM_LOG ("[libtbm:%d] "
                         "error %s:%d fail to lock bo:%p)\n",
                         getpid(), __FUNCTION__, __LINE__, bo);
-
+#ifdef HAVE_CAPI_0_1_1
+        set_last_result (TBM_ERROR_BO_LOCK_FAILED);
+#endif
         pthread_mutex_unlock (&bufmgr->lock);
         return (tbm_bo_handle)NULL;
     }
@@ -1302,6 +1304,9 @@ tbm_bo_map (tbm_bo bo, int device, int opt)
                         getpid(), __FUNCTION__, __LINE__, bo);
 
         _tbm_bo_unlock(bo);
+#ifdef HAVE_CAPI_0_1_1
+        set_last_result (TBM_ERROR_BO_MAP_FAILED);
+#endif
         pthread_mutex_unlock (&bufmgr->lock);
         return (tbm_bo_handle)NULL;
     }
