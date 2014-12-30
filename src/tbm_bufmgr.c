@@ -99,6 +99,14 @@ typedef struct
 pthread_mutex_t gLock = PTHREAD_MUTEX_INITIALIZER;
 tbm_bufmgr gBufMgr = NULL;
 
+static __thread tbm_error_e tbm_last_error = TBM_ERROR_NONE;
+
+static void
+_tbm_set_last_result(tbm_error_e err)
+{
+	tbm_last_error = err;
+}
+
 static inline int
 _tgl_init (int fd, unsigned int key)
 {
@@ -1289,9 +1297,9 @@ tbm_bo_map (tbm_bo bo, int device, int opt)
         TBM_LOG ("[libtbm:%d] "
                         "error %s:%d fail to lock bo:%p)\n",
                         getpid(), __FUNCTION__, __LINE__, bo);
-#ifdef HAVE_CAPI_0_1_1
-        set_last_result (TBM_ERROR_BO_LOCK_FAILED);
-#endif
+
+        _tbm_set_last_result (TBM_ERROR_BO_LOCK_FAILED);
+
         pthread_mutex_unlock (&bufmgr->lock);
         return (tbm_bo_handle)NULL;
     }
@@ -1304,9 +1312,8 @@ tbm_bo_map (tbm_bo bo, int device, int opt)
                         getpid(), __FUNCTION__, __LINE__, bo);
 
         _tbm_bo_unlock(bo);
-#ifdef HAVE_CAPI_0_1_1
-        set_last_result (TBM_ERROR_BO_MAP_FAILED);
-#endif
+        _tbm_set_last_result (TBM_ERROR_BO_MAP_FAILED);
+
         pthread_mutex_unlock (&bufmgr->lock);
         return (tbm_bo_handle)NULL;
     }
@@ -1494,5 +1501,11 @@ tbm_bo_delete_user_data (tbm_bo bo, unsigned long key)
     _user_data_delete (old_data);
 
     return 1;
+}
+
+tbm_error_e
+tbm_get_last_error (void)
+{
+    return tbm_last_error;
 }
 
