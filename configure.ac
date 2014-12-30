@@ -82,8 +82,8 @@ if test "x$TBM_PLATFORM" = "xWAYLAND"; then
 		    [${WAYLAND_PREFIX}/bin$PATH_SEPARATOR$PATH])
 fi
 
-PKG_CHECK_MODULES(CAPI, [capi-base-common >= 0.1.1], [capi_0.1.1=yes], [capi_0.1.1=no])
-if test x"$capi_0.1.1" = xyes; then
+PKG_CHECK_MODULES(CAPI, [capi-base-common >= 0.1.1], [capi_0_1_1=yes], [capi_0_1_1=no])
+if test x"$capi_0_1_1" = xyes; then
 	AC_DEFINE(HAVE_CAPI_0_1_1,1,[The version of capi-base-common is over 0.1.1])
 fi
 
