@@ -34,12 +34,10 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <tbm_type.h>
 #include <stdint.h>
-#include <tizen_error.h>
 
-
-/* this define will be removed when the capi-common is the version 0.1.1 */
-#ifndef TIZEN_ERROR_TBM
-#define TIZEN_ERROR_TBM			-0x02830000
+/* tbm error base : this error base is same as TIZEN_ERROR_TBM in tizen_error.h */
+#ifndef TBM_ERROR_BASE
+#define TBM_ERROR_BASE			-0x02830000
 #endif
 
 /**
@@ -160,9 +158,9 @@ enum TBM_BO_FLAGS
  */
 typedef enum
 {
-    TBM_ERROR_NONE  = TIZEN_ERROR_NONE,                    /**< Successful */
-    TBM_ERROR_BO_LOCK_FAILED  = TIZEN_ERROR_TBM|0x0101,    /**< tbm_bo lock failed */
-    TBM_ERROR_BO_MAP_FAILED  = TIZEN_ERROR_TBM|0x0102,     /**< tbm_bo map failed */
+    TBM_ERROR_NONE  = 0,                    /**< Successful */
+    TBM_ERROR_BO_LOCK_FAILED  = TBM_ERROR_BASE|0x0101,    /**< tbm_bo lock failed */
+    TBM_ERROR_BO_MAP_FAILED  = TBM_ERROR_BASE|0x0102,     /**< tbm_bo map failed */
 } tbm_error_e;
 
 
@@ -361,7 +359,7 @@ void          tbm_bo_unref      (tbm_bo bo);
    handle = tbm_bo_map (bo, TBM_DEVICE_2D, TBM_OPTION_READ|TBM_OPTION_WRITE);
    if (handle.ptr == NULL)
    {
-      error = get_last_result ();
+      error = tbm_get_last_error ();
       ...
    }
 
@@ -875,6 +873,41 @@ int tbm_bo_set_user_data    (tbm_bo bo, unsigned long key, void* data);
    @endcode
  */
 int tbm_bo_get_user_data    (tbm_bo bo, unsigned long key, void** data);
+
+/**
+ * @brief Gets the latest tbm_error.
+ * @since_tizen 2.4
+ * @return the latest tbm_error
+ * @par Example
+   @code
+   #include <tbm_bufmgr.h>
+
+   int bufmgr_fd;
+   tbm_bufmgr bufmgr;
+   tbm_bo bo;
+   tbm_bo_handle handle;
+   tbm_error_e error;
+
+   bufmgr = tbm_bufmgr_init (bufmgr_fd);
+   bo = tbm_bo_alloc (bufmgr, 128 * 128, TBM_BO_DEFAULT);
+
+   ...
+
+   handle = tbm_bo_map (bo, TBM_DEVICE_2D, TBM_OPTION_READ|TBM_OPTION_WRITE);
+   if (handle.ptr == NULL)
+   {
+      error = tbm_get_last_error ();
+      ...
+   }
+
+   ...
+
+   tbm_bo_unmap (bo);
+   tbm_bo_unref (bo);
+   tbm_bufmgr_deinit (bufmgr);
+   @endcode
+ */
+tbm_error_e tbm_get_last_error    (void);
 
 #ifdef __cplusplus
 }
