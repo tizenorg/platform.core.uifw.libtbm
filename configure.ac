@@ -73,11 +73,11 @@ if test "x$TBM_PLATFORM" = "xX11"; then
 fi
 
 if test "x$TBM_PLATFORM" = "xWAYLAND"; then
-    PKG_CHECK_MODULES(WAYLAND_CLIENT, wayland-client)
+    PKG_CHECK_MODULES(WAYLAND_CLIENT, wayland-client wayland-server)
     LIBTBM_CFLAGS="$WAYLAND_CLIENT_CFLAGS"
     LIBTBM_LIBS="$WAYLAND_CLIENT_LIBS"
 
-	WAYLAND_PREFIX=`$PKG_CONFIG --variable=prefix wayland-client`
+	WAYLAND_PREFIX=`$PKG_CONFIG --variable=prefix wayland-client wayland-server`
     AC_PATH_PROG([WAYLAND_SCANNER], [wayland-scanner],,
 		    [${WAYLAND_PREFIX}/bin$PATH_SEPARATOR$PATH])
 fi
