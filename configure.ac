@@ -45,7 +45,7 @@ m4_ifndef([PKG_PROG_PKG_CONFIG],
 PKG_PROG_PKG_CONFIG()
 
 # set the dir for the tbm module
-DEFAULT_BUFMGR_MODULE_PATH="/usr/lib/bufmgr"
+DEFAULT_BUFMGR_MODULE_PATH="${libdir}/bufmgr"
 AC_ARG_WITH(bufmgr-module-path, AS_HELP_STRING([--with-bufmgr-module-path=PATH], [tbm bufmgr module dir]),
 				[ BUFMGR_MODULE_PATH="$withval" ],
 				[ BUFMGR_MODULE_PATH="${DEFAULT_BUFMGR_MODULE_PATH}" ])
