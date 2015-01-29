@@ -161,10 +161,11 @@ destroy_display(struct display *display)
 {
 	if (display->wl_drm)
 		wl_drm_destroy(display->wl_drm);
-
 	wl_registry_destroy(display->registry);
 	wl_display_flush(display->display);
 	wl_display_disconnect(display->display);
+	if (display->drm_device_name)
+		free (display->drm_device_name);
 	free(display);
 }
 
@@ -172,6 +173,7 @@ int
 tbm_bufmgr_get_drm_fd_wayland()
 {
 	struct display *display = NULL;
+	int drm_fd;
 
 	display = create_display();
     if (display == NULL) {
@@ -179,8 +181,9 @@ tbm_bufmgr_get_drm_fd_wayland()
         return -1;
     }
 
+	drm_fd = display->drm_fd;
 	destroy_display(display);
 
-    return display->drm_fd;
+    return drm_fd;
 }
 
