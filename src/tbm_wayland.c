@@ -116,7 +116,7 @@ create_display(void)
 	struct display *display;
     drm_magic_t magic;
 
-	display = malloc(sizeof *display);
+	display = calloc(sizeof(struct display), 1);
 	if (display == NULL) {
         TBM_LOG ("[libtbm:%d] out of memory\n", getpid());
         return NULL;
