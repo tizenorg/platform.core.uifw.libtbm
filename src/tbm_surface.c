@@ -34,50 +34,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "tbm_bufmgr_int.h"
 #include "tbm_surface_internal.h"
 
-static int
-_tbm_surface_get_info (struct _tbm_surface *surf, int opt, tbm_surface_info_s *info, int map)
-{
-    tbm_bo_handle bo_handles[4];
-    int i;
-
-    info->width = surf->info.width;
-    info->height = surf->info.height;
-    info->format = surf->info.format;
-    info->bpp = surf->info.bpp;
-    info->size = surf->info.size;
-    info->num_planes = surf->info.num_planes;
-
-    if (surf->num_bos == 1)
-    {
-        if (map == 1)
-        {
-            bo_handles[0] = tbm_bo_map (surf->bos[0], TBM_DEVICE_CPU, opt);
-            if (bo_handles[0].ptr == NULL)
-                return 0;
-        }
-        else
-        {
-            bo_handles[0] = tbm_bo_get_handle (surf->bos[0], TBM_DEVICE_CPU);
-            if (bo_handles[0].ptr == NULL)
-                return 0;
-        }
-
-        for (i = 0; i < surf->info.num_planes; i++)
-        {
-            info->planes[i].size = surf->info.planes[i].size;
-            info->planes[i].offset = surf->info.planes[i].offset;
-            info->planes[i].stride = surf->info.planes[i].stride;
-            info->planes[i].ptr = bo_handles[0].ptr + surf->info.planes[i].offset;
-        }
-    }
-    else
-    {
-        /* TODO: calculate the virtaul address when num_bos is over 1 */
-    }
-
-    return 1;
-}
-
 int
 tbm_surface_query_formats (uint32_t **formats, uint32_t *num)
 {
@@ -133,10 +89,9 @@ tbm_surface_map (tbm_surface_h surface, int opt, tbm_surface_info_s *info)
     TBM_RETURN_VAL_IF_FAIL (surface != NULL, TBM_SURFACE_ERROR_INVALID_PARAMETER);
     TBM_RETURN_VAL_IF_FAIL (info != NULL, TBM_SURFACE_ERROR_INVALID_PARAMETER);
 
-    struct _tbm_surface *surf = (struct _tbm_surface *)surface;
     int ret = 0;
 
-    ret = _tbm_surface_get_info (surf, opt, info, 1);
+    ret = tbm_surface_internal_get_info (surface, opt, info, 1);
     if (ret == 0)
         return TBM_SURFACE_ERROR_INVALID_OPERATION;
 
@@ -148,11 +103,7 @@ tbm_surface_unmap (tbm_surface_h surface)
 {
     TBM_RETURN_VAL_IF_FAIL (surface != NULL, TBM_SURFACE_ERROR_INVALID_PARAMETER);
 
-    struct _tbm_surface *surf = (struct _tbm_surface *)surface;
-    int i;
-
-    for (i = 0; i < surf->num_bos; i++)
-        tbm_bo_unmap (surf->bos[i]);
+    tbm_surface_internal_unmap(surface);
 
     return TBM_SURFACE_ERROR_NONE;
 }
@@ -163,10 +114,9 @@ tbm_surface_get_info (tbm_surface_h surface, tbm_surface_info_s *info)
     TBM_RETURN_VAL_IF_FAIL (surface != NULL, TBM_SURFACE_ERROR_INVALID_PARAMETER);
     TBM_RETURN_VAL_IF_FAIL (info != NULL, TBM_SURFACE_ERROR_INVALID_PARAMETER);
 
-    struct _tbm_surface *surf = (struct _tbm_surface *)surface;
     int ret = 0;
 
-    ret = _tbm_surface_get_info (surf, 0, info, 0);
+    ret = tbm_surface_internal_get_info (surface, 0, info, 0);
     if (ret == 0)
         return TBM_SURFACE_ERROR_INVALID_OPERATION;
 
@@ -178,9 +128,7 @@ tbm_surface_get_width (tbm_surface_h surface)
 {
     TBM_RETURN_VAL_IF_FAIL (surface != NULL, TBM_SURFACE_ERROR_INVALID_PARAMETER);
 
-    struct _tbm_surface *surf = (struct _tbm_surface *)surface;
-
-    return surf->info.width;
+    return tbm_surface_internal_get_width(surface);
 }
 
 int
@@ -188,9 +136,7 @@ tbm_surface_get_height (tbm_surface_h surface)
 {
     TBM_RETURN_VAL_IF_FAIL (surface != NULL, TBM_SURFACE_ERROR_INVALID_PARAMETER);
 
-    struct _tbm_surface *surf = (struct _tbm_surface *)surface;
-
-    return surf->info.height;
+    return tbm_surface_internal_get_height(surface);
 }
 
 tbm_format
@@ -204,11 +150,9 @@ tbm_surface_get_format (tbm_surface_h surface)
         return 0;
     }
 
-    struct _tbm_surface *surf = (struct _tbm_surface *)surface;
-
 #ifdef HAVE_CAPI_0_1_1
     set_last_result (TBM_SURFACE_ERROR_NONE);
 #endif
-    return surf->info.format;
+    return tbm_surface_internal_get_format(surface);
 }
 

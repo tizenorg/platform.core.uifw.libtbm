@@ -2,7 +2,7 @@
 %bcond_with wayland
 
 Name:           libtbm
-Version:        1.1.1
+Version:        1.1.4
 Release:        1
 License:        MIT
 Summary:        The library for Tizen Buffer Manager
@@ -68,10 +68,6 @@ rm -rf %{buildroot}
 %defattr(-,root,root,-)
 /usr/share/license/%{name}
 %{_libdir}/libtbm.so.*
-%ifarch x86_64
-%else
-%{_libdir}/libdrm_slp.so.*
-%endif
 
 %files devel
 %defattr(-,root,root,-)
@@ -82,8 +78,4 @@ rm -rf %{buildroot}
 %{_includedir}/tbm_bufmgr_backend.h
 %{_includedir}/tbm_type.h
 %{_libdir}/libtbm.so
-%ifarch x86_64
-%else
-%{_libdir}/libdrm_slp.so
-%endif
 %{_libdir}/pkgconfig/libtbm.pc

@@ -250,6 +250,15 @@ struct _tbm_bufmgr_backend
     */
     tbm_fd		(*bo_export_fd)         (tbm_bo bo);
 
+    /**
+    * @brief get the tbm_bo_handle according to the device type and the prime fd.
+    * @param[in] bufmgr : the tizen buffer manager
+    * @param[in] fd : the prime fd associated with the buffer object
+    * @param[in] device : the option to access the buffer object
+    * @return the handle of the buffer object
+    */
+    tbm_bo_handle   (*fd_to_handle)  (tbm_bufmgr bufmgr, tbm_fd fd, int device);
+
     /* Padding for future extension */
     void (*reserved1)    (void);
     void (*reserved2)    (void);
@@ -289,6 +298,7 @@ void                tbm_backend_free  (tbm_bufmgr_backend backend);
 int                 tbm_backend_init  (tbm_bufmgr bufmgr, tbm_bufmgr_backend backend);
 
 void *tbm_backend_get_bufmgr_priv (tbm_bo bo);
+void *tbm_backend_get_priv_from_bufmgr (tbm_bufmgr bufmgr);
 void *tbm_backend_get_bo_priv     (tbm_bo bo);
 
 #endif  /* _TBM_BUFMGR_BACKEND_H_ */

@@ -93,20 +93,6 @@ tbm_backend_init (tbm_bufmgr bufmgr, tbm_bufmgr_backend backend)
         }
     }
 
-    /* log for tbm flags */
-    TBM_LOG ("[libtbm:%d] ", getpid());
-    TBM_LOG ("cache_crtl:");
-    if (flags&TBM_CACHE_CTRL_BACKEND)
-        TBM_LOG ("BACKEND ");
-    else
-        TBM_LOG ("TBM ");
-    TBM_LOG ("lock_crtl:");
-    if (flags&TBM_LOCK_CTRL_BACKEND)
-        TBM_LOG ("BACKEND ");
-    else
-        TBM_LOG ("TBM ");
-    TBM_LOG ("\n");
-
     bufmgr->backend = backend;
 
     return 1;
@@ -116,6 +102,14 @@ void *
 tbm_backend_get_bufmgr_priv (tbm_bo bo)
 {
     tbm_bufmgr_backend backend = bo->bufmgr->backend;
+
+    return backend->priv;
+}
+
+void *
+tbm_backend_get_priv_from_bufmgr (tbm_bufmgr bufmgr)
+{
+    tbm_bufmgr_backend backend = bufmgr->backend;
 
     return backend->priv;
 }
