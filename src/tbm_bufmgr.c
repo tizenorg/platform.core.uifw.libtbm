@@ -1234,7 +1234,10 @@ tbm_bo_import (tbm_bufmgr bufmgr, unsigned int key)
 
     bo = calloc (1, sizeof(struct _tbm_bo));
     if(!bo)
+    {
+        pthread_mutex_unlock (&bufmgr->lock);
         return NULL;
+    }
 
     bo->bufmgr = bufmgr;
 
@@ -1304,7 +1307,10 @@ tbm_bo_import_fd  (tbm_bufmgr bufmgr, tbm_fd fd)
 
     bo = calloc (1, sizeof(struct _tbm_bo));
     if(!bo)
+    {
+        pthread_mutex_unlock (&bufmgr->lock);
         return NULL;
+    }
 
     bo->bufmgr = bufmgr;
 
