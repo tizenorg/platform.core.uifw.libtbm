@@ -48,7 +48,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * @brief Enumeration for tbm_surface error type.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 typedef enum
 {
@@ -59,25 +59,25 @@ typedef enum
 
 /**
  * @brief Definition for the max number of TBM surface plane.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_SURF_PLANE_MAX 4
 
 /* option to map the tbm_surface */
 /**
  * @brief Definition for the access option to read.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_SURF_OPTION_READ      (1 << 0)
 /**
  * @brief Definition for the access option to write.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_SURF_OPTION_WRITE     (1 << 1)
 
 /**
  * @brief Definition for the TBM plane struct.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 typedef struct _tbm_surface_plane
 {
@@ -93,7 +93,7 @@ typedef struct _tbm_surface_plane
 
 /**
  * @brief Definition for the TBM surface information struct.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 typedef struct _tbm_surface_info
 {
@@ -117,240 +117,240 @@ typedef struct _tbm_surface_info
 /* color index */
 /**
  * @brief Definition for the TBM surface format C8 ([7:0] C).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_C8       __tbm_fourcc_code('C', '8', ' ', ' ')
 
 /* 8 bpp RGB */
 /**
  * @brief Definition for the TBM surface format RGB322 ([7:0] R:G:B 3:3:2).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_RGB332   __tbm_fourcc_code('R', 'G', 'B', '8')
 /**
  * @brief Definition for the TBM surface format RGB233 ([7:0] B:G:R 2:3:3).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_BGR233   __tbm_fourcc_code('B', 'G', 'R', '8')
 
 /* 16 bpp RGB */
 /**
  * @brief Definition for the TBM surface format XRGB4444 ([15:0] x:R:G:B 4:4:4:4 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_XRGB4444 __tbm_fourcc_code('X', 'R', '1', '2')
 /**
  * @brief Definition for the TBM surface format XBRG4444 ([15:0] x:B:G:R 4:4:4:4 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_XBGR4444 __tbm_fourcc_code('X', 'B', '1', '2')
 /**
  * @brief Definition for the TBM surface format RGBX4444 ([15:0] R:G:B:x 4:4:4:4 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_RGBX4444 __tbm_fourcc_code('R', 'X', '1', '2')
 /**
  * @brief Definition for the TBM surface format BGRX4444 ([15:0] B:G:R:x 4:4:4:4 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_BGRX4444 __tbm_fourcc_code('B', 'X', '1', '2')
 
 /**
  * @brief Definition for the TBM surface format ARGB4444 ([15:0] A:R:G:B 4:4:4:4 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_ARGB4444 __tbm_fourcc_code('A', 'R', '1', '2')
 /**
  * @brief Definition for the TBM surface format ABGR4444 ([15:0] A:B:G:R 4:4:4:4 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_ABGR4444 __tbm_fourcc_code('A', 'B', '1', '2')
 /**
  * @brief Definition for the TBM surface format RGBA4444 ([15:0] R:G:B:A 4:4:4:4 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_RGBA4444 __tbm_fourcc_code('R', 'A', '1', '2')
 /**
  * @brief Definition for the TBM surface format BGRA4444 ([15:0] B:G:R:A 4:4:4:4 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_BGRA4444 __tbm_fourcc_code('B', 'A', '1', '2')
 
 /**
  * @brief Definition for the TBM surface format XRGB1555 ([15:0] x:R:G:B 1:5:5:5 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_XRGB1555 __tbm_fourcc_code('X', 'R', '1', '5')
 /**
  * @brief Definition for the TBM surface format XBGR1555 ([15:0] x:B:G:R 1:5:5:5 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_XBGR1555 __tbm_fourcc_code('X', 'B', '1', '5')
 /**
  * @brief Definition for the TBM surface format RGBX5551 ([15:0] R:G:B:x 5:5:5:1 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_RGBX5551 __tbm_fourcc_code('R', 'X', '1', '5')
 /**
  * @brief Definition for the TBM surface format BGRX5551 ([15:0] B:G:R:x 5:5:5:1 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_BGRX5551 __tbm_fourcc_code('B', 'X', '1', '5')
 
 /**
  * @brief Definition for the TBM surface format ARGB1555 ([15:0] A:R:G:B 1:5:5:5 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_ARGB1555 __tbm_fourcc_code('A', 'R', '1', '5')
 /**
  * @brief Definition for the TBM surface format ABGR1555 ([15:0] A:B:G:R 1:5:5:5 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_ABGR1555 __tbm_fourcc_code('A', 'B', '1', '5')
 /**
  * @brief Definition for the TBM surface format RGBA5551 ([15:0] R:G:B:A 5:5:5:1 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_RGBA5551 __tbm_fourcc_code('R', 'A', '1', '5')
 /**
  * @brief Definition for the TBM surface format BGRA5551 ([15:0] B:G:R:A 5:5:5:1 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_BGRA5551 __tbm_fourcc_code('B', 'A', '1', '5')
 
 /**
  * @brief Definition for the TBM surface format RGB565 ([15:0] R:G:B 5:6:5 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_RGB565   __tbm_fourcc_code('R', 'G', '1', '6')
 /**
  * @brief Definition for the TBM surface format BGR565 ([15:0] B:G:R 5:6:5 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_BGR565   __tbm_fourcc_code('B', 'G', '1', '6')
 
 /* 24 bpp RGB */
 /**
  * @brief Definition for the TBM surface format RGB888 ([23:0] R:G:B little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_RGB888   __tbm_fourcc_code('R', 'G', '2', '4')
 /**
  * @brief Definition for the TBM surface format BGR888 ([23:0] B:G:R little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_BGR888   __tbm_fourcc_code('B', 'G', '2', '4')
 
 /* 32 bpp RGB */
 /**
  * @brief Definition for the TBM surface format XRGB8888 ([31:0] x:R:G:B 8:8:8:8 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_XRGB8888 __tbm_fourcc_code('X', 'R', '2', '4')
 /**
  * @brief Definition for the TBM surface format XBGR8888 ([31:0] x:B:G:R 8:8:8:8 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_XBGR8888 __tbm_fourcc_code('X', 'B', '2', '4')
 /**
  * @brief Definition for the TBM surface format RGBX8888 ([31:0] R:G:B:x 8:8:8:8 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_RGBX8888 __tbm_fourcc_code('R', 'X', '2', '4')
 /**
  * @brief Definition for the TBM surface format BGRX8888 ([31:0] B:G:R:x 8:8:8:8 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_BGRX8888 __tbm_fourcc_code('B', 'X', '2', '4')
 
 /**
  * @brief Definition for the TBM surface format ARGB8888 ([31:0] A:R:G:B 8:8:8:8 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_ARGB8888 __tbm_fourcc_code('A', 'R', '2', '4')
 /**
  * @brief Definition for the TBM surface format ABGR8888 ([31:0] [31:0] A:B:G:R 8:8:8:8 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_ABGR8888 __tbm_fourcc_code('A', 'B', '2', '4')
 /**
  * @brief Definition for the TBM surface format RGBA8888 ([31:0] R:G:B:A 8:8:8:8 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_RGBA8888 __tbm_fourcc_code('R', 'A', '2', '4')
 /**
  * @brief Definition for the TBM surface format BGRA8888 ([31:0] B:G:R:A 8:8:8:8 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_BGRA8888 __tbm_fourcc_code('B', 'A', '2', '4')
 
 /**
  * @brief Definition for the TBM surface format XRGB2101010 ([31:0] x:R:G:B 2:10:10:10 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_XRGB2101010  __tbm_fourcc_code('X', 'R', '3', '0')
 /**
  * @brief Definition for the TBM surface format XBGR2101010 ([31:0] x:B:G:R 2:10:10:10 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_XBGR2101010  __tbm_fourcc_code('X', 'B', '3', '0')
 /**
  * @brief Definition for the TBM surface format RGBX1010102 ([31:0] R:G:B:x 10:10:10:2 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_RGBX1010102  __tbm_fourcc_code('R', 'X', '3', '0')
 /**
  * @brief Definition for the TBM surface format BGRX1010102 ([31:0] B:G:R:x 10:10:10:2 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_BGRX1010102  __tbm_fourcc_code('B', 'X', '3', '0')
 
 /**
  * @brief Definition for the TBM surface format ARGB2101010 ([31:0] A:R:G:B 2:10:10:10 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_ARGB2101010  __tbm_fourcc_code('A', 'R', '3', '0')
 /**
  * @brief Definition for the TBM surface format ABGR2101010 ([31:0] A:B:G:R 2:10:10:10 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_ABGR2101010  __tbm_fourcc_code('A', 'B', '3', '0')
 /**
  * @brief Definition for the TBM surface format RGBA1010102 ([31:0] R:G:B:A 10:10:10:2 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_RGBA1010102  __tbm_fourcc_code('R', 'A', '3', '0')
 /**
  * @brief Definition for the TBM surface format BGRA1010102 ([31:0] B:G:R:A 10:10:10:2 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_BGRA1010102  __tbm_fourcc_code('B', 'A', '3', '0') /*  */
 
 /* packed YCbCr */
 /**
  * @brief Definition for the TBM surface format YUYV ([31:0] Cr0:Y1:Cb0:Y0 8:8:8:8 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_YUYV     __tbm_fourcc_code('Y', 'U', 'Y', 'V')
 /**
  * @brief Definition for the TBM surface format YVYU ([31:0] Cb0:Y1:Cr0:Y0 8:8:8:8 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_YVYU     __tbm_fourcc_code('Y', 'V', 'Y', 'U') /*  */
 /**
  * @brief Definition for the TBM surface format UYVY ([31:0] Y1:Cr0:Y0:Cb0 8:8:8:8 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_UYVY     __tbm_fourcc_code('U', 'Y', 'V', 'Y')
 /**
  * @brief Definition for the TBM surface format VYUY ([31:0] Y1:Cb0:Y0:Cr0 8:8:8:8 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_VYUY     __tbm_fourcc_code('V', 'Y', 'U', 'Y')
 
 /**
  * @brief Definition for the TBM surface format AYUV ([31:0] A:Y:Cb:Cr 8:8:8:8 little endian).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_AYUV     __tbm_fourcc_code('A', 'Y', 'U', 'V')
 
@@ -363,22 +363,22 @@ typedef struct _tbm_surface_info
  */
 /**
  * @brief Definition for the TBM surface format NV12 (2x2 subsampled Cr:Cb plane).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_NV12     __tbm_fourcc_code('N', 'V', '1', '2')
 /**
  * @brief Definition for the TBM surface format NV21 (2x2 subsampled Cb:Cr plane).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_NV21     __tbm_fourcc_code('N', 'V', '2', '1') /*  */
 /**
  * @brief Definition for the TBM surface format NV16 (2x1 subsampled Cr:Cb plane).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_NV16     __tbm_fourcc_code('N', 'V', '1', '6')
 /**
  * @brief Definition for the TBM surface format NV61 (2x1 subsampled Cb:Cr plane).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_NV61     __tbm_fourcc_code('N', 'V', '6', '1')
 
@@ -397,47 +397,47 @@ typedef struct _tbm_surface_info
 #define TBM_FORMAT_YUV410   __tbm_fourcc_code('Y', 'U', 'V', '9')
 /**
  * @brief Definition for the TBM surface format YVU410 (4x4 subsampled Cr (1) and Cb (2) planes).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_YVU410   __tbm_fourcc_code('Y', 'V', 'U', '9')
 /**
  * @brief Definition for the TBM surface format YUV411 (4x1 subsampled Cb (1) and Cr (2) planes).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_YUV411   __tbm_fourcc_code('Y', 'U', '1', '1')
 /**
  * @brief Definition for the TBM surface format YVU411 (4x1 subsampled Cr (1) and Cb (2) planes).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_YVU411   __tbm_fourcc_code('Y', 'V', '1', '1')
 /**
  * @brief Definition for the TBM surface format YUV420 (2x2 subsampled Cb (1) and Cr (2) planes).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_YUV420   __tbm_fourcc_code('Y', 'U', '1', '2')
 /**
  * @brief Definition for the TBM surface format YVU420 (2x2 subsampled Cr (1) and Cb (2) planes).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_YVU420   __tbm_fourcc_code('Y', 'V', '1', '2')
 /**
  * @brief Definition for the TBM surface format YUV422 (2x1 subsampled Cb (1) and Cr (2) planes).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_YUV422   __tbm_fourcc_code('Y', 'U', '1', '6')
 /**
  * @brief Definition for the TBM surface format YVU422 (2x1 subsampled Cr (1) and Cb (2) planes).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_YVU422   __tbm_fourcc_code('Y', 'V', '1', '6')
 /**
  * @brief Definition for the TBM surface format YUV444 (non-subsampled Cb (1) and Cr (2) planes).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_YUV444   __tbm_fourcc_code('Y', 'U', '2', '4')
 /**
  * @brief Definition for the TBM surface format YVU444 (non-subsampled Cr (1) and Cb (2) planes).
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_FORMAT_YVU444   __tbm_fourcc_code('Y', 'V', '2', '4')
 
@@ -447,7 +447,7 @@ extern "C" {
 
 /**
  * @brief Queries surface format list and number of format supported by the system.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @remarks You must release the formats using free().
  *
@@ -487,7 +487,7 @@ int tbm_surface_query_formats (uint32_t **formats, uint32_t *num);
  * @brief Creates the tbm_surface.
  * @details This function creates the tbm_surface with the given width, height, and format.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @remark The specific error code can be obtained using the get_last_result() method. Error codes are described in Exception section.
  *
@@ -523,7 +523,7 @@ tbm_surface_h tbm_surface_create (int width, int height, tbm_format format);
 
 /**
  * @brief Destroys the tbm_surface.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @param[in] surface  The #tbm_surface_h
  *
@@ -558,7 +558,7 @@ int tbm_surface_destroy (tbm_surface_h surface);
  *          #TBM_SURF_OPTION_READ indicates access option to read. \n
  *          #TBM_SURF_OPTION_WRITE indicates access option to write.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @param[in]  surface  The #tbm_surface_h
  * @param[in]  opt      The option to access the tbm_surface
@@ -594,7 +594,7 @@ int tbm_surface_map (tbm_surface_h surface, int opt, tbm_surface_info_s *info);
 
 /**
  * @brief Unmaps the tbm_surface.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @param[in] surface  The #tbm_surface_h
  *
@@ -631,7 +631,7 @@ int tbm_surface_unmap (tbm_surface_h surface);
  *          The information of tbm_surface has width, height, format, bpp, size, number of planes and information of planes. \n
  *          The information of planes has stride, offset, size and pointer of plane.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @param[in]   surface  The #tbm_surface_h
  * @param[out]  info     The information of the tbm_surface
@@ -665,7 +665,7 @@ int tbm_surface_get_info (tbm_surface_h surface, tbm_surface_info_s *info);
 
 /**
  * @brief Gets the width of the tbm_surface.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @param[in] surface  The #tbm_surface_h
  *
@@ -696,7 +696,7 @@ int tbm_surface_get_width (tbm_surface_h surface);
 
 /**
  * @brief Gets the height of the tbm_surface.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @param[in] surface  The #tbm_surface_h
  *
@@ -727,7 +727,7 @@ int tbm_surface_get_height (tbm_surface_h surface);
 
 /**
  * @brief Gets the format of the tbm_surface.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @remark The specific error code can be obtained using the get_last_result() method. Error codes are described in Exception section.
  *

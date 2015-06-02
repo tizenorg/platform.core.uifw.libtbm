@@ -42,10 +42,12 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * @brief Definition for the Tizen buffer surface.
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 typedef struct _tbm_surface * tbm_surface_h;
 /**
  * @brief Definition for the Tizen buffer surface format.
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 typedef uint32_t tbm_format;
 
