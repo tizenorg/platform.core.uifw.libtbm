@@ -41,7 +41,7 @@ extern "C" {
 
 /**
  * @brief Queries formats which the system can support.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @remarks The formats must be released using free().
  * @param[in] bufmgr : the buffer manager
  * @param[out] *formats : format array which the system can support. This pointer has to be freed by user.
@@ -69,7 +69,7 @@ int tbm_surface_internal_query_supported_formats (uint32_t **formats, uint32_t *
 
 /**
  * @brief Creates the tbm_surface with memory type.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @details
  * #TBM_BO_DEFAULT is default memory: it depends on the backend\n
  * #TBM_BO_SCANOUT is scanout memory\n
@@ -95,7 +95,7 @@ int tbm_surface_internal_query_supported_formats (uint32_t **formats, uint32_t *
    uint32_t format_num;
 
    bufmgr = tbm_bufmgr_create (bufmgr_fd);
-   surface = tbm_surface_internal_create_with_flags (bufmgr, 128, 128, TBM_FORMAT_YUV420, TBM_BO_DEFAULT);
+   surface = tbm_surface_internal_create_with_flags (128, 128, TBM_FORMAT_YUV420, TBM_BO_DEFAULT);
 
    ...
 
@@ -107,7 +107,7 @@ tbm_surface_h tbm_surface_internal_create_with_flags (int width, int height, int
 
 /**
  * @brief Creates the tbm_surface with buffer objects.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in] bufmgr : the buffer manager
  * @param[in] width  : the width of surface
  * @param[in] height : the height of surface
@@ -125,14 +125,25 @@ tbm_surface_h tbm_surface_internal_create_with_flags (int width, int height, int
    int bufmgr_fd
    tbm_bufmgr bufmgr;
    tbm_surface_h surface;
+   tbm_surface_info_s info;
    uint32_t *format;
    uint32_t format_num;
-   tbm_bo bo[2];
+   tbm_bo bo[1];
 
    bufmgr = tbm_bufmgr_init (bufmgr_fd);
-   bo[1] = tbm_bo_alloc (bufmgr, 128 * 128, TBM_BO_DEFAULT);
-   bo[2] = tbm_bo_alloc (bufmgr, 128 * 128, TBM_BO_DEFAULT);
-   surface = tbm_surface_internal_create_with_bos (bufmgr, 128, 128, TBM_FORMAT_YUV420, TBM_BO_DEFAULT);
+   bo[0] = tbm_bo_alloc (bufmgr, 128 * 128, TBM_BO_DEFAULT);
+
+   info.with = 128;
+   info.height = 128;
+   info.format = TBM_FORMAT_ARGB8888;
+   info.bpp = 32;
+   info.size = 65536;
+   info.num_planes = 1;
+   info.planes[0].size = 65536;
+   info.planes[0].offset = 0;
+   info.planes[0].stride = 512;
+
+   surface = tbm_surface_internal_create_with_bos (&info, bo, 1);
 
    ...
 
@@ -140,7 +151,7 @@ tbm_surface_h tbm_surface_internal_create_with_flags (int width, int height, int
    tbm_surface_bufmgr_deinit (bufmgr);
    @endcode
  */
-tbm_surface_h tbm_surface_internal_create_with_bos (int width, int height, int format, tbm_bo *bos, int num);
+tbm_surface_h tbm_surface_internal_create_with_bos (tbm_surface_info_s *info, tbm_bo *bos, int num);
 
 
 /**
@@ -151,7 +162,7 @@ void tbm_surface_internal_destroy (tbm_surface_h surface);
 
 /**
  * @brief Gets the number of buffer objects associated with the tbm_surface.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in] surface : the tbm_surface_h
  * @return the number of buffer objects associated with the tbm_surface_h, otherwise -1.
  * @par Example
@@ -174,7 +185,7 @@ int tbm_surface_internal_get_num_bos (tbm_surface_h surface);
 
 /**
  * @brief Gets the buffor object by the bo_index.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in] surface : the tbm_surface_h
  * @param[in] bo_idx : the bo index in the the tbm_surface
  * @return the buffer object, otherwise NULL.
@@ -204,7 +215,7 @@ tbm_bo tbm_surface_internal_get_bo (tbm_surface_h surface, int bo_idx);
 
 /**
  * @brief Gets the size of the surface.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in] surface : the tbm_surface_h
  * @return the size of tbm_surface, otherwise -1.
  * @par Example
@@ -225,7 +236,7 @@ int tbm_surface_internal_get_size (tbm_surface_h surface);
 
 /**
  * @brief Gets size, offset and pitch data of plane by the plane_index.
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in] surface : the tbm_surface_h
  * @param[in] plane_idx : the bo index in the the tbm_surface
  * @param[out] size : the size of plan in tbm_surface
@@ -250,6 +261,46 @@ int tbm_surface_internal_get_size (tbm_surface_h surface);
    @endcode
  */
 int tbm_surface_internal_get_plane_data (tbm_surface_h surface, int plane_idx, uint32_t *size, uint32_t *offset, uint32_t *pitch);
+
+/**
+ * @brief Gets number of planes by the format.
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @param[in] format : the format of surface
+ * @return number of planes by the format, otherwise 0.
+ * @par Example
+   @code
+   #include <tbm_surface.h>
+   #include <tbm_surface_internal.h>
+
+   int num;
+
+   num = tbm_surface_internal_get_num_planes (TBM_FORMAT_YUV420);
+
+   ...
+
+   @endcode
+ */
+int tbm_surface_internal_get_num_planes (tbm_format format);
+
+/**
+ * @brief Gets bpp by the format.
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @param[in] format : the format of surface
+ * @return bpp by the format, otherwise 0.
+ * @par Example
+   @code
+   #include <tbm_surface.h>
+   #include <tbm_surface_internal.h>
+
+   int bpp;
+
+   bpp = tbm_surface_internal_get_bpp (TBM_FORMAT_YUV420);
+
+   ...
+
+   @endcode
+ */
+int tbm_surface_internal_get_bpp (tbm_format format);
 
 #ifdef __cplusplus
 }
