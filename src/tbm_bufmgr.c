@@ -1183,6 +1183,7 @@ tbm_bo_alloc (tbm_bufmgr bufmgr, int size, int flags)
     bo->flags = flags;
     bo->tgl_key = INITIAL_KEY;
     bo->priv = bo_priv;
+    bo->default_handle.u32 = 0;
 
     /* init bo state */
     if (!_tbm_bo_init_state (bo, CACHE_OP_CREATE))
@@ -1253,6 +1254,7 @@ tbm_bo_import (tbm_bufmgr bufmgr, unsigned int key)
     bo->ref_cnt = 1;
     bo->tgl_key = INITIAL_KEY;
     bo->priv = bo_priv;
+    bo->default_handle.u32 = 0;
 
     /* init bo state */
     if (!_tbm_bo_init_state (bo, CACHE_OP_IMPORT))
@@ -1326,6 +1328,7 @@ tbm_bo_import_fd  (tbm_bufmgr bufmgr, tbm_fd fd)
     bo->ref_cnt = 1;
     bo->tgl_key = INITIAL_KEY;
     bo->priv = bo_priv;
+    bo->default_handle.u32 = 0;
 
     /* init bo state */
     if (!_tbm_bo_init_state (bo, CACHE_OP_IMPORT))
@@ -1505,6 +1508,7 @@ tbm_bo_swap (tbm_bo bo1, tbm_bo bo2)
 
     void* temp;
     unsigned int tmp_key;
+    tbm_bo_handle tmp_defualt_handle;
 
     pthread_mutex_lock (&bo1->bufmgr->lock);
 
@@ -1519,6 +1523,10 @@ tbm_bo_swap (tbm_bo bo1, tbm_bo bo2)
     tmp_key = bo1->tgl_key;
     bo1->tgl_key = bo2->tgl_key;
     bo2->tgl_key = tmp_key;
+
+    tmp_defualt_handle = bo1->default_handle;
+    bo1->default_handle = bo2->default_handle;
+    bo2->default_handle = tmp_defualt_handle;
 
     temp = bo1->priv;
     bo1->priv = bo2->priv;
