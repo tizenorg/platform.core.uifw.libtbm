@@ -1505,6 +1505,7 @@ tbm_bo_swap (tbm_bo bo1, tbm_bo bo2)
 
     void* temp;
     unsigned int tmp_key;
+    tbm_bo_handle tmp_defualt_handle;
 
     pthread_mutex_lock (&bo1->bufmgr->lock);
 
@@ -1519,6 +1520,10 @@ tbm_bo_swap (tbm_bo bo1, tbm_bo bo2)
     tmp_key = bo1->tgl_key;
     bo1->tgl_key = bo2->tgl_key;
     bo2->tgl_key = tmp_key;
+
+    tmp_defualt_handle = bo1->default_handle;
+    bo1->default_handle = bo2->default_handle;
+    bo2->default_handle = tmp_defualt_handle;
 
     temp = bo1->priv;
     bo1->priv = bo2->priv;
