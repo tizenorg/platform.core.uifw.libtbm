@@ -104,6 +104,9 @@ _tbm_surface_internal_query_size (tbm_surface_h surface)
     TBM_RETURN_VAL_IF_FAIL (surf->info.height > 0, 0);
     TBM_RETURN_VAL_IF_FAIL (surf->info.format > 0, 0);
 
+    if (!mgr->backend->surface_get_size)
+        return 0;
+
     size = mgr->backend->surface_get_size (surf, surf->info.width, surf->info.height, surf->info.format);
 
     return size;
@@ -123,6 +126,9 @@ _tbm_surface_internal_query_plane_data (tbm_surface_h surface, int plane_idx, ui
     TBM_RETURN_VAL_IF_FAIL (surf->info.width > 0, 0);
     TBM_RETURN_VAL_IF_FAIL (surf->info.height > 0, 0);
     TBM_RETURN_VAL_IF_FAIL (surf->info.format > 0, 0);
+
+    if (!mgr->backend->surface_get_plane_data)
+        return 0;
 
     ret = mgr->backend->surface_get_plane_data (surf, surf->info.width, surf->info.height, surf->info.format, plane_idx, size, offset, pitch);
     if (!ret)
@@ -146,6 +152,13 @@ tbm_surface_internal_query_supported_formats (uint32_t **formats, uint32_t *num)
     }
 
     mgr = g_surface_bufmgr;
+
+    if (!mgr->backend->surface_surpported_format)
+    {
+        _tbm_surface_mutex_unlock();
+        return 0;
+    }
+
     ret = mgr->backend->surface_supported_format (formats, num);
 
     _tbm_surface_mutex_unlock();
