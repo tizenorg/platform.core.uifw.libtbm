@@ -153,7 +153,7 @@ tbm_surface_internal_query_supported_formats (uint32_t **formats, uint32_t *num)
 
     mgr = g_surface_bufmgr;
 
-    if (!mgr->backend->surface_surpported_format)
+    if (!mgr->backend->surface_supported_format)
     {
         _tbm_surface_mutex_unlock();
         return 0;
