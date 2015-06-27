@@ -231,9 +231,10 @@ struct _tbm_bufmgr_backend
     * @param[out] size : the size of the plane
     * @param[out] offset : the offset of the plane
     * @param[out] pitch : the pitch of the plane
+    * @param[out] bo_idx : the bo index of the plane
     * @return 1 if this function succeeds, otherwise 0.
     */
-    int           (*surface_get_plane_data)   (tbm_surface_h surface, int width, int height, tbm_format format, int plane_idx, uint32_t *size, uint32_t *offset, uint32_t *pitch);
+    int           (*surface_get_plane_data)   (tbm_surface_h surface, int width, int height, tbm_format format, int plane_idx, uint32_t *size, uint32_t *offset, uint32_t *pitch, int *bo_idx);
 
     /**
     * @brief import the buffer object associated with the prime fd.
@@ -258,6 +259,13 @@ struct _tbm_bufmgr_backend
     * @return the handle of the buffer object
     */
     tbm_bo_handle   (*fd_to_handle)  (tbm_bufmgr bufmgr, tbm_fd fd, int device);
+
+    /**
+    * @brief get the num of bos with a format.
+    * @param[in] format : the format of the surface
+    * @return num of the bos if this function succeeds, otherwise 0.
+    */
+    int           (*surface_get_num_bos)   (tbm_format format);
 
     /* Padding for future extension */
     void (*reserved1)    (void);

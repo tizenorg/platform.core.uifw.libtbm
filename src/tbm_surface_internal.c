@@ -113,7 +113,7 @@ _tbm_surface_internal_query_size (tbm_surface_h surface)
 }
 
 static int
-_tbm_surface_internal_query_plane_data (tbm_surface_h surface, int plane_idx, uint32_t *size, uint32_t *offset, uint32_t *pitch)
+_tbm_surface_internal_query_plane_data (tbm_surface_h surface, int plane_idx, uint32_t *size, uint32_t *offset, uint32_t *pitch, int *bo_idx)
 {
     TBM_RETURN_VAL_IF_FAIL (surface, 0);
     TBM_RETURN_VAL_IF_FAIL (plane_idx > -1, 0);
@@ -130,12 +130,32 @@ _tbm_surface_internal_query_plane_data (tbm_surface_h surface, int plane_idx, ui
     if (!mgr->backend->surface_get_plane_data)
         return 0;
 
-    ret = mgr->backend->surface_get_plane_data (surf, surf->info.width, surf->info.height, surf->info.format, plane_idx, size, offset, pitch);
+    ret = mgr->backend->surface_get_plane_data (surf, surf->info.width, surf->info.height, surf->info.format, plane_idx, size, offset, pitch, bo_idx);
     if (!ret)
         return 0;
 
     return 1;
 }
+
+static int
+_tbm_surface_internal_query_num_bos (tbm_format format)
+{
+    TBM_RETURN_VAL_IF_FAIL (format > 0, 0);
+    struct _tbm_bufmgr *mgr;
+    int ret = 0;
+
+    mgr = g_surface_bufmgr;
+
+    if (!mgr->backend->surface_get_num_bos)
+        return 0;
+
+    ret = mgr->backend->surface_get_num_bos (format);
+    if (!ret)
+        return 0;
+
+    return ret;
+}
+
 
 int
 tbm_surface_internal_query_supported_formats (uint32_t **formats, uint32_t *num)
@@ -165,6 +185,7 @@ tbm_surface_internal_query_supported_formats (uint32_t **formats, uint32_t *num)
 
     return ret;
 }
+
 
 int tbm_surface_internal_get_num_planes (tbm_format format)
 {
@@ -335,7 +356,6 @@ int tbm_surface_internal_get_bpp (tbm_format format)
     return bpp;
 }
 
-
 tbm_surface_h
 tbm_surface_internal_create_with_flags (int width, int height, int format, int flags)
 {
@@ -347,7 +367,9 @@ tbm_surface_internal_create_with_flags (int width, int height, int format, int f
     uint32_t size = 0;
     uint32_t offset = 0;
     uint32_t stride = 0;
-    int i;
+    uint32_t bo_size = 0;
+    int bo_idx;
+    int i, j;
 
     _tbm_surface_mutex_lock();
 
@@ -377,32 +399,44 @@ tbm_surface_internal_create_with_flags (int width, int height, int format, int f
     surf->info.bpp = tbm_surface_internal_get_bpp (format);
     surf->info.size = _tbm_surface_internal_query_size (surf);
     surf->info.num_planes = tbm_surface_internal_get_num_planes(format);
+    surf->num_bos = _tbm_surface_internal_query_num_bos(format);
 
-    /* get size, stride and offset */
+    /* get size, stride and offset bo_idx*/
     for (i = 0; i < surf->info.num_planes; i++)
     {
-        _tbm_surface_internal_query_plane_data (surf, i, &size, &offset, &stride);
+        _tbm_surface_internal_query_plane_data (surf, i, &size, &offset, &stride, &bo_idx);
         surf->info.planes[i].size = size;
         surf->info.planes[i].offset = offset;
         surf->info.planes[i].stride = stride;
+        surf->planes_bo_idx[i] = bo_idx;
     }
 
     surf->flags = flags;
 
-    /* create only one bo */
-    surf->num_bos = 1;
-    surf->bos[0] = tbm_bo_alloc (mgr, surf->info.size, flags);
-    if (!surf->bos[0])
+    for (i = 0; i < surf->num_bos; i++)
     {
-        free (surf);
-        surf = NULL;
-
-        if(LIST_IS_EMPTY (&g_surface_list))
+        bo_size = 0;
+        for (j = 0; j < surf->info.num_planes; j++)
         {
-            _deinit_surface_bufmgr ();
-            LIST_DELINIT (&g_surface_list);
-            _tbm_surface_mutex_unlock();
-            return NULL;
+            if (surf->planes_bo_idx[i] == i)
+                bo_size += surf->info.planes[i].size;
+        }
+
+        surf->bos[i] = tbm_bo_alloc (mgr, bo_size, flags);
+        if (!surf->bos[i]) {
+            for (j = 0; j < i; j++)
+                tbm_bo_unref (surf->bos[j]);
+
+            free (surf);
+            surf = NULL;
+
+            if(LIST_IS_EMPTY (&g_surface_list))
+            {
+                _deinit_surface_bufmgr ();
+                LIST_DELINIT (&g_surface_list);
+                _tbm_surface_mutex_unlock();
+                return NULL;
+            }
         }
     }
 
@@ -622,7 +656,7 @@ tbm_surface_internal_get_info (tbm_surface_h surface, int opt, tbm_surface_info_
 {
     struct _tbm_surface *surf;
     tbm_bo_handle bo_handles[4];
-    int i;
+    int i, j;
 
     _tbm_surface_mutex_lock();
 
@@ -635,38 +669,40 @@ tbm_surface_internal_get_info (tbm_surface_h surface, int opt, tbm_surface_info_
     info->size = surf->info.size;
     info->num_planes = surf->info.num_planes;
 
-    if (surf->num_bos == 1)
+    if (map == 1)
     {
-        if (map == 1)
+        for (i = 0; i < surf->num_bos; i++)
         {
-            bo_handles[0] = tbm_bo_map (surf->bos[0], TBM_DEVICE_CPU, opt);
-            if (bo_handles[0].ptr == NULL)
+            bo_handles[i] = tbm_bo_map (surf->bos[i], TBM_DEVICE_CPU, opt);
+            if (bo_handles[i].ptr == NULL)
             {
-                _tbm_surface_mutex_unlock();
-                return 0;
-            }
-        }
-        else
-        {
-            bo_handles[0] = tbm_bo_get_handle (surf->bos[0], TBM_DEVICE_CPU);
-            if (bo_handles[0].ptr == NULL)
-            {
-                _tbm_surface_mutex_unlock();
-                return 0;
-            }
-        }
+                for (j = 0; j < i; j++)
+                    tbm_bo_unmap (surf->bos[j]);
 
-        for (i = 0; i < surf->info.num_planes; i++)
-        {
-            info->planes[i].size = surf->info.planes[i].size;
-            info->planes[i].offset = surf->info.planes[i].offset;
-            info->planes[i].stride = surf->info.planes[i].stride;
-            info->planes[i].ptr = bo_handles[0].ptr + surf->info.planes[i].offset;
+                _tbm_surface_mutex_unlock();
+                return 0;
+            }
         }
     }
     else
     {
-        /* TODO: calculate the virtaul address when num_bos is over 1 */
+        for (i = 0; i < surf->num_bos; i++)
+        {
+            bo_handles[i] = tbm_bo_get_handle (surf->bos[i], TBM_DEVICE_CPU);
+            if (bo_handles[i].ptr == NULL)
+            {
+                _tbm_surface_mutex_unlock();
+                return 0;
+            }
+        }
+    }
+
+    for (i = 0; i < surf->info.num_planes; i++)
+    {
+        info->planes[i].size = surf->info.planes[i].size;
+        info->planes[i].offset = surf->info.planes[i].offset;
+        info->planes[i].stride = surf->info.planes[i].stride;
+        info->planes[i].ptr = bo_handles[surf->planes_bo_idx[i]].ptr + surf->info.planes[i].offset;
     }
 
     _tbm_surface_mutex_unlock();

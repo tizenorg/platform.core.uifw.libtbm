@@ -2,8 +2,8 @@
 %bcond_with wayland
 
 Name:           libtbm
-Version:        1.1.4
-Release:        2
+Version:        1.1.5
+Release:        1
 License:        MIT
 Summary:        The library for Tizen Buffer Manager
 Group:          System/Libraries

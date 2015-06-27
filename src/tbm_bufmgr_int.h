@@ -185,7 +185,12 @@ struct _tbm_surface {
     int flags;
 
     int num_bos;  /* the number of buffer objects */
-    tbm_bo bos[4];   /* the array of buffer objects */
+
+    tbm_bo bos[4];
+
+    int num_planes;  /* the number of buffer objects */
+
+    int planes_bo_idx[TBM_SURF_PLANE_MAX];
 
     struct list_head item_link; /* link of surface */
 };
