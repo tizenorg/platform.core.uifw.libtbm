@@ -112,8 +112,7 @@ AM_CONDITIONAL(HAVE_TBM_PLATFORM_WAYLAND, test "x$TBM_PLATFORM" = "xWAYLAND")
 AM_CONDITIONAL(HOST_CPU_X86_64, test "x$HOST_CPU_X86_64" = "xyes")
 
 AC_OUTPUT([
-    src/Makefile
-	src/wayland-drm/Makefile
+   src/Makefile
 	Makefile
 	libtbm.pc])
 

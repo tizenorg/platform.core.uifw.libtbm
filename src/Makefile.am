@@ -1,9 +1,5 @@
 SUBDIRS =
 
-if HAVE_TBM_PLATFORM_WAYLAND
-SUBDIRS += wayland-drm
-endif
-
 AM_CFLAGS = \
 	$(WARN_CFLAGS) \
 	-I./ \
@@ -25,9 +21,6 @@ if HAVE_TBM_PLATFORM_X11
 endif
 
 if HAVE_TBM_PLATFORM_WAYLAND
-    AM_CFLAGS += \
-	    -I$(top_srcdir)/src/wayland-drm
-    libtbm_la_LIBADD += $(top_builddir)/src/wayland-drm/libwayland-drm.la
     libtbm_la_SOURCES += \
 	    tbm_wayland.c
 endif
