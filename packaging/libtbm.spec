@@ -64,7 +64,6 @@ rm -rf %{buildroot}
 
 
 %files
-%manifest libtbm.manifest
 %defattr(-,root,root,-)
 /usr/share/license/%{name}
 %{_libdir}/libtbm.so.*
