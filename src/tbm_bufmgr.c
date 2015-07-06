@@ -908,6 +908,9 @@ tbm_bufmgr_init (int fd)
     if (!gBufMgr)
     {
         _tbm_set_last_result (TBM_BO_ERROR_HEAP_ALLOC_FAILED);
+        if (fd_flag)
+            close(fd);
+
         pthread_mutex_unlock (&gLock);
         return NULL;
     }
@@ -941,6 +944,7 @@ tbm_bufmgr_init (int fd)
         TBM_LOG ("[libtbm:%d] "
                 "error : Fail to load bufmgr backend\n",
                 getpid());
+        close (gBufMgr->fd);
         free (gBufMgr);
         gBufMgr = NULL;
         pthread_mutex_unlock (&gLock);
@@ -976,6 +980,7 @@ tbm_bufmgr_init (int fd)
         gBufMgr->backend->bufmgr_deinit (gBufMgr->backend->priv);
         tbm_backend_free (gBufMgr->backend);
         dlclose (gBufMgr->module_data);
+        close (gBufMgr->fd);
         free (gBufMgr);
         gBufMgr = NULL;
         pthread_mutex_unlock (&gLock);
@@ -993,6 +998,7 @@ tbm_bufmgr_init (int fd)
         tbm_backend_free (gBufMgr->backend);
         pthread_mutex_destroy (&gBufMgr->lock);
         dlclose (gBufMgr->module_data);
+        close (gBufMgr->fd);
         free (gBufMgr);
         gBufMgr = NULL;
         pthread_mutex_unlock (&gLock);
