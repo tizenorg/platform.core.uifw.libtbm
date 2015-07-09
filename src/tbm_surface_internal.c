@@ -775,3 +775,21 @@ tbm_surface_internal_get_format (tbm_surface_h surface)
     return format;
 }
 
+int
+tbm_surface_internal_get_plane_bo_idx (tbm_surface_h surface, int plane_idx)
+{
+    TBM_RETURN_VAL_IF_FAIL (surface, 0);
+    TBM_RETURN_VAL_IF_FAIL (plane_idx > -1, 0);
+    struct _tbm_surface *surf;
+    int bo_idx;
+
+    _tbm_surface_mutex_lock();
+
+    surf = (struct _tbm_surface *)surface;
+    bo_idx = surf->planes_bo_idx[plane_idx];
+
+    _tbm_surface_mutex_unlock();
+
+    return bo_idx;
+}
+
