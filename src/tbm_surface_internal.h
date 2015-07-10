@@ -304,7 +304,7 @@ int tbm_surface_internal_get_bpp (tbm_format format);
 
 /**
  * @brief Gets bo index of plane.
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen 2.4
  * @param[in] surface : the tbm_surface_h
  * @param[in] plane_idx : the bo index in the the tbm_surface
  * @return bo index of plane, otherwise -1.
