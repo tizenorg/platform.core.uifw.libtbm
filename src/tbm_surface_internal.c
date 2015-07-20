@@ -434,9 +434,10 @@ tbm_surface_internal_create_with_flags (int width, int height, int format, int f
             {
                 _deinit_surface_bufmgr ();
                 LIST_DELINIT (&g_surface_list);
-                _tbm_surface_mutex_unlock();
-                return NULL;
             }
+
+            _tbm_surface_mutex_unlock();
+            return NULL;
         }
     }
 
@@ -659,6 +660,8 @@ tbm_surface_internal_get_info (tbm_surface_h surface, int opt, tbm_surface_info_
     int i, j;
 
     _tbm_surface_mutex_lock();
+
+    memset (bo_handles, 0, sizeof(tbm_bo_handle) * 4);
 
     surf = (struct _tbm_surface *)surface;
 
