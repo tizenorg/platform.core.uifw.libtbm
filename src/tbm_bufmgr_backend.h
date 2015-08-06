@@ -238,6 +238,7 @@ struct _tbm_bufmgr_backend
 
     /**
     * @brief import the buffer object associated with the prime fd.
+    * @remarks tbm_fd must be free by user.
     * @param[in] bo : the buffer object
     * @param[in] fd : the prime fd associated with the buffer object
     * @return pointer of the bo private.
@@ -246,6 +247,7 @@ struct _tbm_bufmgr_backend
 
     /**
     * @brief export the buffer object
+    * @remarks tbm_fd must be free by user.
     * @param[in] bo : the buffer object
     * @return tbm_fd associated with the buffer object
     */

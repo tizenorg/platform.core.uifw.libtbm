@@ -512,6 +512,7 @@ tbm_key  tbm_bo_export     (tbm_bo bo);
  * @brief Exports the buffer object by fd.
  * @details The tbm_bo can be exported to the anther process with the unique fd associated with the the tbm_bo.
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @remarks You must release the fd using close().
  * @param[in] bo : the buffer object
  * @return fd associated with the buffer object
  * @retval #tbm_fd
@@ -584,8 +585,9 @@ tbm_bo        tbm_bo_import     (tbm_bufmgr bufmgr, tbm_key key);
  * @brief Imports the buffer object associated with the fd.
  * @details The reference count of the tbm_bo is 1.
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @remarks You must release the fd using close().
  * @param[in] bufmgr : the buffer manager
- * @param[in] fd : the fd associated with the buffer object
+ * @parak[in] fd : the fd associated with the buffer object
  * @return a buffer object
  * @retval #tbm_bo
  * @see tbm_bo_export_fd()
