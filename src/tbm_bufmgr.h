@@ -177,6 +177,16 @@ typedef enum
     TBM_BO_ERROR_DUP_FD_FAILED = TBM_ERROR_BASE|0x0116,       /**< failed to duplicate fd */
 } tbm_error_e;
 
+/**
+ * @brief Enumeration of tbm buffer manager capability.
+ * @since_tizen 2.4
+ */
+enum TBM_BUFMGR_CAPABILITY
+{
+    TBM_BUFMGR_CAPABILITY_NONE = 0,                 /**< Not Support capability*/
+    TBM_BUFMGR_CAPABILITY_SHARE_KEY = (1<<0),       /**< Support sharing buffer by tbm key */
+    TBM_BUFMGR_CAPABILITY_SHARE_FD = (1<<1),        /**< Support sharing buffer by tbm fd */
+};
 
 #ifdef __cplusplus
 extern "C" {
@@ -587,7 +597,7 @@ tbm_bo        tbm_bo_import     (tbm_bufmgr bufmgr, tbm_key key);
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @remarks You must release the fd using close().
  * @param[in] bufmgr : the buffer manager
- * @parak[in] fd : the fd associated with the buffer object
+ * @param[in] fd : the fd associated with the buffer object
  * @return a buffer object
  * @retval #tbm_bo
  * @see tbm_bo_export_fd()
@@ -977,6 +987,28 @@ int tbm_bo_get_user_data    (tbm_bo bo, unsigned long key, void** data);
    @endcode
  */
 tbm_error_e tbm_get_last_error    (void);
+
+/**
+ * @brief Gets the tbm buffer capability.
+ * @since_tizen 2.4
+ * @param[in] bufmgr : the buffer manager
+ * @return the tbm bufmgr capability
+ * @par Example
+   @code
+   #include <tbm_bufmgr.h>
+
+   int bufmgr_fd;
+   tbm_bufmgr bufmgr;
+   unsigned int capability;
+
+   bufmgr = tbm_bufmgr_init (bufmgr_fd);
+
+   capability = tbm_bufmgr_get_capability (bufmgr);
+
+   tbm_bufmgr_deinit (bufmgr);
+   @endcode
+ */
+unsigned int tbm_bufmgr_get_capability (tbm_bufmgr bufmgr);
 
 #ifdef __cplusplus
 }

@@ -125,6 +125,8 @@ struct _tbm_bufmgr_backend
 
     /**
     * @brief import the buffer object associated with the key.
+    * @remarks If the backend doesn't support a buffer sharing by tbm key,
+               fucntion pointer must be set to NULL.
     * @param[in] bo : the buffer object
     * @param[in] key : the key associated with the buffer object
     * @return pointer of the bo private.
@@ -133,6 +135,8 @@ struct _tbm_bufmgr_backend
 
     /**
     * @brief export the buffer object
+    * @remarks If the backend doesn't support a buffer sharing by tbm key,
+               fucntion pointer must be set to NULL.
     * @param[in] bo : the buffer object
     * @return key associated with the buffer object
     */
@@ -239,6 +243,8 @@ struct _tbm_bufmgr_backend
     /**
     * @brief import the buffer object associated with the prime fd.
     * @remarks tbm_fd must be free by user.
+    * @remarks If the backend doesn't support a buffer sharing by tbm fd,
+               fucntion pointer must be set to NULL.
     * @param[in] bo : the buffer object
     * @param[in] fd : the prime fd associated with the buffer object
     * @return pointer of the bo private.
@@ -248,6 +254,8 @@ struct _tbm_bufmgr_backend
     /**
     * @brief export the buffer object
     * @remarks tbm_fd must be free by user.
+    * @remarks If the backend doesn't support a buffer sharing by tbm fd,
+               fucntion pointer must be set to NULL.
     * @param[in] bo : the buffer object
     * @return tbm_fd associated with the buffer object
     */

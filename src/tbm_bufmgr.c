@@ -1664,3 +1664,19 @@ tbm_get_last_error (void)
     return tbm_last_error;
 }
 
+unsigned int
+tbm_bufmgr_get_capability (tbm_bufmgr bufmgr)
+{
+    TBM_RETURN_IF_FAIL (TBM_BUFMGR_IS_VALID(bufmgr));
+
+    unsigned int capability = TBM_BUFMGR_CAPABILITY_NONE;
+
+    if (bufmgr->backend->bo_import && bufmgr->backend->bo_export)
+        capability |= TBM_BUFMGR_CAPABILITY_SHARE_KEY;
+
+    if (bufmgr->backend->bo_import_fd && bufmgr->backend->bo_export_fd)
+        capability |= TBM_BUFMGR_CAPABILITY_SHARE_FD;
+
+    return capability;
+}
+
