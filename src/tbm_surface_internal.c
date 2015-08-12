@@ -161,8 +161,6 @@ _tbm_surface_internal_destroy (tbm_surface_h surface)
 {
     int i;
 
-    surface = (struct _tbm_surface *)surface;
-
     for (i = 0; i < surface->num_bos; i++)
     {
         tbm_bo_unref (surface->bos[i]);
