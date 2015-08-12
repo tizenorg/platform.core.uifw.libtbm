@@ -591,8 +591,10 @@ tbm_surface_internal_destroy (tbm_surface_h surface)
 
     surface->refcnt--;
 
-    if (surface->refcnt > 0)
+    if (surface->refcnt > 0) {
+        _tbm_surface_mutex_unlock();
         return;
+    }
 
     if (surface->refcnt == 0)
         _tbm_surface_internal_destroy(surface);
@@ -604,8 +606,6 @@ tbm_surface_internal_destroy (tbm_surface_h surface)
 void
 tbm_surface_internal_ref (tbm_surface_h surface)
 {
-    _tbm_surface_mutex_lock();
-
     TBM_RETURN_IF_FAIL (surface);
 
     _tbm_surface_mutex_lock();
@@ -618,14 +618,16 @@ tbm_surface_internal_ref (tbm_surface_h surface)
 void
 tbm_surface_internal_unref (tbm_surface_h surface)
 {
-    _tbm_surface_mutex_lock();
-
     TBM_RETURN_IF_FAIL (surface);
+
+    _tbm_surface_mutex_lock();
 
     surface->refcnt--;
 
-    if (surface->refcnt > 0)
+    if (surface->refcnt > 0) {
+        _tbm_surface_mutex_unlock();
         return;
+    }
 
     if (surface->refcnt == 0)
         _tbm_surface_internal_destroy(surface);
