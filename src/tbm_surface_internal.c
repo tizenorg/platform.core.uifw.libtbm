@@ -484,15 +484,31 @@ tbm_surface_internal_create_with_bos (tbm_surface_info_s *info, tbm_bo *bos, int
     surf->info.height = info->height;
     surf->info.format = info->format;
     surf->info.bpp = info->bpp;
-    surf->info.size = info->size;
     surf->info.num_planes = info->num_planes;
 
     /* get size, stride and offset */
     for (i = 0; i < info->num_planes; i++)
     {
-        surf->info.planes[i].size = info->planes[i].size;
         surf->info.planes[i].offset = info->planes[i].offset;
         surf->info.planes[i].stride = info->planes[i].stride;
+
+        if (info->planes[i].size > 0)
+            surf->info.planes[i].size = info->planes[i].size;
+        else
+            surf->info.planes[i].size += surf->info.planes[i].stride * info->height;
+    }
+
+    if (info->size > 0)
+    {
+        surf->info.size = info->size;
+    }
+    else
+    {
+        surf->info.size = 0;
+        for (i = 0; i < info->num_planes; i++)
+        {
+            surf->info.size += surf->info.planes[i].size;
+        }
     }
 
     surf->flags = TBM_BO_DEFAULT;
