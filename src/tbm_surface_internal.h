@@ -161,6 +161,18 @@ tbm_surface_h tbm_surface_internal_create_with_bos (tbm_surface_info_s *info, tb
 void tbm_surface_internal_destroy (tbm_surface_h surface);
 
 /**
+ * @brief reference the tbm surface
+    TODO:
+ */
+void tbm_surface_internal_ref (tbm_surface_h surface);
+
+/**
+ * @brief unreference the tbm surface
+    TODO:
+ */
+void tbm_surface_internal_unref (tbm_surface_h surface);
+
+/**
  * @brief Gets the number of buffer objects associated with the tbm_surface.
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in] surface : the tbm_surface_h

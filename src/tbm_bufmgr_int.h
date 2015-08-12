@@ -192,6 +192,8 @@ struct _tbm_surface {
 
     int planes_bo_idx[TBM_SURF_PLANE_MAX];
 
+    int refcnt;
+
     struct list_head item_link; /* link of surface */
 };
 

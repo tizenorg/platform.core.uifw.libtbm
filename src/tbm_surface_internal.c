@@ -156,6 +156,32 @@ _tbm_surface_internal_query_num_bos (tbm_format format)
     return ret;
 }
 
+static void
+_tbm_surface_internal_destroy (tbm_surface_h surface)
+{
+    int i;
+
+    surface = (struct _tbm_surface *)surface;
+
+    for (i = 0; i < surface->num_bos; i++)
+    {
+        tbm_bo_unref (surface->bos[i]);
+        surface->bos[i] = NULL;
+    }
+
+    LIST_DEL (&surface->item_link);
+
+    free (surface);
+    surface = NULL;
+
+    if(LIST_IS_EMPTY (&g_surface_list))
+    {
+        _deinit_surface_bufmgr ();
+        LIST_DELINIT (&g_surface_list);
+    }
+
+}
+
 
 int
 tbm_surface_internal_query_supported_formats (uint32_t **formats, uint32_t *num)
@@ -400,6 +426,7 @@ tbm_surface_internal_create_with_flags (int width, int height, int format, int f
     surf->info.size = _tbm_surface_internal_query_size (surf);
     surf->info.num_planes = tbm_surface_internal_get_num_planes(format);
     surf->num_bos = _tbm_surface_internal_query_num_bos(format);
+    surf->refcnt = 1;
 
     /* get size, stride and offset bo_idx*/
     for (i = 0; i < surf->info.num_planes; i++)
@@ -485,6 +512,7 @@ tbm_surface_internal_create_with_bos (tbm_surface_info_s *info, tbm_bo *bos, int
     surf->info.format = info->format;
     surf->info.bpp = info->bpp;
     surf->info.num_planes = info->num_planes;
+    surf->refcnt = 1;
 
     /* get size, stride and offset */
     for (i = 0; i < info->num_planes; i++)
@@ -556,35 +584,54 @@ bail1:
 void
 tbm_surface_internal_destroy (tbm_surface_h surface)
 {
-    int i;
-
     if (!surface)
         return;
 
     _tbm_surface_mutex_lock();
 
-    surface = (struct _tbm_surface *)surface;
+    surface->refcnt--;
 
-    for (i = 0; i < surface->num_bos; i++)
-    {
-        tbm_bo_unref (surface->bos[i]);
-        surface->bos[i] = NULL;
-    }
+    if (surface->refcnt > 0)
+        return;
 
-    LIST_DEL (&surface->item_link);
-
-    free (surface);
-    surface = NULL;
-
-    if(LIST_IS_EMPTY (&g_surface_list))
-    {
-        _deinit_surface_bufmgr ();
-        LIST_DELINIT (&g_surface_list);
-    }
+    if (surface->refcnt == 0)
+        _tbm_surface_internal_destroy(surface);
 
     _tbm_surface_mutex_unlock();
 }
 
+
+void
+tbm_surface_internal_ref (tbm_surface_h surface)
+{
+    _tbm_surface_mutex_lock();
+
+    TBM_RETURN_IF_FAIL (surface);
+
+    _tbm_surface_mutex_lock();
+
+    surface->refcnt++;
+
+    _tbm_surface_mutex_unlock();
+}
+
+void
+tbm_surface_internal_unref (tbm_surface_h surface)
+{
+    _tbm_surface_mutex_lock();
+
+    TBM_RETURN_IF_FAIL (surface);
+
+    surface->refcnt--;
+
+    if (surface->refcnt > 0)
+        return;
+
+    if (surface->refcnt == 0)
+        _tbm_surface_internal_destroy(surface);
+
+    _tbm_surface_mutex_unlock();
+}
 
 int
 tbm_surface_internal_get_num_bos (tbm_surface_h surface)
