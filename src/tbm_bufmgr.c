@@ -1667,7 +1667,7 @@ tbm_get_last_error (void)
 unsigned int
 tbm_bufmgr_get_capability (tbm_bufmgr bufmgr)
 {
-    TBM_RETURN_IF_FAIL (TBM_BUFMGR_IS_VALID(bufmgr));
+    TBM_RETURN_VAL_IF_FAIL (TBM_BUFMGR_IS_VALID(bufmgr), 0);
 
     unsigned int capability = TBM_BUFMGR_CAPABILITY_NONE;
 
