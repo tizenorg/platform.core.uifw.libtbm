@@ -1262,6 +1262,11 @@ tbm_bo_import (tbm_bufmgr bufmgr, unsigned int key)
     bo->priv = bo_priv;
     bo->default_handle.u32 = 0;
 
+    if (bufmgr->backend->bo_get_flags)
+        bo->flags = bufmgr->backend->bo_get_flags (bo);
+    else
+        bo->flags = TBM_BO_DEFAULT;
+
     /* init bo state */
     if (!_tbm_bo_init_state (bo, CACHE_OP_IMPORT))
     {
@@ -1335,6 +1340,11 @@ tbm_bo_import_fd  (tbm_bufmgr bufmgr, tbm_fd fd)
     bo->tgl_key = INITIAL_KEY;
     bo->priv = bo_priv;
     bo->default_handle.u32 = 0;
+
+    if (bufmgr->backend->bo_get_flags)
+        bo->flags = bufmgr->backend->bo_get_flags (bo);
+    else
+        bo->flags = TBM_BO_DEFAULT;
 
     /* init bo state */
     if (!_tbm_bo_init_state (bo, CACHE_OP_IMPORT))
@@ -1680,3 +1690,10 @@ tbm_bufmgr_get_capability (tbm_bufmgr bufmgr)
     return capability;
 }
 
+int
+tbm_bo_get_flags (tbm_bo bo)
+{
+    TBM_RETURN_VAL_IF_FAIL(_tbm_bo_is_valid(bo), 0);
+
+    return bo->flags;
+}

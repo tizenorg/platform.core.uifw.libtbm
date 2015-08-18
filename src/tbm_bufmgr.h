@@ -1010,6 +1010,34 @@ tbm_error_e tbm_get_last_error    (void);
  */
 unsigned int tbm_bufmgr_get_capability (tbm_bufmgr bufmgr);
 
+/**
+ * @brief Gets the tbm bo flags.
+ * @since_tizen 2.4
+ * @param[in] bo : the buffer object
+ * @return the tbm bo flags
+ * @see TBM_BO_FLAGS
+ * @par Example
+   @code
+   #include <tbm_bufmgr.h>
+
+   int bufmgr_fd;
+   tbm_bufmgr bufmgr;
+   tbm_bo;
+   int flags;
+
+   bufmgr = tbm_bufmgr_init (bufmgr_fd);
+   bo = tbm_bo_alloc (bufmgr, 128 * 128, TBM_BO_DEFAULT);
+   flags = tbm_bo_get_flags (bo);
+
+   ...
+
+   tbm_bo_unref (bo);
+   tbm_bufmgr_deinit (bufmgr);
+
+   @endcode
+ */
+int tbm_bo_get_flags (tbm_bo bo);
+
 #ifdef __cplusplus
 }
 #endif
