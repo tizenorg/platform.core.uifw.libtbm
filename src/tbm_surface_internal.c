@@ -478,6 +478,7 @@ tbm_surface_internal_create_with_bos (tbm_surface_info_s *info, tbm_bo *bos, int
 {
     TBM_RETURN_VAL_IF_FAIL (bos, NULL);
     TBM_RETURN_VAL_IF_FAIL (info, NULL);
+    TBM_RETURN_VAL_IF_FAIL (num == 1 || info->num_planes == num, NULL);
 
     struct _tbm_bufmgr *mgr;
     struct _tbm_surface *surf = NULL;
@@ -497,6 +498,7 @@ tbm_surface_internal_create_with_bos (tbm_surface_info_s *info, tbm_bo *bos, int
         _tbm_surface_mutex_unlock();
         return NULL;
     }
+
     surf = calloc (1, sizeof(struct _tbm_surface));
     if (!surf)
     {
@@ -522,6 +524,11 @@ tbm_surface_internal_create_with_bos (tbm_surface_info_s *info, tbm_bo *bos, int
             surf->info.planes[i].size = info->planes[i].size;
         else
             surf->info.planes[i].size += surf->info.planes[i].stride * info->height;
+
+        if (num == 1)
+            surf->planes_bo_idx[i] = 0;
+        else
+            surf->planes_bo_idx[i] = i;
     }
 
     if (info->size > 0)
