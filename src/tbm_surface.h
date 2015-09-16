@@ -441,6 +441,13 @@ typedef struct _tbm_surface_info
  */
 #define TBM_FORMAT_YVU444   __tbm_fourcc_code('Y', 'V', '2', '4')
 
+/* 2 plane YCbCr */
+/**
+ * @brief Definition for the TBM surface format NV12MT (tiled '64x32' & multi-plane version of NV12).
+ * @since_tizen 3.0 @endif
+ */
+#define TBM_FORMAT_NV12MT   __tbm_fourcc_code('T', 'M', '1', '2')
+
 #ifdef __cplusplus
 extern "C" {
 #endif
