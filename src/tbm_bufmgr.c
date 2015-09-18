@@ -864,7 +864,6 @@ tbm_bufmgr_init (int fd)
     if (gBufMgr)
     {
         DBG ("[libtbm:%d] use previous gBufMgr\n", getpid());
-        gBufMgr->ref_count++;
 
         if (fd >= 0)
         {
@@ -877,6 +876,7 @@ tbm_bufmgr_init (int fd)
             DBG ("[libtbm:%d] duplicate the drm_fd(%d), new drm_fd(%d).\n",
                         getpid(), gBufMgr->fd, fd);
         }
+        gBufMgr->ref_count++;
 
         DBG ("[libtbm:%d] bufmgr ref: fd=%d, ref_count:%d\n",
                     getpid(), gBufMgr->fd, gBufMgr->ref_count);
