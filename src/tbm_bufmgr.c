@@ -1390,7 +1390,7 @@ tbm_bo_export (tbm_bo bo)
 tbm_fd
 tbm_bo_export_fd (tbm_bo bo)
 {
-    TBM_RETURN_VAL_IF_FAIL (_tbm_bo_is_valid(bo), 0);
+    TBM_RETURN_VAL_IF_FAIL (_tbm_bo_is_valid(bo), -1);
 
     tbm_bufmgr bufmgr;
     int ret;
@@ -1399,7 +1399,7 @@ tbm_bo_export_fd (tbm_bo bo)
 
     pthread_mutex_lock (&bufmgr->lock);
     ret = bufmgr->backend->bo_export_fd (bo);
-    if (!ret)
+    if (ret < 0)
     {
         _tbm_set_last_result (TBM_BO_ERROR_EXPORT_FD_FAILED);
         pthread_mutex_unlock (&bufmgr->lock);
