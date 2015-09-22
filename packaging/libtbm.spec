@@ -3,7 +3,7 @@
 
 Name:           libtbm
 Version:        1.1.8
-Release:        1
+Release:        2
 License:        MIT
 Summary:        The library for Tizen Buffer Manager
 Group:          System/Libraries
