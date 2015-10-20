@@ -47,7 +47,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <pthread.h>
 #include <tbm_bufmgr.h>
 #include <tbm_surface.h>
+#include <tbm_surface_internal.h>
 #include <tbm_bufmgr_backend.h>
+#include <tbm_surface_queue.h>
 
 /* check condition */
 #define TBM_RETURN_IF_FAIL(cond) {\

@@ -78,6 +78,7 @@ rm -rf %{buildroot}
 %{_includedir}/tbm_bufmgr.h
 %{_includedir}/tbm_surface.h
 %{_includedir}/tbm_surface_internal.h
+%{_includedir}/tbm_surface_queue.h
 %{_includedir}/tbm_bufmgr_backend.h
 %{_includedir}/tbm_type.h
 %{_libdir}/libtbm.so

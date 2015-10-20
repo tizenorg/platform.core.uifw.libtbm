@@ -28,9 +28,10 @@ endif
 libtbm_la_SOURCES += \
 	tbm_surface_internal.c \
 	tbm_surface.c \
+	tbm_surface_queue.c \
 	tbm_bufmgr_backend.c \
 	tbm_bufmgr.c
 
 libtbmincludedir=$(includedir)
-libtbminclude_HEADERS = tbm_bufmgr.h tbm_surface.h tbm_bufmgr_backend.h tbm_type.h tbm_surface_internal.h
+libtbminclude_HEADERS = tbm_bufmgr.h tbm_surface.h tbm_bufmgr_backend.h tbm_type.h tbm_surface_internal.h tbm_surface_queue.h
 
