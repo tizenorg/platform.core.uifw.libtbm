@@ -443,10 +443,9 @@ tbm_surface_internal_create_with_flags (int width, int height, int format, int f
         bo_size = 0;
         for (j = 0; j < surf->info.num_planes; j++)
         {
-            if (surf->planes_bo_idx[i] == i)
-                bo_size += surf->info.planes[i].size;
+            if (surf->planes_bo_idx[j] == i)
+                bo_size += surf->info.planes[j].size;
         }
-
         surf->bos[i] = tbm_bo_alloc (mgr, bo_size, flags);
         if (!surf->bos[i]) {
             for (j = 0; j < i; j++)
