@@ -75,12 +75,10 @@ struct _tbm_surface_queue
 };
 
 static queue_node *
-_queue_node_create (tbm_surface_h surface)
+_queue_node_create (void)
 {
     queue_node *node = (queue_node *) calloc (1, sizeof(queue_node));
     TBM_RETURN_VAL_IF_FAIL (node != NULL, NULL);
-
-    node->surface = surface;
 
     return node;
 }
@@ -106,6 +104,14 @@ static void
 _queue_node_push_back (queue *queue, queue_node *node)
 {
     LIST_ADDTAIL (&node->item_link, &queue->tail);
+    queue->count++;
+    return;
+}
+
+static void
+_queue_node_push_front (queue *queue, queue_node *node)
+{
+    LIST_ADD (&node->item_link, &queue->head);
     queue->count++;
     return;
 }
@@ -141,6 +147,15 @@ _queue_node_exist_in_queue (queue *queue, queue_node *node)
     return 0;
 }
 
+static void
+_queue_init (queue *queue)
+{
+    LIST_INITHEAD (&queue->head);
+    LIST_INITHEAD (&queue->tail);
+    LIST_ADDTAIL (&queue->head, &queue->tail);
+    queue->count = 0;
+}
+
 tbm_surface_queue_error_e
 tbm_surface_queue_enqueue (tbm_surface_queue_h surface_queue, tbm_surface_h surface)
 {
@@ -159,7 +174,7 @@ tbm_surface_queue_enqueue (tbm_surface_queue_h surface_queue, tbm_surface_h surf
 
     if (i == surface_queue->size)
     {
-        TBM_LOG ("Can't fine surface list in queue\n");
+        TBM_LOG ("Can't find the surface in queue\n");
         pthread_mutex_unlock (&surface_queue->lock);
         return TBM_SURFACE_QUEUE_ERROR_INVALID_SURFACE;
     }
@@ -207,6 +222,21 @@ tbm_surface_queue_dequeue (tbm_surface_queue_h surface_queue, tbm_surface_h *sur
         return TBM_SURFACE_QUEUE_ERROR_INVALID_QUEUE;
     }
 
+	if (!node->surface)
+    {
+        tbm_surface_h surface = tbm_surface_internal_create_with_flags (surface_queue->width,
+                                                    surface_queue->height,
+                                                    surface_queue->format,
+                                                    surface_queue->flags);
+        if (surface == NULL)
+        {
+            TBM_LOG ("tbm surface create  failed");
+	        pthread_mutex_unlock (&surface_queue->lock);
+	        return TBM_SURFACE_QUEUE_ERROR_SURFACE_ALLOC_FAILED;
+        }
+        node->surface = surface;
+    }
+
     *surface = node->surface;
 
     pthread_mutex_unlock (&surface_queue->lock);
@@ -230,7 +260,7 @@ tbm_surface_queue_release (tbm_surface_queue_h surface_queue, tbm_surface_h surf
     }
     if (i == surface_queue->size)
     {
-        TBM_LOG ("Can't fine surface list in queue\n");
+        TBM_LOG ("Can't find the surface in queue\n");
         pthread_mutex_unlock (&surface_queue->lock);
         return TBM_SURFACE_QUEUE_ERROR_INVALID_SURFACE;
     }
@@ -242,7 +272,7 @@ tbm_surface_queue_release (tbm_surface_queue_h surface_queue, tbm_surface_h surf
         return TBM_SURFACE_QUEUE_ERROR_INVALID_SURFACE;
     }
 
-    _queue_node_push_back(&surface_queue->free_queue, surface_queue->node_list[i]);
+    _queue_node_push_front(&surface_queue->free_queue, surface_queue->node_list[i]);
 
     pthread_mutex_unlock (&surface_queue->lock);
     pthread_cond_signal(&surface_queue->free_cond);
@@ -364,22 +394,12 @@ tbm_surface_queue_create(int queue_size, int width, int height, int format, int 
         return NULL;
     }
 
-    LIST_INITHEAD (&surface_queue->free_queue.tail);
-    LIST_ADDTAIL (&surface_queue->free_queue.head, &surface_queue->free_queue.tail);
-
-    LIST_INITHEAD (&surface_queue->duty_queue.tail);
-    LIST_ADDTAIL (&surface_queue->duty_queue.head, &surface_queue->duty_queue.tail);
+	_queue_init (&surface_queue->free_queue);
+	_queue_init (&surface_queue->duty_queue);
 
     for (i = 0 ; i < queue_size; i++)
     {
-        tbm_surface_h surface = tbm_surface_internal_create_with_flags (width, height, format, flags);
-        if (surface == NULL)
-        {
-            TBM_LOG ("tbm surface create  failed");
-            goto fail;
-        }
-
-        queue_node *node = _queue_node_create(surface);
+        queue_node *node = _queue_node_create();
         if (node == NULL)
         {
             TBM_LOG ("surface node create failed");
