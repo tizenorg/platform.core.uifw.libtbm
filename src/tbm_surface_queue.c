@@ -69,6 +69,9 @@ struct _tbm_surface_queue
     tbm_surface_queue_notify_cb acquirable_cb;
     void *acquirable_cb_data;
 
+    tbm_surface_queue_notify_cb reset_cb;
+    void *reset_cb_data;
+
     pthread_mutex_t lock;
     pthread_cond_t free_cond;
     pthread_cond_t duty_cond;
@@ -86,7 +89,8 @@ _queue_node_create (void)
 static void
 _queue_node_delete (queue_node *node)
 {
-    tbm_surface_destroy (node->surface);
+    if (node->surface)
+        tbm_surface_destroy (node->surface);
     LIST_DEL (&node->item_link);
     free (node);
 }
@@ -511,4 +515,64 @@ int
 tbm_surface_queue_get_format(tbm_surface_queue_h surface_queue)
 {
     return surface_queue->format;
+}
+
+tbm_surface_queue_error_e
+tbm_surface_queue_reset(tbm_surface_queue_h surface_queue, int width, int height, int format)
+{
+    TBM_RETURN_VAL_IF_FAIL (surface_queue != NULL, TBM_SURFACE_QUEUE_ERROR_INVALID_QUEUE);
+
+    int i;
+    queue_node *node = NULL;
+
+    if (width == surface_queue->width &&
+        height == surface_queue->height &&
+        format == surface_queue->format)
+        return TBM_SURFACE_QUEUE_ERROR_NONE;
+
+    pthread_mutex_lock (&surface_queue->lock);
+
+    surface_queue->width = width;
+    surface_queue->height = height;
+    surface_queue->format = format;
+
+    //Reset queue
+    _queue_init(&surface_queue->free_queue);
+    _queue_init(&surface_queue->duty_queue);
+
+    //Destory surface and Push to free_queue
+    for (i = 0 ; i < surface_queue->size; i++)
+    {
+        node = surface_queue->node_list[i];
+        if (node->surface)
+        {
+            tbm_surface_destroy(node->surface);
+            node->surface = NULL;
+        }
+
+        _queue_node_push_back(&surface_queue->free_queue, node);
+    }
+
+    pthread_mutex_unlock (&surface_queue->lock);
+    pthread_cond_signal(&surface_queue->free_cond);
+
+    if (surface_queue->reset_cb)
+        surface_queue->reset_cb (surface_queue, surface_queue->reset_cb_data);
+
+    return TBM_SURFACE_QUEUE_ERROR_NONE;
+}
+
+tbm_surface_queue_error_e
+tbm_surface_queue_set_reset_cb (tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb reset_cb, void *data)
+{
+    TBM_RETURN_VAL_IF_FAIL (surface_queue != NULL, TBM_SURFACE_QUEUE_ERROR_INVALID_QUEUE);
+
+    pthread_mutex_lock (&surface_queue->lock);
+
+    surface_queue->reset_cb = reset_cb;
+    surface_queue->reset_cb_data = data;
+
+    pthread_mutex_unlock (&surface_queue->lock);
+
+    return TBM_SURFACE_QUEUE_ERROR_NONE;
 }
