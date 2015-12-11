@@ -1038,6 +1038,23 @@ unsigned int tbm_bufmgr_get_capability (tbm_bufmgr bufmgr);
  */
 int tbm_bo_get_flags (tbm_bo bo);
 
+/**
+ * @brief Print out the information of tbm_bos.
+ * @since_tizen 3.0
+ * @param[in] bufmgr : the buffer manager
+ */
+void tbm_bufmgr_debug_show (tbm_bufmgr bufmgr);
+
+/**
+ * @brief Print out the trace of tbm_bos.
+ * @since_tizen 3.0
+ * @param[in] bufmgr : the buffer manager
+ * @param[in] onoff : 1 is on, and 0 is off
+ */
+void tbm_bufmgr_debug_trace (tbm_bufmgr bufmgr, int onoff);
+
+
+
 #ifdef __cplusplus
 }
 #endif
