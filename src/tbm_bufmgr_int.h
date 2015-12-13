@@ -97,7 +97,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define TBM_LOCK_CTRL_BACKEND_VALID(flags) \
         (flags&TBM_LOCK_CTRL_BACKEND)
 
-#define TBM_LOG(...)  fprintf (stderr, __VA_ARGS__)
+#define TBM_DEBUG(fmt, ...)   fprintf (stderr, "[TBM:DEBUG(%d)] " fmt, getpid(), ##__VA_ARGS__)
+#define TBM_LOG(fmt, ...)  fprintf (stderr, "[TBM(%d):%s] " fmt, getpid(), __func__, ##__VA_ARGS__)
 
 typedef union _tbm_bo_cache_state tbm_bo_cache_state;
 
