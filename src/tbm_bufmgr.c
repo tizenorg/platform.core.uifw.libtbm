@@ -1712,14 +1712,14 @@ tbm_bufmgr_debug_show (tbm_bufmgr bufmgr)
 
 	TBM_DEBUG("============TBM DEBUG: PID(%d)===========================\n", getpid());
 
-	TBM_DEBUG(" [tbm_bo information]\n");
+	TBM_DEBUG("[tbm_bo information]\n");
+	TBM_DEBUG("no  bo		 ref_cnt tgl_key lock_cnt map_cnt cache_state flags\n");
 	/* show the tbm_bo information in bo_list */
 	if(!LIST_IS_EMPTY (&bufmgr->bo_list))
 	{
 		LIST_FOR_EACH_ENTRY_SAFE (bo, tmp_bo, &bufmgr->bo_list, item_link)
 		{
-			TBM_DEBUG("no  bo        ref_cnt tgl_key lock_cnt map_cnt cache_state flags\n");
-			TBM_DEBUG("%-4d%-10p%-8d%-8d%-9d%-8d%-12d%-5d\n",
+			TBM_DEBUG("%-4d%-14p%-8d%-8d%-9d%-8d%-12d%-5d\n",
                         ++bo_cnt,
 						bo,
 						bo->ref_cnt,
@@ -1734,15 +1734,17 @@ tbm_bufmgr_debug_show (tbm_bufmgr bufmgr)
 	{
 		TBM_DEBUG("no tbm_bos.\n");
 	}
+	TBM_DEBUG("\n");
 
-	TBM_DEBUG(" [tbm_surface information]\n");
+	TBM_DEBUG("[tbm_surface information]\n");
+	TBM_DEBUG("no  surface	 width height format bpp size num_bos num_planes flags\n");
+
 	/* show the tbm_surface information in surf_list */
 	if(!LIST_IS_EMPTY (&bufmgr->surf_list))
 	{
 		LIST_FOR_EACH_ENTRY_SAFE (surf, tmp_surf, &bufmgr->surf_list, item_link)
 		{
-			TBM_DEBUG("no  surface   width height format bpp size num_bos num_planes flags\n");
-			TBM_DEBUG("%-4d%-10p%-6d%-7d%-7d%-4d%-5d%-8d%-8d%-11d%-5d\\n",
+			TBM_DEBUG("%-4d%-14p%-6d%-7d%-7d%-4d%-5d%-8d%-8d%-11d%-5d\\n",
 						++surf_cnt,
 						surf,
 						surf->refcnt,
