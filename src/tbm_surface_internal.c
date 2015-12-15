@@ -36,8 +36,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "list.h"
 
 static tbm_bufmgr g_surface_bufmgr = NULL;
-struct list_head g_surface_list; /* list of surfaces belonging to bufmgr */
-
 static pthread_mutex_t tbm_surface_lock;
 
 static bool
@@ -160,6 +158,7 @@ static void
 _tbm_surface_internal_destroy (tbm_surface_h surface)
 {
     int i;
+	tbm_bufmgr bufmgr = surface->bufmgr;
 
     for (i = 0; i < surface->num_bos; i++)
     {
@@ -172,10 +171,10 @@ _tbm_surface_internal_destroy (tbm_surface_h surface)
     free (surface);
     surface = NULL;
 
-    if(LIST_IS_EMPTY (&g_surface_list))
+    if(LIST_IS_EMPTY (&bufmgr->surf_list))
     {
+        LIST_DELINIT (&bufmgr->surf_list);
         _deinit_surface_bufmgr ();
-        LIST_DELINIT (&g_surface_list);
     }
 
 }
@@ -192,7 +191,7 @@ tbm_surface_internal_query_supported_formats (uint32_t **formats, uint32_t *num)
     if (!g_surface_bufmgr)
     {
         _init_surface_bufmgr();
-        LIST_INITHEAD (&g_surface_list);
+        LIST_INITHEAD (&g_surface_bufmgr->surf_list);
     }
 
     mgr = g_surface_bufmgr;
@@ -400,7 +399,7 @@ tbm_surface_internal_create_with_flags (int width, int height, int format, int f
     if (!g_surface_bufmgr)
     {
         _init_surface_bufmgr();
-        LIST_INITHEAD (&g_surface_list);
+        LIST_INITHEAD (&g_surface_bufmgr->surf_list);
     }
 
     mgr = g_surface_bufmgr;
@@ -454,10 +453,10 @@ tbm_surface_internal_create_with_flags (int width, int height, int format, int f
             free (surf);
             surf = NULL;
 
-            if(LIST_IS_EMPTY (&g_surface_list))
+            if(LIST_IS_EMPTY (&mgr->surf_list))
             {
+                LIST_DELINIT (&mgr->surf_list);
                 _deinit_surface_bufmgr ();
-                LIST_DELINIT (&g_surface_list);
             }
 
             _tbm_surface_mutex_unlock();
@@ -465,7 +464,7 @@ tbm_surface_internal_create_with_flags (int width, int height, int format, int f
         }
     }
 
-    LIST_ADD (&surf->item_link, &g_surface_list);
+    LIST_ADD (&surf->item_link, &mgr->surf_list);
 
     _tbm_surface_mutex_unlock();
 
@@ -488,7 +487,7 @@ tbm_surface_internal_create_with_bos (tbm_surface_info_s *info, tbm_bo *bos, int
     if (!g_surface_bufmgr)
     {
         _init_surface_bufmgr();
-        LIST_INITHEAD (&g_surface_list);
+        LIST_INITHEAD (&g_surface_bufmgr->surf_list);
     }
 
     mgr = g_surface_bufmgr;
@@ -555,7 +554,7 @@ tbm_surface_internal_create_with_bos (tbm_surface_info_s *info, tbm_bo *bos, int
         surf->bos[i] = tbm_bo_ref(bos[i]);
     }
 
-    LIST_ADD (&surf->item_link, &g_surface_list);
+    LIST_ADD (&surf->item_link, &mgr->surf_list);
 
     _tbm_surface_mutex_unlock();
 
@@ -573,10 +572,10 @@ bail1:
     free (surf);
     surf = NULL;
 
-    if(LIST_IS_EMPTY (&g_surface_list))
+    if(LIST_IS_EMPTY (&g_surface_bufmgr->surf_list))
     {
+        LIST_DELINIT (&g_surface_bufmgr->surf_list);
         _deinit_surface_bufmgr ();
-        LIST_DELINIT (&g_surface_list);
     }
 
     _tbm_surface_mutex_unlock();
