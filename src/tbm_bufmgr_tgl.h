@@ -67,4 +67,4 @@ typedef enum {
 #define TGL_IOC_SET_DATA			_IOW(TGL_IOC_BASE, _TGL_SET_DATA, struct tgl_user_data *)
 #define TGL_IOC_GET_DATA			_IOW(TGL_IOC_BASE, _TGL_GET_DATA, struct tgl_user_data *)
 
-#endif /* __TBM_BUFMGR_TGL_H__ */
+#endif							/* __TBM_BUFMGR_TGL_H__ */

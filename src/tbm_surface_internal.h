@@ -65,7 +65,7 @@ extern "C" {
    tbm_surface_bufmgr_deinit (bufmgr);
    @endcode
  */
-int tbm_surface_internal_query_supported_formats (uint32_t **formats, uint32_t *num);
+int tbm_surface_internal_query_supported_formats(uint32_t ** formats, uint32_t * num);
 
 /**
  * @brief Creates the tbm_surface with memory type.
@@ -103,7 +103,7 @@ int tbm_surface_internal_query_supported_formats (uint32_t **formats, uint32_t *
    tbm_surface_bufmgr_deinit (bufmgr);
    @endcode
  */
-tbm_surface_h tbm_surface_internal_create_with_flags (int width, int height, int format, int flags);
+tbm_surface_h tbm_surface_internal_create_with_flags(int width, int height, int format, int flags);
 
 /**
  * @brief Creates the tbm_surface with buffer objects.
@@ -151,26 +151,25 @@ tbm_surface_h tbm_surface_internal_create_with_flags (int width, int height, int
    tbm_surface_bufmgr_deinit (bufmgr);
    @endcode
  */
-tbm_surface_h tbm_surface_internal_create_with_bos (tbm_surface_info_s *info, tbm_bo *bos, int num);
-
+tbm_surface_h tbm_surface_internal_create_with_bos(tbm_surface_info_s * info, tbm_bo * bos, int num);
 
 /**
  * @brief Destroy the tbm surface
     TODO:
  */
-void tbm_surface_internal_destroy (tbm_surface_h surface);
+void tbm_surface_internal_destroy(tbm_surface_h surface);
 
 /**
  * @brief reference the tbm surface
     TODO:
  */
-void tbm_surface_internal_ref (tbm_surface_h surface);
+void tbm_surface_internal_ref(tbm_surface_h surface);
 
 /**
  * @brief unreference the tbm surface
     TODO:
  */
-void tbm_surface_internal_unref (tbm_surface_h surface);
+void tbm_surface_internal_unref(tbm_surface_h surface);
 
 /**
  * @brief Gets the number of buffer objects associated with the tbm_surface.
@@ -193,7 +192,7 @@ void tbm_surface_internal_unref (tbm_surface_h surface);
    tbm_surface_destroy (surface);
    @endcode
  */
-int tbm_surface_internal_get_num_bos (tbm_surface_h surface);
+int tbm_surface_internal_get_num_bos(tbm_surface_h surface);
 
 /**
  * @brief Gets the buffor object by the bo_index.
@@ -223,7 +222,7 @@ int tbm_surface_internal_get_num_bos (tbm_surface_h surface);
    tbm_surface_destroy (surface);
    @endcode
  */
-tbm_bo tbm_surface_internal_get_bo (tbm_surface_h surface, int bo_idx);
+tbm_bo tbm_surface_internal_get_bo(tbm_surface_h surface, int bo_idx);
 
 /**
  * @brief Gets the size of the surface.
@@ -244,7 +243,7 @@ tbm_bo tbm_surface_internal_get_bo (tbm_surface_h surface, int bo_idx);
    tbm_surface_destroy (surface);
    @endcode
  */
-int tbm_surface_internal_get_size (tbm_surface_h surface);
+int tbm_surface_internal_get_size(tbm_surface_h surface);
 
 /**
  * @brief Gets size, offset and pitch data of plane by the plane_index.
@@ -272,7 +271,7 @@ int tbm_surface_internal_get_size (tbm_surface_h surface);
    tbm_surface_destroy (surface);
    @endcode
  */
-int tbm_surface_internal_get_plane_data (tbm_surface_h surface, int plane_idx, uint32_t *size, uint32_t *offset, uint32_t *pitch);
+int tbm_surface_internal_get_plane_data(tbm_surface_h surface, int plane_idx, uint32_t * size, uint32_t * offset, uint32_t * pitch);
 
 /**
  * @brief Gets number of planes by the format.
@@ -292,7 +291,7 @@ int tbm_surface_internal_get_plane_data (tbm_surface_h surface, int plane_idx, u
 
    @endcode
  */
-int tbm_surface_internal_get_num_planes (tbm_format format);
+int tbm_surface_internal_get_num_planes(tbm_format format);
 
 /**
  * @brief Gets bpp by the format.
@@ -312,7 +311,7 @@ int tbm_surface_internal_get_num_planes (tbm_format format);
 
    @endcode
  */
-int tbm_surface_internal_get_bpp (tbm_format format);
+int tbm_surface_internal_get_bpp(tbm_format format);
 
 /**
  * @brief Gets bo index of plane.
@@ -335,7 +334,7 @@ int tbm_surface_internal_get_bpp (tbm_format format);
 
    @endcode
  */
-int tbm_surface_internal_get_plane_bo_idx (tbm_surface_h surface, int plane_idx);
+int tbm_surface_internal_get_plane_bo_idx(tbm_surface_h surface, int plane_idx);
 
 /**
  * @brief Set the pid to the tbm_surface for debugging.
@@ -348,6 +347,4 @@ void tbm_surface_internal_set_debug_pid(tbm_surface_h surface, unsigned int pid)
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* _TBM_SURFACE_INTERNAL_H_ */
-
+#endif							/* _TBM_SURFACE_INTERNAL_H_ */
