@@ -50,11 +50,10 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @brief Enumeration for tbm_surface error type.
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
-typedef enum
-{
-    TBM_SURFACE_ERROR_NONE  = TIZEN_ERROR_NONE,                           /**< Successful */
-    TBM_SURFACE_ERROR_INVALID_PARAMETER  = TIZEN_ERROR_INVALID_PARAMETER, /**< Invalid parameter */
-    TBM_SURFACE_ERROR_INVALID_OPERATION  = TIZEN_ERROR_INVALID_OPERATION, /**< Invalid Operation */
+typedef enum {
+	TBM_SURFACE_ERROR_NONE = TIZEN_ERROR_NONE,							  /**< Successful */
+	TBM_SURFACE_ERROR_INVALID_PARAMETER = TIZEN_ERROR_INVALID_PARAMETER,  /**< Invalid parameter */
+	TBM_SURFACE_ERROR_INVALID_OPERATION = TIZEN_ERROR_INVALID_OPERATION,  /**< Invalid Operation */
 } tbm_surface_error_e;
 
 /**
@@ -79,40 +78,38 @@ typedef enum
  * @brief Definition for the TBM plane struct.
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
-typedef struct _tbm_surface_plane
-{
-    unsigned char *ptr;   /**< Plane pointer */
-    uint32_t size;        /**< Plane size */
-    uint32_t offset;      /**< Plane offset */
-    uint32_t stride;      /**< Plane stride */
+typedef struct _tbm_surface_plane {
+	unsigned char *ptr;	  /**< Plane pointer */
+	uint32_t size;		  /**< Plane size */
+	uint32_t offset;	  /**< Plane offset */
+	uint32_t stride;	  /**< Plane stride */
 
-    void *reserved1;      /**< Reserved pointer1 */
-    void *reserved2;      /**< Reserved pointer2 */
-    void *reserved3;      /**< Reserved pointer3 */
+	void *reserved1;	  /**< Reserved pointer1 */
+	void *reserved2;	  /**< Reserved pointer2 */
+	void *reserved3;	  /**< Reserved pointer3 */
 } tbm_surface_plane_s;
 
 /**
  * @brief Definition for the TBM surface information struct.
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
-typedef struct _tbm_surface_info
-{
-    uint32_t width;      /**< TBM surface width */
-    uint32_t height;     /**< TBM surface height */
-    tbm_format format;   /**< TBM surface format*/
-    uint32_t bpp;        /**< TBM surface bbp */
-    uint32_t size;       /**< TBM surface size */
+typedef struct _tbm_surface_info {
+	uint32_t width;		 /**< TBM surface width */
+	uint32_t height;	 /**< TBM surface height */
+	tbm_format format;	 /**< TBM surface format*/
+	uint32_t bpp;		 /**< TBM surface bbp */
+	uint32_t size;		 /**< TBM surface size */
 
-    uint32_t num_planes;                            /**< The number of planes */
-    tbm_surface_plane_s planes[TBM_SURF_PLANE_MAX]; /**< Array of planes */
+	uint32_t num_planes;							/**< The number of planes */
+	tbm_surface_plane_s planes[TBM_SURF_PLANE_MAX];	/**< Array of planes */
 
-    void *reserved4;   /**< Reserved pointer4 */
-    void *reserved5;   /**< Reserved pointer5 */
-    void *reserved6;   /**< Reserved pointer6 */
+	void *reserved4;   /**< Reserved pointer4 */
+	void *reserved5;   /**< Reserved pointer5 */
+	void *reserved6;   /**< Reserved pointer6 */
 } tbm_surface_info_s;
 
-#define __tbm_fourcc_code(a,b,c,d) ((uint32_t)(a) | ((uint32_t)(b) << 8) | \
-                  ((uint32_t)(c) << 16) | ((uint32_t)(d) << 24))
+#define __tbm_fourcc_code(a, b, c, d) ((uint32_t)(a) | ((uint32_t)(b) << 8) | \
+				((uint32_t)(c) << 16) | ((uint32_t)(d) << 24))
 
 /* color index */
 /**
@@ -324,7 +321,7 @@ typedef struct _tbm_surface_info
  * @brief Definition for the TBM surface format BGRA1010102 ([31:0] B:G:R:A 10:10:10:2 little endian).
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
-#define TBM_FORMAT_BGRA1010102  __tbm_fourcc_code('B', 'A', '3', '0') /*  */
+#define TBM_FORMAT_BGRA1010102  __tbm_fourcc_code('B', 'A', '3', '0')	/*  */
 
 /* packed YCbCr */
 /**
@@ -336,7 +333,7 @@ typedef struct _tbm_surface_info
  * @brief Definition for the TBM surface format YVYU ([31:0] Cb0:Y1:Cr0:Y0 8:8:8:8 little endian).
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
-#define TBM_FORMAT_YVYU     __tbm_fourcc_code('Y', 'V', 'Y', 'U') /*  */
+#define TBM_FORMAT_YVYU     __tbm_fourcc_code('Y', 'V', 'Y', 'U')	/*  */
 /**
  * @brief Definition for the TBM surface format UYVY ([31:0] Y1:Cr0:Y0:Cb0 8:8:8:8 little endian).
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
@@ -370,7 +367,7 @@ typedef struct _tbm_surface_info
  * @brief Definition for the TBM surface format NV21 (2x2 subsampled Cb:Cr plane).
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
-#define TBM_FORMAT_NV21     __tbm_fourcc_code('N', 'V', '2', '1') /*  */
+#define TBM_FORMAT_NV21     __tbm_fourcc_code('N', 'V', '2', '1')	/*  */
 /**
  * @brief Definition for the TBM surface format NV16 (2x1 subsampled Cr:Cb plane).
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
@@ -488,7 +485,7 @@ extern "C" {
    free (formats);
    @endcode
  */
-int tbm_surface_query_formats (uint32_t **formats, uint32_t *num);
+int tbm_surface_query_formats(uint32_t ** formats, uint32_t * num);
 
 /**
  * @brief Creates the tbm_surface.
@@ -526,7 +523,7 @@ int tbm_surface_query_formats (uint32_t **formats, uint32_t *num);
    tbm_surface_destroy (surface);
    @endcode
  */
-tbm_surface_h tbm_surface_create (int width, int height, tbm_format format);
+tbm_surface_h tbm_surface_create(int width, int height, tbm_format format);
 
 /**
  * @brief Destroys the tbm_surface.
@@ -555,7 +552,7 @@ tbm_surface_h tbm_surface_create (int width, int height, tbm_format format);
    tbm_surface_destroy (surface);
    @endcode
  */
-int tbm_surface_destroy (tbm_surface_h surface);
+int tbm_surface_destroy(tbm_surface_h surface);
 
 /**
  * @brief Maps the tbm_surface according to the access option.
@@ -597,7 +594,7 @@ int tbm_surface_destroy (tbm_surface_h surface);
    tbm_surface_destroy (surface);
    @endcode
  */
-int tbm_surface_map (tbm_surface_h surface, int opt, tbm_surface_info_s *info);
+int tbm_surface_map(tbm_surface_h surface, int opt, tbm_surface_info_s * info);
 
 /**
  * @brief Unmaps the tbm_surface.
@@ -630,7 +627,7 @@ int tbm_surface_map (tbm_surface_h surface, int opt, tbm_surface_info_s *info);
    tbm_surface_destroy (surface);
    @endcode
  */
-int tbm_surface_unmap (tbm_surface_h surface);
+int tbm_surface_unmap(tbm_surface_h surface);
 
 /**
  * @brief Gets the information of the tbm_surface.
@@ -668,7 +665,7 @@ int tbm_surface_unmap (tbm_surface_h surface);
    tbm_surface_destroy (surface);
    @endcode
  */
-int tbm_surface_get_info (tbm_surface_h surface, tbm_surface_info_s *info);
+int tbm_surface_get_info(tbm_surface_h surface, tbm_surface_info_s * info);
 
 /**
  * @brief Gets the width of the tbm_surface.
@@ -699,7 +696,7 @@ int tbm_surface_get_info (tbm_surface_h surface, tbm_surface_info_s *info);
    tbm_surface_destroy (surface);
    @endcode
  */
-int tbm_surface_get_width (tbm_surface_h surface);
+int tbm_surface_get_width(tbm_surface_h surface);
 
 /**
  * @brief Gets the height of the tbm_surface.
@@ -730,7 +727,7 @@ int tbm_surface_get_width (tbm_surface_h surface);
    tbm_surface_destroy (surface);
    @endcode
  */
-int tbm_surface_get_height (tbm_surface_h surface);
+int tbm_surface_get_height(tbm_surface_h surface);
 
 /**
  * @brief Gets the format of the tbm_surface.
@@ -766,15 +763,12 @@ int tbm_surface_get_height (tbm_surface_h surface);
    tbm_surface_destroy (surface);
    @endcode
  */
-tbm_format tbm_surface_get_format (tbm_surface_h surface);
+tbm_format tbm_surface_get_format(tbm_surface_h surface);
 
 #ifdef __cplusplus
 }
 #endif
-
 /**
 * @}
 */
-
-#endif /* _TBM_SURFACE_H_ */
-
+#endif							/* _TBM_SURFACE_H_ */
