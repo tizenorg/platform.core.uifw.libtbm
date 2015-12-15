@@ -38,6 +38,74 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 static tbm_bufmgr g_surface_bufmgr = NULL;
 static pthread_mutex_t tbm_surface_lock;
 
+char* _tbm_surface_internal_format_to_str(tbm_format format)
+{
+	switch(format)
+    {
+    case TBM_FORMAT_C8              : return "TBM_FORMAT_C8";
+    case TBM_FORMAT_RGB332          : return "TBM_FORMAT_RGB332";
+    case TBM_FORMAT_BGR233		    : return "TBM_FORMAT_BGR233";
+    case TBM_FORMAT_XRGB4444		: return "TBM_FORMAT_XRGB4444";
+    case TBM_FORMAT_XBGR4444		: return "TBM_FORMAT_XBGR4444";
+    case TBM_FORMAT_RGBX4444		: return "TBM_FORMAT_RGBX4444";
+    case TBM_FORMAT_BGRX4444		: return "TBM_FORMAT_BGRX4444";
+    case TBM_FORMAT_ARGB4444		: return "TBM_FORMAT_ARGB4444";
+    case TBM_FORMAT_ABGR4444		: return "TBM_FORMAT_ABGR4444";
+    case TBM_FORMAT_RGBA4444		: return "TBM_FORMAT_RGBA4444";
+    case TBM_FORMAT_BGRA4444		: return "TBM_FORMAT_BGRA4444";
+    case TBM_FORMAT_XRGB1555		: return "TBM_FORMAT_XRGB1555";
+    case TBM_FORMAT_XBGR1555		: return "TBM_FORMAT_XBGR1555";
+    case TBM_FORMAT_RGBX5551		: return "TBM_FORMAT_RGBX5551";
+    case TBM_FORMAT_BGRX5551		: return "TBM_FORMAT_BGRX5551";
+    case TBM_FORMAT_ARGB1555		: return "TBM_FORMAT_ARGB1555";
+    case TBM_FORMAT_ABGR1555		: return "TBM_FORMAT_ABGR1555";
+    case TBM_FORMAT_RGBA5551		: return "TBM_FORMAT_RGBA5551";
+    case TBM_FORMAT_BGRA5551		: return "TBM_FORMAT_BGRA5551";
+    case TBM_FORMAT_RGB565		    : return "TBM_FORMAT_RGB565";
+    case TBM_FORMAT_BGR565		    : return "TBM_FORMAT_BGR565";
+    case TBM_FORMAT_RGB888		    : return "TBM_FORMAT_RGB888";
+    case TBM_FORMAT_BGR888		    : return "TBM_FORMAT_BGR888";
+    case TBM_FORMAT_XRGB8888		: return "TBM_FORMAT_XRGB8888";
+    case TBM_FORMAT_XBGR8888		: return "TBM_FORMAT_XBGR8888";
+    case TBM_FORMAT_RGBX8888		: return "TBM_FORMAT_RGBX8888";
+    case TBM_FORMAT_BGRX8888		: return "TBM_FORMAT_BGRX8888";
+    case TBM_FORMAT_ARGB8888		: return "TBM_FORMAT_ARGB8888";
+    case TBM_FORMAT_ABGR8888		: return "TBM_FORMAT_ABGR8888";
+    case TBM_FORMAT_RGBA8888		: return "TBM_FORMAT_RGBA8888";
+    case TBM_FORMAT_BGRA8888 		: return "TBM_FORMAT_BGRA8888";
+    case TBM_FORMAT_XRGB2101010		: return "TBM_FORMAT_XRGB2101010";
+    case TBM_FORMAT_XBGR2101010		: return "TBM_FORMAT_XBGR2101010";
+    case TBM_FORMAT_RGBX1010102		: return "TBM_FORMAT_RGBX1010102";
+    case TBM_FORMAT_BGRX1010102		: return "TBM_FORMAT_BGRX1010102";
+    case TBM_FORMAT_ARGB2101010		: return "TBM_FORMAT_ARGB2101010";
+    case TBM_FORMAT_ABGR2101010		: return "TBM_FORMAT_ABGR2101010";
+    case TBM_FORMAT_RGBA1010102		: return "TBM_FORMAT_RGBA1010102";
+    case TBM_FORMAT_BGRA1010102		: return "TBM_FORMAT_BGRA1010102";
+    case TBM_FORMAT_YUYV		    : return "TBM_FORMAT_YUYV";
+    case TBM_FORMAT_YVYU		    : return "TBM_FORMAT_YVYU";
+    case TBM_FORMAT_UYVY		    : return "TBM_FORMAT_UYVY";
+    case TBM_FORMAT_VYUY	    	: return "TBM_FORMAT_VYUY";
+    case TBM_FORMAT_AYUV	    	: return "TBM_FORMAT_AYUV";
+    case TBM_FORMAT_NV12	    	: return "TBM_FORMAT_NV12";
+    case TBM_FORMAT_NV21    		: return "TBM_FORMAT_NV21";
+    case TBM_FORMAT_NV16	    	: return "TBM_FORMAT_NV16";
+    case TBM_FORMAT_NV61	    	: return "TBM_FORMAT_NV61";
+    case TBM_FORMAT_YUV410	    	: return "TBM_FORMAT_YUV410";
+    case TBM_FORMAT_YVU410	    	: return "TBM_FORMAT_YVU410";
+    case TBM_FORMAT_YUV411		    : return "TBM_FORMAT_YUV411";
+    case TBM_FORMAT_YVU411    		: return "TBM_FORMAT_YVU411";
+    case TBM_FORMAT_YUV420		    : return "TBM_FORMAT_YUV420";
+    case TBM_FORMAT_YVU420		    : return "TBM_FORMAT_YVU420";
+    case TBM_FORMAT_YUV422		    : return "TBM_FORMAT_YUV422";
+    case TBM_FORMAT_YVU422		    : return "TBM_FORMAT_YVU422";
+    case TBM_FORMAT_YUV444		    : return "TBM_FORMAT_YUV444";
+    case TBM_FORMAT_YVU444		    : return "TBM_FORMAT_YVU444";
+    case TBM_FORMAT_NV12MT		    : return "TBM_FORMAT_NV12MT";
+	default                         : return "unknwon";
+	}
+}
+
+
 static bool
 _tbm_surface_mutex_init (void)
 {

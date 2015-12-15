@@ -209,5 +209,7 @@ void         tbm_surface_internal_unmap (tbm_surface_h surface);
 unsigned int tbm_surface_internal_get_width (tbm_surface_h surface);
 unsigned int tbm_surface_internal_get_height (tbm_surface_h surface);
 tbm_format   tbm_surface_internal_get_format (tbm_surface_h surface);
+char         *_tbm_surface_internal_format_to_str(tbm_format format);
+
 
 #endif  /* _TBM_BUFMGR_INT_H_ */
