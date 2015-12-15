@@ -337,6 +337,14 @@ int tbm_surface_internal_get_bpp (tbm_format format);
  */
 int tbm_surface_internal_get_plane_bo_idx (tbm_surface_h surface, int plane_idx);
 
+/**
+ * @brief Set the pid to the tbm_surface for debugging.
+ * @since_tizen 3.0
+ * @param[in] surface : the tbm_surface_h
+ * @param[in] pid : the pid
+ */
+void tbm_surface_internal_set_debug_pid(tbm_surface_h surface, unsigned int pid);
+
 #ifdef __cplusplus
 }
 #endif

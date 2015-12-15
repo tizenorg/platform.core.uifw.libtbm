@@ -937,3 +937,20 @@ tbm_surface_internal_get_plane_bo_idx (tbm_surface_h surface, int plane_idx)
     return bo_idx;
 }
 
+unsigned int
+_tbm_surface_internal_get_debug_pid(tbm_surface_h surface)
+{
+    TBM_RETURN_VAL_IF_FAIL (surface, 0);
+
+	return surface->debug_pid;
+}
+
+void
+tbm_surface_internal_set_debug_pid(tbm_surface_h surface, unsigned int pid)
+{
+    TBM_RETURN_IF_FAIL (surface);
+
+	surface->debug_pid = pid;
+}
+
+
