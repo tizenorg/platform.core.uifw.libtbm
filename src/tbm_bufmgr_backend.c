@@ -37,94 +37,74 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <sys/types.h>
 #include "tbm_bufmgr_int.h"
 
-tbm_bufmgr_backend
-tbm_backend_alloc (void)
+tbm_bufmgr_backend tbm_backend_alloc(void)
 {
-    tbm_bufmgr_backend bufmgr_backend;
+	tbm_bufmgr_backend bufmgr_backend;
 
-    bufmgr_backend = calloc (1, sizeof(struct _tbm_bufmgr_backend));
-    if (!bufmgr_backend)
-        return NULL;
+	bufmgr_backend = calloc(1, sizeof(struct _tbm_bufmgr_backend));
+	if (!bufmgr_backend)
+		return NULL;
 
-    return bufmgr_backend;
+	return bufmgr_backend;
 }
 
-void
-tbm_backend_free (tbm_bufmgr_backend backend)
+void tbm_backend_free(tbm_bufmgr_backend backend)
 {
-    if (!backend)
-        return;
+	if (!backend)
+		return;
 
-    free (backend);
-    backend = NULL;
+	free(backend);
+	backend = NULL;
 }
 
-int
-tbm_backend_init (tbm_bufmgr bufmgr, tbm_bufmgr_backend backend)
+int tbm_backend_init(tbm_bufmgr bufmgr, tbm_bufmgr_backend backend)
 {
-    int flags = 0;
+	int flags = 0;
 
-    if (!bufmgr)
-    {
-        TBM_LOG ("[libtbm:%d] "
-            "error (%s): fail to init tbm backend... bufmgr is null\n",
-            getpid(), __FUNCTION__);
-        return 0;
-    }
+	if (!bufmgr) {
+		TBM_LOG("[libtbm:%d] " "error (%s): fail to init tbm backend... bufmgr is null\n", getpid(), __FUNCTION__);
+		return 0;
+	}
 
-    if (!backend)
-    {
-        TBM_LOG ("[libtbm:%d] "
-            "error (%s): fail to init tbm backend... backend is null\n",
-            getpid(), __FUNCTION__);
-        return 0;
-    }
+	if (!backend) {
+		TBM_LOG("[libtbm:%d] " "error (%s): fail to init tbm backend... backend is null\n", getpid(), __FUNCTION__);
+		return 0;
+	}
 
-    flags = backend->flags;
-    /* check the backend flags */
-    if (!(flags&TBM_CACHE_CTRL_BACKEND))
-    {
-        if (!backend->bo_cache_flush)
-        {
-            TBM_LOG ("[libtbm:%d] "
-                "error (%s): TBM_FLAG_CACHE_CTRL_TBM needs backend->bo_cache_flush\n",
-                getpid(), __FUNCTION__);
-            return 0;
-        }
-    }
+	flags = backend->flags;
+	/* check the backend flags */
+	if (!(flags & TBM_CACHE_CTRL_BACKEND)) {
+		if (!backend->bo_cache_flush) {
+			TBM_LOG("[libtbm:%d] " "error (%s): TBM_FLAG_CACHE_CTRL_TBM needs backend->bo_cache_flush\n", getpid(), __FUNCTION__);
+			return 0;
+		}
+	}
 
-    bufmgr->backend = backend;
+	bufmgr->backend = backend;
 
-    return 1;
+	return 1;
 }
 
-void *
-tbm_backend_get_bufmgr_priv (tbm_bo bo)
+void *tbm_backend_get_bufmgr_priv(tbm_bo bo)
 {
-    tbm_bufmgr_backend backend = bo->bufmgr->backend;
+	tbm_bufmgr_backend backend = bo->bufmgr->backend;
 
-    return backend->priv;
+	return backend->priv;
 }
 
-void *
-tbm_backend_get_priv_from_bufmgr (tbm_bufmgr bufmgr)
+void *tbm_backend_get_priv_from_bufmgr(tbm_bufmgr bufmgr)
 {
-    tbm_bufmgr_backend backend = bufmgr->backend;
+	tbm_bufmgr_backend backend = bufmgr->backend;
 
-    return backend->priv;
+	return backend->priv;
 }
 
-void
-tbm_backend_set_bo_priv (tbm_bo bo, void *bo_priv)
+void tbm_backend_set_bo_priv(tbm_bo bo, void *bo_priv)
 {
-    bo->priv = bo_priv;
+	bo->priv = bo_priv;
 }
 
-void *
-tbm_backend_get_bo_priv (tbm_bo bo)
+void *tbm_backend_get_bo_priv(tbm_bo bo)
 {
-    return bo->priv;
+	return bo->priv;
 }
-
-
-
