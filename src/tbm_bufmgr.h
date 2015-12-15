@@ -49,7 +49,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @brief Definition for the tizen buffer manager
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
-typedef struct _tbm_bufmgr * tbm_bufmgr;
+typedef struct _tbm_bufmgr *tbm_bufmgr;
 
 /**
  * @brief Definition for the tizen buffer object
@@ -66,7 +66,6 @@ typedef uint32_t tbm_key;
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 typedef int32_t tbm_fd;
-
 
 /* TBM_DEVICE_TYPE */
 
@@ -129,63 +128,58 @@ typedef int32_t tbm_fd;
  * @brief tbm_bo_handle abstraction of the memory handle by TBM_DEVICE_TYPE
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
-typedef union _tbm_bo_handle
-{
-   void     *ptr;
-   int32_t  s32;
-   uint32_t u32;
-   int64_t  s64;
-   uint64_t u64;
+typedef union _tbm_bo_handle {
+	void *ptr;
+	int32_t s32;
+	uint32_t u32;
+	int64_t s64;
+	uint64_t u64;
 } tbm_bo_handle;
 
 /**
  * @brief Enumeration of bo memory type
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
-enum TBM_BO_FLAGS
-{
-    TBM_BO_DEFAULT = 0,            /**< default memory: it depends on the backend         */
-    TBM_BO_SCANOUT = (1<<0),       /**< scanout memory                                    */
-    TBM_BO_NONCACHABLE = (1<<1),   /**< non-cachable memory                               */
-    TBM_BO_WC = (1<<2),            /**< write-combine memory                              */
-    TBM_BO_VENDOR = (0xffff0000), /**< vendor specific memory: it depends on the backend */
+enum TBM_BO_FLAGS {
+	TBM_BO_DEFAULT = 0,			   /**< default memory: it depends on the backend         */
+	TBM_BO_SCANOUT = (1 << 0),	   /**< scanout memory                                    */
+	TBM_BO_NONCACHABLE = (1 << 1), /**< non-cachable memory                               */
+	TBM_BO_WC = (1 << 2),		   /**< write-combine memory                              */
+	TBM_BO_VENDOR = (0xffff0000), /**< vendor specific memory: it depends on the backend */
 };
-
 
 /**
  * @brief Enumeration for tbm error type.
  * @since_tizen 2.4
  */
-typedef enum
-{
-    TBM_ERROR_NONE  = 0,                    /**< Successful */
-    TBM_BO_ERROR_GET_FD_FAILED = TBM_ERROR_BASE|0x0101,       /**< failed to get fd failed */
-    TBM_BO_ERROR_HEAP_ALLOC_FAILED = TBM_ERROR_BASE|0x0102,   /**< failed to allocate the heap memory */
-    TBM_BO_ERROR_LOAD_MODULE_FAILED = TBM_ERROR_BASE|0x0103,  /**< failed to load module*/
-    TBM_BO_ERROR_THREAD_INIT_FAILED = TBM_ERROR_BASE|0x0104,  /**< failed to initialize the pthread */
-    TBM_BO_ERROR_BO_ALLOC_FAILED = TBM_ERROR_BASE|0x0105,     /**< failed to allocate tbm_bo */
-    TBM_BO_ERROR_INIT_STATE_FAILED = TBM_ERROR_BASE|0x0106,   /**< failed to initialize the state of tbm_bo */
-    TBM_BO_ERROR_IMPORT_FAILED = TBM_ERROR_BASE|0x0107,       /**< failed to import the handle of tbm_bo */
-    TBM_BO_ERROR_IMPORT_FD_FAILED = TBM_ERROR_BASE|0x0108,    /**< failed to import fd of tbm_bo */
-    TBM_BO_ERROR_EXPORT_FAILED = TBM_ERROR_BASE|0x0109,       /**< failed to export the handle of the tbm_bo */
-    TBM_BO_ERROR_EXPORT_FD_FAILED = TBM_ERROR_BASE|0x01010,   /**< failed to export fd of tbm_bo */
-    TBM_BO_ERROR_GET_HANDLE_FAILED = TBM_ERROR_BASE|0x0111,   /**< failed to get the tbm_bo_handle */
-    TBM_BO_ERROR_LOCK_FAILED = TBM_ERROR_BASE|0x0112,         /**< failed to lock the tbm_bo */
-    TBM_BO_ERROR_MAP_FAILED = TBM_ERROR_BASE|0x0113,          /**< failed to map the tbm_bo to get the tbm_bo_handle */
-    TBM_BO_ERROR_UNMAP_FAILED = TBM_ERROR_BASE|0x0114,        /**< failed to unmap the tbm_bo */
-    TBM_BO_ERROR_SWAP_FAILED = TBM_ERROR_BASE|0x0115,         /**< failed to swap the tbm_bos */
-    TBM_BO_ERROR_DUP_FD_FAILED = TBM_ERROR_BASE|0x0116,       /**< failed to duplicate fd */
+typedef enum {
+	TBM_ERROR_NONE = 0,						/**< Successful */
+	TBM_BO_ERROR_GET_FD_FAILED = TBM_ERROR_BASE | 0x0101,	  /**< failed to get fd failed */
+	TBM_BO_ERROR_HEAP_ALLOC_FAILED = TBM_ERROR_BASE | 0x0102, /**< failed to allocate the heap memory */
+	TBM_BO_ERROR_LOAD_MODULE_FAILED = TBM_ERROR_BASE | 0x0103,/**< failed to load module*/
+	TBM_BO_ERROR_THREAD_INIT_FAILED = TBM_ERROR_BASE | 0x0104,/**< failed to initialize the pthread */
+	TBM_BO_ERROR_BO_ALLOC_FAILED = TBM_ERROR_BASE | 0x0105,	  /**< failed to allocate tbm_bo */
+	TBM_BO_ERROR_INIT_STATE_FAILED = TBM_ERROR_BASE | 0x0106, /**< failed to initialize the state of tbm_bo */
+	TBM_BO_ERROR_IMPORT_FAILED = TBM_ERROR_BASE | 0x0107,	  /**< failed to import the handle of tbm_bo */
+	TBM_BO_ERROR_IMPORT_FD_FAILED = TBM_ERROR_BASE | 0x0108,  /**< failed to import fd of tbm_bo */
+	TBM_BO_ERROR_EXPORT_FAILED = TBM_ERROR_BASE | 0x0109,	  /**< failed to export the handle of the tbm_bo */
+	TBM_BO_ERROR_EXPORT_FD_FAILED = TBM_ERROR_BASE | 0x01010, /**< failed to export fd of tbm_bo */
+	TBM_BO_ERROR_GET_HANDLE_FAILED = TBM_ERROR_BASE | 0x0111, /**< failed to get the tbm_bo_handle */
+	TBM_BO_ERROR_LOCK_FAILED = TBM_ERROR_BASE | 0x0112,		  /**< failed to lock the tbm_bo */
+	TBM_BO_ERROR_MAP_FAILED = TBM_ERROR_BASE | 0x0113,		  /**< failed to map the tbm_bo to get the tbm_bo_handle */
+	TBM_BO_ERROR_UNMAP_FAILED = TBM_ERROR_BASE | 0x0114,	  /**< failed to unmap the tbm_bo */
+	TBM_BO_ERROR_SWAP_FAILED = TBM_ERROR_BASE | 0x0115,		  /**< failed to swap the tbm_bos */
+	TBM_BO_ERROR_DUP_FD_FAILED = TBM_ERROR_BASE | 0x0116,	  /**< failed to duplicate fd */
 } tbm_error_e;
 
 /**
  * @brief Enumeration of tbm buffer manager capability.
  * @since_tizen 2.4
  */
-enum TBM_BUFMGR_CAPABILITY
-{
-    TBM_BUFMGR_CAPABILITY_NONE = 0,                 /**< Not Support capability*/
-    TBM_BUFMGR_CAPABILITY_SHARE_KEY = (1<<0),       /**< Support sharing buffer by tbm key */
-    TBM_BUFMGR_CAPABILITY_SHARE_FD = (1<<1),        /**< Support sharing buffer by tbm fd */
+enum TBM_BUFMGR_CAPABILITY {
+	TBM_BUFMGR_CAPABILITY_NONE = 0,					/**< Not Support capability*/
+	TBM_BUFMGR_CAPABILITY_SHARE_KEY = (1 << 0),		/**< Support sharing buffer by tbm key */
+	TBM_BUFMGR_CAPABILITY_SHARE_FD = (1 << 1),		/**< Support sharing buffer by tbm fd */
 };
 
 #ifdef __cplusplus
@@ -217,7 +211,6 @@ extern "C" {
    #include <tbm_bufmgr.h>
    int bufmgr_fd;
 
-
    setenv("BUFMGR_LOCK_TYPE", "once", 1);
    setenv("BUFMGR_MAP_CACHE", "true", 1);
 
@@ -229,7 +222,7 @@ extern "C" {
    tbm_bufmgr_deinit (bufmgr);
    @endcode
  */
-tbm_bufmgr tbm_bufmgr_init   (int fd);
+tbm_bufmgr tbm_bufmgr_init(int fd);
 
 /**
  * @brief Deinitializes the buffer manager.
@@ -255,7 +248,7 @@ tbm_bufmgr tbm_bufmgr_init   (int fd);
    tbm_bufmgr_deinit (bufmgr);
    @endcode
  */
-void       tbm_bufmgr_deinit (tbm_bufmgr bufmgr);
+void tbm_bufmgr_deinit(tbm_bufmgr bufmgr);
 
 /* Functions for bo */
 
@@ -296,7 +289,7 @@ void       tbm_bufmgr_deinit (tbm_bufmgr bufmgr);
    tbm_bufmgr_deinit (bufmgr);
    @endcode
  */
-tbm_bo        tbm_bo_alloc      (tbm_bufmgr bufmgr, int size, int flags);
+tbm_bo tbm_bo_alloc(tbm_bufmgr bufmgr, int size, int flags);
 
 /**
  * @brief Increases the reference count of bo.
@@ -325,7 +318,7 @@ tbm_bo        tbm_bo_alloc      (tbm_bufmgr bufmgr, int size, int flags);
    tbm_bufmgr_deinit (bufmgr);
    @endcode
  */
-tbm_bo        tbm_bo_ref        (tbm_bo bo);
+tbm_bo tbm_bo_ref(tbm_bo bo);
 
 /**
  * @brief Decreases the reference count of bo
@@ -350,7 +343,7 @@ tbm_bo        tbm_bo_ref        (tbm_bo bo);
    tbm_bufmgr_deinit (bufmgr);
    @endcode
  */
-void          tbm_bo_unref      (tbm_bo bo);
+void tbm_bo_unref(tbm_bo bo);
 
 /**
  * @brief Maps the buffer object according to the device type and the option.
@@ -406,7 +399,7 @@ void          tbm_bo_unref      (tbm_bo bo);
    tbm_bufmgr_deinit (bufmgr);
    @endcode
  */
-tbm_bo_handle tbm_bo_map        (tbm_bo bo, int device, int opt);
+tbm_bo_handle tbm_bo_map(tbm_bo bo, int device, int opt);
 
 /**
  * @brief Unmaps the buffer object.
@@ -437,7 +430,7 @@ tbm_bo_handle tbm_bo_map        (tbm_bo bo, int device, int opt);
    tbm_bufmgr_deinit (bufmgr);
    @endcode
  */
-int           tbm_bo_unmap      (tbm_bo bo);
+int tbm_bo_unmap(tbm_bo bo);
 
 /**
  * @brief Gets the tbm_bo_handle according to the device type.
@@ -481,7 +474,7 @@ int           tbm_bo_unmap      (tbm_bo bo);
    tbm_bufmgr_deinit (bufmgr);
    @endcode
   */
-tbm_bo_handle tbm_bo_get_handle (tbm_bo bo, int device);
+tbm_bo_handle tbm_bo_get_handle(tbm_bo bo, int device);
 
 /**
  * @brief Exports the buffer object by key.
@@ -516,7 +509,7 @@ tbm_bo_handle tbm_bo_get_handle (tbm_bo bo, int device);
    tbm_bufmgr_deinit (bufmgr);
    @endcode
   */
-tbm_key  tbm_bo_export     (tbm_bo bo);
+tbm_key tbm_bo_export(tbm_bo bo);
 
 /**
  * @brief Exports the buffer object by fd.
@@ -552,7 +545,7 @@ tbm_key  tbm_bo_export     (tbm_bo bo);
    tbm_bufmgr_deinit (bufmgr);
    @endcode
   */
-tbm_fd tbm_bo_export_fd (tbm_bo bo);
+tbm_fd tbm_bo_export_fd(tbm_bo bo);
 
 /**
  * @brief Imports the buffer object associated with the key.
@@ -589,7 +582,7 @@ tbm_fd tbm_bo_export_fd (tbm_bo bo);
    tbm_bufmgr_deinit (bufmgr);
    @endcode
   */
-tbm_bo        tbm_bo_import     (tbm_bufmgr bufmgr, tbm_key key);
+tbm_bo tbm_bo_import(tbm_bufmgr bufmgr, tbm_key key);
 
 /**
  * @brief Imports the buffer object associated with the fd.
@@ -627,7 +620,7 @@ tbm_bo        tbm_bo_import     (tbm_bufmgr bufmgr, tbm_key key);
    tbm_bufmgr_deinit (bufmgr);
    @endcode
   */
-tbm_bo        tbm_bo_import_fd  (tbm_bufmgr bufmgr, tbm_fd fd);
+tbm_bo tbm_bo_import_fd(tbm_bufmgr bufmgr, tbm_fd fd);
 
 /**
  * @brief Gets the size of a bo.
@@ -654,7 +647,7 @@ tbm_bo        tbm_bo_import_fd  (tbm_bufmgr bufmgr, tbm_fd fd);
    tbm_bufmgr_deinit (bufmgr);
    @endcode
   */
-int           tbm_bo_size       (tbm_bo bo);
+int tbm_bo_size(tbm_bo bo);
 
 /**
  * @brief Gets the state where the buffer object is locked.
@@ -685,7 +678,7 @@ int           tbm_bo_size       (tbm_bo bo);
    tbm_bufmgr_deinit (bufmgr);
    @endcode
 */
-int           tbm_bo_locked     (tbm_bo bo);
+int tbm_bo_locked(tbm_bo bo);
 
 /**
  * @brief Swaps the buffer object.
@@ -724,8 +717,7 @@ int           tbm_bo_locked     (tbm_bo bo);
    tbm_bufmgr_deinit (bufmgr);
    @endcode
  */
-int           tbm_bo_swap       (tbm_bo bo1, tbm_bo bo2);
-
+int tbm_bo_swap(tbm_bo bo1, tbm_bo bo2);
 
 /**
  * @brief Called when the user data is deleted in buffer object.
@@ -736,7 +728,7 @@ int           tbm_bo_swap       (tbm_bo bo1, tbm_bo bo2);
  * @see tbm_bo_add_user_data()
  * @see tbm_bo_delete_user_data()
  */
-typedef void (*tbm_data_free)(void *user_data);
+typedef void (*tbm_data_free) (void *user_data);
 
 /**
  * @brief Adds a user_data to the buffer object.
@@ -791,7 +783,7 @@ typedef void (*tbm_data_free)(void *user_data);
    @endcode
  */
 
-int tbm_bo_add_user_data    (tbm_bo bo, unsigned long key, tbm_data_free data_free_func);
+int tbm_bo_add_user_data(tbm_bo bo, unsigned long key, tbm_data_free data_free_func);
 
 /**
  * @brief Deletes the user_data in the buffer object.
@@ -842,7 +834,7 @@ int tbm_bo_add_user_data    (tbm_bo bo, unsigned long key, tbm_data_free data_fr
    }
    @endcode
  */
-int tbm_bo_delete_user_data (tbm_bo bo, unsigned long key);
+int tbm_bo_delete_user_data(tbm_bo bo, unsigned long key);
 
 /**
  * @brief Sets a user_date to the buffer object.
@@ -894,7 +886,7 @@ int tbm_bo_delete_user_data (tbm_bo bo, unsigned long key);
    }
    @endcode
  */
-int tbm_bo_set_user_data    (tbm_bo bo, unsigned long key, void* data);
+int tbm_bo_set_user_data(tbm_bo bo, unsigned long key, void *data);
 
 /**
  * @brief Gets a user_data from the buffer object with the key.
@@ -946,7 +938,7 @@ int tbm_bo_set_user_data    (tbm_bo bo, unsigned long key, void* data);
    }
    @endcode
  */
-int tbm_bo_get_user_data    (tbm_bo bo, unsigned long key, void** data);
+int tbm_bo_get_user_data(tbm_bo bo, unsigned long key, void **data);
 
 /**
  * @brief Gets the latest tbm_error.
@@ -986,7 +978,7 @@ int tbm_bo_get_user_data    (tbm_bo bo, unsigned long key, void** data);
    tbm_bufmgr_deinit (bufmgr);
    @endcode
  */
-tbm_error_e tbm_get_last_error    (void);
+tbm_error_e tbm_get_last_error(void);
 
 /**
  * @brief Gets the tbm buffer capability.
@@ -1008,7 +1000,7 @@ tbm_error_e tbm_get_last_error    (void);
    tbm_bufmgr_deinit (bufmgr);
    @endcode
  */
-unsigned int tbm_bufmgr_get_capability (tbm_bufmgr bufmgr);
+unsigned int tbm_bufmgr_get_capability(tbm_bufmgr bufmgr);
 
 /**
  * @brief Gets the tbm bo flags.
@@ -1036,7 +1028,7 @@ unsigned int tbm_bufmgr_get_capability (tbm_bufmgr bufmgr);
 
    @endcode
  */
-int tbm_bo_get_flags (tbm_bo bo);
+int tbm_bo_get_flags(tbm_bo bo);
 
 /**
  * @brief Print out the information of tbm_bos.
@@ -1058,6 +1050,4 @@ void tbm_bufmgr_debug_trace (tbm_bufmgr bufmgr, int onoff);
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* _TBM_BUFMGR_H_ */
-
+#endif							/* _TBM_BUFMGR_H_ */
