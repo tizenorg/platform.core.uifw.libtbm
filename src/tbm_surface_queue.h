@@ -34,19 +34,18 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <tbm_surface.h>
 
-typedef enum
-{
-    TBM_SURFACE_QUEUE_ERROR_NONE  = 0,                    /**< Successful */
-    TBM_SURFACE_QUEUE_ERROR_INVALID_SURFACE  = -1,
-    TBM_SURFACE_QUEUE_ERROR_INVALID_QUEUE  = -2,
-    TBM_SURFACE_QUEUE_ERROR_EMPTY  = -3,
-    TBM_SURFACE_QUEUE_ERROR_INVALID_PARAMETER  = -4,
-    TBM_SURFACE_QUEUE_ERROR_SURFACE_ALLOC_FAILED   = -5,
+typedef enum {
+	TBM_SURFACE_QUEUE_ERROR_NONE = 0,					  /**< Successful */
+	TBM_SURFACE_QUEUE_ERROR_INVALID_SURFACE = -1,
+	TBM_SURFACE_QUEUE_ERROR_INVALID_QUEUE = -2,
+	TBM_SURFACE_QUEUE_ERROR_EMPTY = -3,
+	TBM_SURFACE_QUEUE_ERROR_INVALID_PARAMETER = -4,
+	TBM_SURFACE_QUEUE_ERROR_SURFACE_ALLOC_FAILED = -5,
 } tbm_surface_queue_error_e;
 
 typedef struct _tbm_surface_queue *tbm_surface_queue_h;
 
-typedef void (* tbm_surface_queue_notify_cb) (tbm_surface_queue_h surface_queue, void* data);
+typedef void (*tbm_surface_queue_notify_cb) (tbm_surface_queue_h surface_queue, void *data);
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,11 +53,11 @@ extern "C" {
 
 tbm_surface_queue_error_e tbm_surface_queue_enqueue(tbm_surface_queue_h surface_queue, tbm_surface_h surface);
 
-tbm_surface_queue_error_e tbm_surface_queue_dequeue(tbm_surface_queue_h surface_queue, tbm_surface_h *surface);
+tbm_surface_queue_error_e tbm_surface_queue_dequeue(tbm_surface_queue_h surface_queue, tbm_surface_h * surface);
 
 tbm_surface_queue_error_e tbm_surface_queue_release(tbm_surface_queue_h surface_queue, tbm_surface_h surface);
 
-tbm_surface_queue_error_e tbm_surface_queue_acquire(tbm_surface_queue_h surface_queue, tbm_surface_h *surface);
+tbm_surface_queue_error_e tbm_surface_queue_acquire(tbm_surface_queue_h surface_queue, tbm_surface_h * surface);
 
 int tbm_surface_queue_can_dequeue(tbm_surface_queue_h surface_queue, int wait);
 
@@ -84,12 +83,9 @@ int tbm_surface_queue_get_format(tbm_surface_queue_h surface_queue);
 
 tbm_surface_queue_error_e tbm_surface_queue_reset(tbm_surface_queue_h surface_queue, int width, int height, int format);
 
-tbm_surface_queue_error_e tbm_surface_queue_set_reset_cb (tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb reset_cb, void *data);
-
+tbm_surface_queue_error_e tbm_surface_queue_set_reset_cb(tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb reset_cb, void *data);
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* _TBM_SURFACE_H_ */
-
+#endif							/* _TBM_SURFACE_H_ */
