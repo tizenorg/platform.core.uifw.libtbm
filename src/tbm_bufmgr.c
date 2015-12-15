@@ -1775,3 +1775,15 @@ tbm_bufmgr_debug_trace (tbm_bufmgr bufmgr, int onoff)
 	TBM_LOG("Not implemented yet.\n");
 }
 
+/* internal function */
+int
+_tbm_bo_set_surface (tbm_bo bo, tbm_surface_h surface)
+{
+    TBM_RETURN_VAL_IF_FAIL (_tbm_bo_is_valid(bo), 0);
+
+	bo->surface = surface;
+
+	return 1;
+}
+
+

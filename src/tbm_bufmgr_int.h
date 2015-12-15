@@ -145,6 +145,9 @@ struct _tbm_bo
     struct list_head item_link; /* link of bo */
 
     tbm_bo_handle default_handle; /*default handle */
+
+	tbm_surface_h surface; /* tbm_surface */
+
 };
 
 /**
@@ -202,6 +205,8 @@ struct _tbm_surface {
 
 int tbm_bufmgr_get_drm_fd_x11(void);
 int tbm_bufmgr_get_drm_fd_wayland(void);
+
+int _tbm_bo_set_surface (tbm_bo bo, tbm_surface_h surface);
 
 /* functions for mutex */
 int          tbm_surface_internal_get_info (tbm_surface_h surface, int opt, tbm_surface_info_s *info, int map);

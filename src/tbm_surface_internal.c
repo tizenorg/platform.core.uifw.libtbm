@@ -230,6 +230,8 @@ _tbm_surface_internal_destroy (tbm_surface_h surface)
 
     for (i = 0; i < surface->num_bos; i++)
     {
+		surface->bos[i]->surface = NULL;
+
         tbm_bo_unref (surface->bos[i]);
         surface->bos[i] = NULL;
     }
@@ -530,6 +532,8 @@ tbm_surface_internal_create_with_flags (int width, int height, int format, int f
             _tbm_surface_mutex_unlock();
             return NULL;
         }
+		_tbm_bo_set_surface(surf->bos[i], surf);
+
     }
 
     LIST_ADD (&surf->item_link, &mgr->surf_list);
@@ -620,6 +624,7 @@ tbm_surface_internal_create_with_bos (tbm_surface_info_s *info, tbm_bo *bos, int
             goto bail1;
 
         surf->bos[i] = tbm_bo_ref(bos[i]);
+		_tbm_bo_set_surface(bos[i], surf);
     }
 
     LIST_ADD (&surf->item_link, &mgr->surf_list);
