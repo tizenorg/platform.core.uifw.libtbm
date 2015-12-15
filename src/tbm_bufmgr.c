@@ -1602,6 +1602,10 @@ void tbm_bufmgr_debug_show(tbm_bufmgr bufmgr)
 
 	pthread_mutex_lock(&gLock);
 
+	TBM_DEBUG("\n");
+	TBM_DEBUG("\n");
+	TBM_DEBUG("\n");
+	TBM_DEBUG("\n");
 	_tbm_util_get_appname_from_pid(getpid(), app_name);
 	_tbm_util_get_appname_brief(app_name);
 	TBM_DEBUG("============TBM DEBUG: %s(%d)===========================\n", app_name, getpid());
