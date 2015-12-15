@@ -1707,27 +1707,64 @@ tbm_bufmgr_debug_show (tbm_bufmgr bufmgr)
 
     tbm_surface_h surf = NULL, tmp_surf = NULL;
 	int surf_cnt = 0;
+    int i;
 
     pthread_mutex_lock (&gLock);
 
 	TBM_DEBUG("============TBM DEBUG: PID(%d)===========================\n", getpid());
 
+	TBM_DEBUG("[tbm_surface information]\n");
+	TBM_DEBUG("no  surface              refcnt  width  height  bpp  size      num_bos num_planes flags format              app_name\n");
+	/* show the tbm_surface information in surf_list */
+	if(!LIST_IS_EMPTY (&bufmgr->surf_list))
+	{
+		LIST_FOR_EACH_ENTRY_SAFE (surf, tmp_surf, &bufmgr->surf_list, item_link)
+		{
+			TBM_DEBUG("%-4d%-23p%-6d%-7d%-8d%-5d%-12d%-10d%-9d%-4d%-20s\n",
+						++surf_cnt,
+						surf,
+						surf->refcnt,
+						surf->info.width,
+						surf->info.height,
+						surf->info.bpp,
+						surf->info.size/1024,
+						surf->num_bos,
+						surf->num_planes,
+						surf->flags,
+						_tbm_surface_internal_format_to_str(surf->info.format));
+            for (i = 0; i < surf->num_bos; i++) {
+                  TBM_DEBUG(" bo:%-11p(key:%2d)   %-26d%-10d\n",
+								surf->bos[i],
+								surf->bos[i]->tgl_key,
+								surf->bos[i]->ref_cnt,
+								tbm_bo_size(surf->bos[i])/1024);
+            }
+		}
+	}
+	else
+	{
+		TBM_DEBUG("no tbm_surfaces.\n");
+	}
+	TBM_DEBUG("\n");
+
 	TBM_DEBUG("[tbm_bo information]\n");
-	TBM_DEBUG("no  bo		 ref_cnt tgl_key lock_cnt map_cnt cache_state flags\n");
+	TBM_DEBUG("no  bo                   refcnt  size     lock_cnt map_cnt cache_state flags surface\n");
 	/* show the tbm_bo information in bo_list */
 	if(!LIST_IS_EMPTY (&bufmgr->bo_list))
 	{
 		LIST_FOR_EACH_ENTRY_SAFE (bo, tmp_bo, &bufmgr->bo_list, item_link)
 		{
-			TBM_DEBUG("%-4d%-14p%-8d%-8d%-9d%-8d%-12d%-5d\n",
+			TBM_DEBUG("%-4d%-11p(key:%2d)   %-6d%-12d%-9d%-9d%-10d%-4d%-11p\n",
                         ++bo_cnt,
 						bo,
-						bo->ref_cnt,
 						bo->tgl_key,
+						bo->ref_cnt,
+                        tbm_bo_size(bo)/1024,
 						bo->lock_cnt,
 						bo->map_cnt,
 						bo->cache_state.val,
-						bo->flags);
+						bo->flags,
+						bo->surface);
 		}
 	}
 	else
@@ -1736,32 +1773,6 @@ tbm_bufmgr_debug_show (tbm_bufmgr bufmgr)
 	}
 	TBM_DEBUG("\n");
 
-	TBM_DEBUG("[tbm_surface information]\n");
-	TBM_DEBUG("no  surface	 width height format bpp size num_bos num_planes flags\n");
-
-	/* show the tbm_surface information in surf_list */
-	if(!LIST_IS_EMPTY (&bufmgr->surf_list))
-	{
-		LIST_FOR_EACH_ENTRY_SAFE (surf, tmp_surf, &bufmgr->surf_list, item_link)
-		{
-			TBM_DEBUG("%-4d%-14p%-6d%-7d%-7d%-4d%-5d%-8d%-8d%-11d%-5d\\n",
-						++surf_cnt,
-						surf,
-						surf->refcnt,
-						surf->info.width,
-						surf->info.height,
-						surf->info.format,
-						surf->info.bpp,
-						surf->info.size,
-						surf->num_bos,
-						surf->num_planes,
-						surf->flags);
-		}
-	}
-	else
-	{
-		TBM_DEBUG("no tbm_surfaces.\n");
-	}
 	TBM_DEBUG("===============================================================\n");
 
 	pthread_mutex_unlock (&gLock);
