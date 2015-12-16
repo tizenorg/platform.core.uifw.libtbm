@@ -1603,9 +1603,6 @@ void tbm_bufmgr_debug_show(tbm_bufmgr bufmgr)
 	pthread_mutex_lock(&gLock);
 
 	TBM_DEBUG("\n");
-	TBM_DEBUG("\n");
-	TBM_DEBUG("\n");
-	TBM_DEBUG("\n");
 	_tbm_util_get_appname_from_pid(getpid(), app_name);
 	_tbm_util_get_appname_brief(app_name);
 	TBM_DEBUG("============TBM DEBUG: %s(%d)===========================\n", app_name, getpid());
@@ -1640,7 +1637,7 @@ void tbm_bufmgr_debug_show(tbm_bufmgr bufmgr)
 				app_name);
 
 			for (i = 0; i < surf->num_bos; i++) {
-				TBM_DEBUG(" bo:%-11p(key:%2d)   %-26d%-10d\n",
+				TBM_DEBUG(" bo:%-12p(key:%2d)   %-26d%-10d\n",
 					surf->bos[i],
 					surf->bos[i]->tgl_key,
 					surf->bos[i]->ref_cnt,
