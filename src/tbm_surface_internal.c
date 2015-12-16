@@ -283,6 +283,8 @@ static void _tbm_surface_internal_destroy(tbm_surface_h surface)
 		surface->bos[i] = NULL;
 	}
 
+	LIST_DEL(&surface->item_link);
+
 	free(surface);
 	surface = NULL;
 
