@@ -382,8 +382,8 @@ tbm_surface_queue_h tbm_surface_queue_create(int queue_size, int width, int heig
 		_queue_node_delete(surface_queue->node_list[j]);
 
 	free(surface_queue->node_list);
-	free(surface_queue);
 	pthread_mutex_destroy(&surface_queue->lock);
+	free(surface_queue);
 
 	return NULL;
 }
