@@ -548,8 +548,10 @@ tbm_surface_h tbm_surface_internal_create_with_flags(int width, int height, int 
 		}
 		surf->bos[i] = tbm_bo_alloc(mgr, bo_size, flags);
 		if (!surf->bos[i]) {
-			for (j = 0; j < i; j++)
-				tbm_bo_unref(surf->bos[j]);
+			for (j = 0; j < i; j++) {
+				if (!surf->bos[j])
+					tbm_bo_unref(surf->bos[j]);
+			}
 
 			free(surf);
 			surf = NULL;
