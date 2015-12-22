@@ -356,8 +356,8 @@ tbm_surface_queue_h tbm_surface_queue_create(int queue_size, int width, int heig
 	surface_queue->node_list = (queue_node **) calloc(queue_size, sizeof(queue_node *));
 	if (!surface_queue->node_list) {
 		TBM_LOG("surface node list alloc failed");
-		free(surface_queue);
 		pthread_mutex_destroy(&surface_queue->lock);
+		free(surface_queue);
 		return NULL;
 	}
 
@@ -401,6 +401,7 @@ void tbm_surface_queue_destroy(tbm_surface_queue_h surface_queue)
 		_queue_node_delete(surface_queue->node_list[i]);
 
 	free(surface_queue->node_list);
+	pthread_mutex_destroy(&surface_queue->lock);
 	free(surface_queue);
 }
 
