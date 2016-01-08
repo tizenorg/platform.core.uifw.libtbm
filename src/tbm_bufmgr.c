@@ -1281,12 +1281,12 @@ tbm_bo tbm_bo_import_fd(tbm_bufmgr bufmgr, tbm_fd fd)
 	return bo;
 }
 
-unsigned int tbm_bo_export(tbm_bo bo)
+tbm_key tbm_bo_export(tbm_bo bo)
 {
 	TBM_RETURN_VAL_IF_FAIL(_tbm_bo_is_valid(bo), 0);
 
 	tbm_bufmgr bufmgr;
-	int ret;
+	tbm_key ret;
 
 	bufmgr = bo->bufmgr;
 
