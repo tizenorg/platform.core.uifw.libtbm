@@ -50,12 +50,6 @@ AC_ARG_WITH(bufmgr-module-path, AS_HELP_STRING([--with-bufmgr-module-path=PATH],
 				[ BUFMGR_MODULE_PATH="$withval" ],
 				[ BUFMGR_MODULE_PATH="${DEFAULT_BUFMGR_MODULE_PATH}" ])
 
-# set the window system platform where the bufmgr initializes
-AC_ARG_WITH(tbm-platform, AS_HELP_STRING([--with-tbm-platform=WINSYS], [tbm platform (default: X11)]),
-				[ TBM_PLATFORM="$withval" ],
-				[ TBM_PLATFORM="X11" ])
-AC_SUBST(TBM_PLATFORM)
-
 #AC_DEFINE(BUFMGR_MODULE_DIR, "${BUFMGR_MODULE_PATH}", [Directory for the modules of tbm_bufmgr])
 AC_DEFINE_UNQUOTED(BUFMGR_MODULE_DIR, "${BUFMGR_MODULE_PATH}", [Directory for the modules of tbm_bufmgr])
 
@@ -64,23 +58,6 @@ AC_CHECK_FUNCS([clock_gettime], [CLOCK_LIB=],
                              [AC_MSG_ERROR([Couldn't find clock_gettime])])])
 AC_SUBST([CLOCK_LIB])
 
-
-if test "x$TBM_PLATFORM" = "xX11"; then
-    PKG_CHECK_MODULES(LIBDRI2, libdri2)
-    PKG_CHECK_MODULES(X11, x11)
-    LIBTBM_CFLAGS="$LIBDRI2_CFLAGS $X11_CFLAGS"
-    LIBTBM_LIBS="$LIBDRI2_LIBS $X11_LIBS"
-fi
-
-if test "x$TBM_PLATFORM" = "xWAYLAND"; then
-    PKG_CHECK_MODULES(WAYLAND_CLIENT, wayland-client wayland-server)
-    LIBTBM_CFLAGS="$WAYLAND_CLIENT_CFLAGS"
-    LIBTBM_LIBS="$WAYLAND_CLIENT_LIBS"
-
-	WAYLAND_PREFIX=`$PKG_CONFIG --variable=prefix wayland-client wayland-server`
-    AC_PATH_PROG([WAYLAND_SCANNER], [wayland-scanner],,
-		    [${WAYLAND_PREFIX}/bin$PATH_SEPARATOR$PATH])
-fi
 
 PKG_CHECK_MODULES(CAPI, [capi-base-common >= 0.1.1], [capi_0_1_1=yes], [capi_0_1_1=no])
 if test x"$capi_0_1_1" = xyes; then
@@ -95,20 +72,12 @@ LIBTBM_LIBS+="$LIBTBM_LIBS $LIBDRM_LIBS $PTHREADSTUBS_LIBS $CAPI_LIBS"
 AC_SUBST(LIBTBM_CFLAGS)
 AC_SUBST(LIBTBM_LIBS)
 
-if test "x$TBM_PLATFORM" = "xX11"; then
-	AC_DEFINE(HAVE_X11,1,[The window system is X11.])
-else
-	AC_DEFINE(HAVE_WAYLAND,1,[The window system is WAYLAND.])
-fi
-
 HOST_CPU_X86_64=no
 case $host_cpu in
   x86_64*|amd64*)
     HOST_CPU_X86_64=yes
 esac
 
-AM_CONDITIONAL(HAVE_TBM_PLATFORM_X11, test "x$TBM_PLATFORM" = "xX11")
-AM_CONDITIONAL(HAVE_TBM_PLATFORM_WAYLAND, test "x$TBM_PLATFORM" = "xWAYLAND")
 AM_CONDITIONAL(HOST_CPU_X86_64, test "x$HOST_CPU_X86_64" = "xyes")
 
 AC_OUTPUT([
@@ -122,6 +91,5 @@ echo "LDFLAGS           : $LDFLAGS"
 echo "LIBTBM_CFLAGS     : $LIBTBM_CFLAGS"
 echo "LIBTBM_LIBS       : $LIBTBM_LIBS"
 echo "BUFMGR_MODULE_DIR : $BUFMGR_MODULE_PATH"
-echo "TBM_PLATFORM      : $TBM_PLATFORM"
 echo ""
 
