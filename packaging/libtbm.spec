@@ -12,13 +12,6 @@ Source1001:		%name.manifest
 
 BuildRequires:  pkgconfig(libdrm)
 BuildRequires:  pkgconfig(pthread-stubs)
-%if %{with wayland}
-BuildRequires:  pkgconfig
-BuildRequires:  pkgconfig(wayland-client)
-%else
-BuildRequires:  pkgconfig(x11)
-BuildRequires:  pkgconfig(libdri2)
-%endif
 BuildRequires:  pkgconfig(capi-base-common)
 
 %description
