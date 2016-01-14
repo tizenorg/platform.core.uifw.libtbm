@@ -838,18 +838,6 @@ tbm_bufmgr tbm_bufmgr_init(int fd)
 	}
 
 	if (fd < 0) {
-#ifdef HAVE_X11
-		fd = tbm_bufmgr_get_drm_fd_x11();
-#elif HAVE_WAYLAND
-		fd = tbm_bufmgr_get_drm_fd_wayland();
-#endif
-		if (fd < 0) {
-			_tbm_set_last_result(TBM_BO_ERROR_GET_FD_FAILED);
-			TBM_LOG("[libtbm:%d] Fail get drm fd\n",
-				getpid());
-			pthread_mutex_unlock(&gLock);
-			return NULL;
-		}
 		fd_flag = 1;
 	}
 
@@ -859,9 +847,6 @@ tbm_bufmgr tbm_bufmgr_init(int fd)
 	gBufMgr = calloc(1, sizeof(struct _tbm_bufmgr));
 	if (!gBufMgr) {
 		_tbm_set_last_result(TBM_BO_ERROR_HEAP_ALLOC_FAILED);
-		if (fd_flag)
-			close(fd);
-
 		pthread_mutex_unlock(&gLock);
 		return NULL;
 	}
@@ -869,7 +854,7 @@ tbm_bufmgr tbm_bufmgr_init(int fd)
 	gBufMgr->fd_flag = fd_flag;
 
 	if (fd_flag) {
-		gBufMgr->fd = fd;
+		gBufMgr->fd = -1;
 	} else {
 		gBufMgr->fd = dup(fd);
 		if (gBufMgr->fd < 0) {
@@ -889,7 +874,10 @@ tbm_bufmgr tbm_bufmgr_init(int fd)
 	if (!_tbm_load_module(gBufMgr, gBufMgr->fd)) {
 		_tbm_set_last_result(TBM_BO_ERROR_LOAD_MODULE_FAILED);
 		TBM_LOG("[libtbm:%d] " "error : Fail to load bufmgr backend\n", getpid());
-		close(gBufMgr->fd);
+
+		if (gBufMgr->fd > 0)
+			close(gBufMgr->fd);
+
 		free(gBufMgr);
 		gBufMgr = NULL;
 		pthread_mutex_unlock(&gLock);
@@ -925,7 +913,10 @@ tbm_bufmgr tbm_bufmgr_init(int fd)
 		gBufMgr->backend->bufmgr_deinit(gBufMgr->backend->priv);
 		tbm_backend_free(gBufMgr->backend);
 		dlclose(gBufMgr->module_data);
-		close(gBufMgr->fd);
+
+		if (gBufMgr->fd > 0)
+			close(gBufMgr->fd);
+
 		free(gBufMgr);
 		gBufMgr = NULL;
 		pthread_mutex_unlock(&gLock);
@@ -940,7 +931,10 @@ tbm_bufmgr tbm_bufmgr_init(int fd)
 		tbm_backend_free(gBufMgr->backend);
 		pthread_mutex_destroy(&gBufMgr->lock);
 		dlclose(gBufMgr->module_data);
-		close(gBufMgr->fd);
+
+		if (gBufMgr->fd > 0)
+			close(gBufMgr->fd);
+
 		free(gBufMgr);
 		gBufMgr = NULL;
 		pthread_mutex_unlock(&gLock);
@@ -1039,7 +1033,8 @@ void tbm_bufmgr_deinit(tbm_bufmgr bufmgr)
 
 	dlclose(bufmgr->module_data);
 
-	close(bufmgr->fd);
+	if (bufmgr->fd > 0)
+		close(bufmgr->fd);
 
 	free(bufmgr);
 	bufmgr = NULL;
