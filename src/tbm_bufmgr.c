@@ -817,17 +817,18 @@ tbm_bufmgr tbm_bufmgr_init(int fd)
 	/* initialize buffer manager */
 	if (gBufMgr) {
 		DBG("[libtbm:%d] use previous gBufMgr\n", getpid());
-
-		if (fd >= 0) {
-			if (dup2(gBufMgr->fd, fd) < 0) {
-				_tbm_set_last_result(TBM_BO_ERROR_DUP_FD_FAILED);
-				DBG("[libtbm:%d] Fail to duplicate(dup2) the drm fd\n",
-					getpid());
-				pthread_mutex_unlock(&gLock);
-				return NULL;
+		if (!gBufMgr->fd_flag) {
+			if (fd >= 0) {
+				if (dup2(gBufMgr->fd, fd) < 0) {
+					_tbm_set_last_result(TBM_BO_ERROR_DUP_FD_FAILED);
+					TBM_LOG("[libtbm:%d] Fail to duplicate(dup2) the drm fd\n",
+						getpid());
+					pthread_mutex_unlock(&gLock);
+					return NULL;
+				}
+				DBG("[libtbm:%d] duplicate the drm_fd(%d), new drm_fd(%d).\n",
+					getpid(), gBufMgr->fd, fd);
 			}
-			DBG("[libtbm:%d] duplicate the drm_fd(%d), new drm_fd(%d).\n",
-				getpid(), gBufMgr->fd, fd);
 		}
 		gBufMgr->ref_count++;
 
