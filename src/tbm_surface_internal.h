@@ -133,7 +133,7 @@ tbm_surface_h tbm_surface_internal_create_with_flags(int width, int height, int 
    bufmgr = tbm_bufmgr_init (bufmgr_fd);
    bo[0] = tbm_bo_alloc (bufmgr, 128 * 128, TBM_BO_DEFAULT);
 
-   info.with = 128;
+   info.width = 128;
    info.height = 128;
    info.format = TBM_FORMAT_ARGB8888;
    info.bpp = 32;
@@ -250,9 +250,9 @@ int tbm_surface_internal_get_size(tbm_surface_h surface);
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @param[in] surface : the tbm_surface_h
  * @param[in] plane_idx : the bo index in the the tbm_surface
- * @param[out] size : the size of plan in tbm_surface
- * @param[out] offset : the offset of plan in tbm_surface
- * @param[out] pitch : the pitch of plan in tbm_surface
+ * @param[out] size : the size of plane in tbm_surface
+ * @param[out] offset : the offset of plane in tbm_surface
+ * @param[out] pitch : the pitch of plane in tbm_surface
  * @return 1 if this function succeeds, otherwise 0.
  * @par Example
    @code
@@ -263,7 +263,7 @@ int tbm_surface_internal_get_size(tbm_surface_h surface);
    uint32_t size, offset, pitch;
    int ret;
 
-   surface = tbm_surfacel_create (128, 128, TBM_FORMAT_YUV420);
+   surface = tbm_surface_create (128, 128, TBM_FORMAT_YUV420);
    ret = tbm_surface_internal_get_plane_data (surface, 1, &size, &offset, &pitch);
 
    ...
@@ -317,7 +317,7 @@ int tbm_surface_internal_get_bpp(tbm_format format);
  * @brief Gets bo index of plane.
  * @since_tizen 2.4
  * @param[in] surface : the tbm_surface_h
- * @param[in] plane_idx : the bo index in the the tbm_surface
+ * @param[in] plane_idx : the bo index in the tbm_surface
  * @return bo index of plane, otherwise -1.
  * @par Example
    @code
@@ -327,7 +327,7 @@ int tbm_surface_internal_get_bpp(tbm_format format);
    int bo_idx;
    tbm_surface_h surface;
 
-   surface = tbm_surfacel_create (128, 128, TBM_FORMAT_YUV420);
+   surface = tbm_surface_create (128, 128, TBM_FORMAT_YUV420);
    bo_idx = tbm_surface_internal_get_plane_bo_idx (surface, 0);
 
    ...
