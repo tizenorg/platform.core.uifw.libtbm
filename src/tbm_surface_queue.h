@@ -72,8 +72,10 @@ tbm_surface_queue_error_e tbm_surface_queue_set_dequeuable_cb(tbm_surface_queue_
 tbm_surface_queue_error_e tbm_surface_queue_set_acquirable_cb(tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb acquirable_cb, void *data);
 
 void tbm_surface_queue_destroy(tbm_surface_queue_h surface_queue);
+#if 0
 
 int tbm_surface_queue_get_queue_size(tbm_surface_queue_h surface_queue);
+#endif
 
 int tbm_surface_queue_get_width(tbm_surface_queue_h surface_queue);
 
