@@ -34,6 +34,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "tbm_bufmgr_int.h"
 #include "tbm_surface_internal.h"
 #include "list.h"
+#include "tbm_user_data.h"
 
 static tbm_bufmgr g_surface_bufmgr = NULL;
 static pthread_mutex_t tbm_surface_lock;
@@ -275,12 +276,22 @@ static void _tbm_surface_internal_destroy(tbm_surface_h surface)
 {
 	int i;
 	tbm_bufmgr bufmgr = surface->bufmgr;
+	tbm_user_data *old_data = NULL, *tmp = NULL;
 
 	for (i = 0; i < surface->num_bos; i++) {
 		surface->bos[i]->surface = NULL;
 
 		tbm_bo_unref(surface->bos[i]);
 		surface->bos[i] = NULL;
+	}
+
+	/* destory the user_data_list */
+	if (!LIST_IS_EMPTY(&surface->user_data_list)) {
+		LIST_FOR_EACH_ENTRY_SAFE(old_data, tmp, &surface->user_data_list, item_link) {
+			TBM_LOG("[tbm_surface:%d] free user_data \n",
+				getpid());
+			user_data_delete(old_data);
+		}
 	}
 
 	LIST_DEL(&surface->item_link);
@@ -948,5 +959,88 @@ void tbm_surface_internal_set_debug_pid(tbm_surface_h surface, unsigned int pid)
 	TBM_RETURN_IF_FAIL(surface);
 
 	surface->debug_pid = pid;
+}
+
+int tbm_surface_internal_add_user_data(tbm_surface_h surface, unsigned long key, tbm_data_free data_free_func)
+{
+	TBM_RETURN_VAL_IF_FAIL(surface, 0);
+
+	tbm_user_data *data;
+
+	/* check if the data according to the key exist if so, return false. */
+	data = user_data_lookup(&surface->user_data_list, key);
+	if (data) {
+		TBM_LOG("[libtbm:%d] "
+			"waring: %s:%d user data already exist. key:%ld\n",
+			getpid(), __FUNCTION__, __LINE__, key);
+		return 0;
+	}
+
+	data = user_data_create(key, data_free_func);
+	if (!data)
+		return 0;
+
+	LIST_ADD(&data->item_link, &surface->user_data_list);
+
+	return 1;
+}
+
+int tbm_surface_internal_set_user_data(tbm_surface_h surface, unsigned long key, void *data)
+{
+	TBM_RETURN_VAL_IF_FAIL(surface, 0);
+
+	tbm_user_data *old_data;
+
+	if (LIST_IS_EMPTY(&surface->user_data_list))
+		return 0;
+
+	old_data = user_data_lookup(&surface->user_data_list, key);
+	if (!old_data)
+		return 0;
+
+	if (old_data->data && old_data->free_func)
+		old_data->free_func(old_data->data);
+
+	old_data->data = data;
+
+	return 1;
+}
+
+int tbm_surface_internal_get_user_data(tbm_surface_h surface, unsigned long key, void **data)
+{
+	TBM_RETURN_VAL_IF_FAIL(surface, 0);
+
+	tbm_user_data *old_data;
+
+	if (!data || LIST_IS_EMPTY(&surface->user_data_list))
+		return 0;
+
+	old_data = user_data_lookup(&surface->user_data_list, key);
+	if (!old_data) {
+		*data = NULL;
+		return 0;
+	}
+
+	*data = old_data->data;
+
+	return 1;
+}
+
+int tbm_surface_internal_delete_user_data(tbm_surface_h surface, unsigned long key)
+{
+	TBM_RETURN_VAL_IF_FAIL(surface, 0);
+
+	tbm_user_data *old_data = (void *)0;
+
+	if (LIST_IS_EMPTY(&surface->user_data_list))
+		return 0;
+
+	old_data = user_data_lookup(&surface->user_data_list, key);
+	if (!old_data)
+		return 0;
+
+	user_data_delete(old_data);
+
+	return 1;
 }
 
