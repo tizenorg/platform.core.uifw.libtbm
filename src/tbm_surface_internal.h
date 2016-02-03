@@ -344,6 +344,50 @@ int tbm_surface_internal_get_plane_bo_idx(tbm_surface_h surface, int plane_idx);
  */
 void tbm_surface_internal_set_debug_pid(tbm_surface_h surface, unsigned int pid);
 
+/**
+ * @brief Adds a user_data to the tbm surface.
+ * @since_tizen 3.0
+ * @param[in] surface : the tbm surface.
+ * @param[in] key : the key associated with the user_data
+ * @param[in] data_free_func : the function pointer to free the user_data
+ * @return 1 if this function succeeds, otherwise 0.
+ * @post the tbm_surface_data_free() will be called under certain conditions, after calling tbm_surface_internal_delete_user_data().
+ * @see tbm_surface_free()
+ * @see tbm_surface_set_user_data()
+ * @see tbm_surface_get_user_data()
+ * @see tbm_surface_delete_user_data()
+ */
+int tbm_surface_internal_add_user_data(tbm_surface_h surface, unsigned long key, tbm_data_free data_free_func);
+
+/**
+ * @brief Sets a user_date to the tbm surface.
+ * @since_tizen 3.0
+ * @param[in] surface : the tbm surface.
+ * @param[in] key : the key associated with the user_date
+ * @param[in] data : a pointer of the user_data
+ * @return 1 if this function succeeds, otherwise 0.
+ */
+int tbm_surface_internal_set_user_data(tbm_surface_h surface, unsigned long key, void *data);
+
+/**
+ * @brief Gets a user_data from the tbm surface with the key.
+ * @since_tizen 3.0
+ * @param[in] surface : the tbm surface.
+ * @param[in] key : the key associated with the user_date
+ * @param[out] data : to get the user data
+ * @return 1 if this function succeeds, otherwise 0.
+ */
+int tbm_surface_internal_get_user_data(tbm_surface_h surface, unsigned long key, void **data);
+
+/**
+ * @brief Deletes the user_data in the tbm surface.
+ * @since_tizen 3.0
+ * @param[in] surface : the tbm surface.
+ * @param[in] key : the key associated with the user_date
+ * @return 1 if this function succeeds, otherwise 0.
+ */
+int tbm_surface_internal_delete_user_data(tbm_surface_h surface, unsigned long key);
+
 #ifdef __cplusplus
 }
 #endif

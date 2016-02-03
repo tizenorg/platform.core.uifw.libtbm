@@ -197,6 +197,8 @@ struct _tbm_surface {
 	unsigned int debug_pid;
 
 	struct list_head item_link; /* link of surface */
+
+	struct list_head user_data_list;	/* list of the user_date in surface */
 };
 
 int tbm_bufmgr_get_drm_fd_x11(void);
@@ -212,6 +214,5 @@ unsigned int tbm_surface_internal_get_height(tbm_surface_h surface);
 tbm_format tbm_surface_internal_get_format(tbm_surface_h surface);
 unsigned int _tbm_surface_internal_get_debug_pid(tbm_surface_h surface);
 char * _tbm_surface_internal_format_to_str(tbm_format format);
-
 
 #endif							/* _TBM_BUFMGR_INT_H_ */
