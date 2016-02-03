@@ -526,7 +526,7 @@ tbm_surface_queue_error_e tbm_surface_queue_acquire(tbm_surface_queue_h surface_
 	queue_node *node = NULL;
 
 	TBM_RETURN_VAL_IF_FAIL(surface_queue != NULL, TBM_SURFACE_QUEUE_ERROR_INVALID_QUEUE);
-    TBM_RETURN_VAL_IF_FAIL(surface != NULL, TBM_SURFACE_QUEUE_ERROR_INVALID_SURFACE);
+	TBM_RETURN_VAL_IF_FAIL(surface != NULL, TBM_SURFACE_QUEUE_ERROR_INVALID_SURFACE);
 
 	pthread_mutex_lock(&surface_queue->lock);
 
@@ -716,7 +716,6 @@ typedef struct
 	int num_attached;
 	int flags;
 	queue dequeue_list;
-	queue enqueue_list;
 }tbm_queue_sequence;
 
 static void __tbm_queue_sequence_init(tbm_surface_queue_h surface_queue)
@@ -725,7 +724,6 @@ static void __tbm_queue_sequence_init(tbm_surface_queue_h surface_queue)
 
 	data->num_attached = 0;
 	_queue_init(&data->dequeue_list);
-	_queue_init(&data->enqueue_list);
 }
 
 static void __tbm_queue_sequence_reset(tbm_surface_queue_h surface_queue)
@@ -734,7 +732,6 @@ static void __tbm_queue_sequence_reset(tbm_surface_queue_h surface_queue)
 
 	data->num_attached = 0;
 	_queue_init(&data->dequeue_list);
-	_queue_init(&data->enqueue_list);
 }
 
 static void __tbm_queue_sequence_destroy(tbm_surface_queue_h surface_queue)
