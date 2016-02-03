@@ -36,6 +36,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "tbm_bufmgr_backend.h"
 #include "tbm_bufmgr_tgl.h"
 #include "list.h"
+#include "tbm_user_data.h"
 
 #define DEBUG
 #ifdef DEBUG
@@ -85,15 +86,6 @@ enum {
 	DEVICE_CA,					/* cache aware device */
 	DEVICE_CO					/* cache oblivious device */
 };
-
-typedef struct {
-	unsigned long key;
-	void *data;
-	tbm_data_free free_func;
-
-	/* link of user_data */
-	struct list_head item_link;
-} tbm_user_data;
 
 pthread_mutex_t gLock = PTHREAD_MUTEX_INITIALIZER;
 tbm_bufmgr gBufMgr = NULL;
@@ -253,49 +245,6 @@ static inline unsigned int _tgl_get_data(int fd, unsigned int key, unsigned int 
 
 	return arg.data1;
 }
-
-static tbm_user_data *_user_data_lookup(struct list_head *user_data_list, unsigned long key)
-{
-	tbm_user_data *user_data = NULL;
-	tbm_user_data *old_data = NULL, *tmp = NULL;
-
-	if (!LIST_IS_EMPTY(user_data_list)) {
-		LIST_FOR_EACH_ENTRY_SAFE(old_data, tmp, user_data_list, item_link) {
-			if (old_data->key == key) {
-				user_data = old_data;
-				return user_data;
-			}
-		}
-	}
-
-	return user_data;
-}
-
-static tbm_user_data *_user_data_create(unsigned long key, tbm_data_free data_free_func)
-{
-	tbm_user_data *user_data = NULL;
-
-	user_data = calloc(1, sizeof(tbm_user_data));
-	if (!user_data)
-		return NULL;
-
-	user_data->key = key;
-	user_data->free_func = data_free_func;
-	user_data->data = (void *)0;
-
-	return user_data;
-}
-
-static void _user_data_delete(tbm_user_data * user_data)
-{
-	if (user_data->data && user_data->free_func)
-		user_data->free_func(user_data->data);
-
-	LIST_DEL(&user_data->item_link);
-
-	free(user_data);
-}
-
 static int _bo_lock(tbm_bo bo, int device, int opt)
 {
 	tbm_bufmgr bufmgr = bo->bufmgr;
@@ -591,7 +540,7 @@ static void _tbm_bo_unref(tbm_bo bo)
 			LIST_FOR_EACH_ENTRY_SAFE(old_data, tmp, &bo->user_data_list, item_link) {
 				DBG("[libtbm:%d] free user_data \n",
 					getpid());
-				_user_data_delete(old_data);
+				user_data_delete(old_data);
 			}
 		}
 
@@ -1481,7 +1430,7 @@ int tbm_bo_add_user_data(tbm_bo bo, unsigned long key, tbm_data_free data_free_f
 	tbm_user_data *data;
 
 	/* check if the data according to the key exist if so, return false. */
-	data = _user_data_lookup(&bo->user_data_list, key);
+	data = user_data_lookup(&bo->user_data_list, key);
 	if (data) {
 		TBM_LOG("[libtbm:%d] "
 			"waring: %s:%d user data already exist. key:%ld\n",
@@ -1489,7 +1438,7 @@ int tbm_bo_add_user_data(tbm_bo bo, unsigned long key, tbm_data_free data_free_f
 		return 0;
 	}
 
-	data = _user_data_create(key, data_free_func);
+	data = user_data_create(key, data_free_func);
 	if (!data)
 		return 0;
 
@@ -1507,7 +1456,7 @@ int tbm_bo_set_user_data(tbm_bo bo, unsigned long key, void *data)
 	if (LIST_IS_EMPTY(&bo->user_data_list))
 		return 0;
 
-	old_data = _user_data_lookup(&bo->user_data_list, key);
+	old_data = user_data_lookup(&bo->user_data_list, key);
 	if (!old_data)
 		return 0;
 
@@ -1528,7 +1477,7 @@ int tbm_bo_get_user_data(tbm_bo bo, unsigned long key, void **data)
 	if (!data || LIST_IS_EMPTY(&bo->user_data_list))
 		return 0;
 
-	old_data = _user_data_lookup(&bo->user_data_list, key);
+	old_data = user_data_lookup(&bo->user_data_list, key);
 	if (!old_data) {
 		*data = NULL;
 		return 0;
@@ -1548,11 +1497,11 @@ int tbm_bo_delete_user_data(tbm_bo bo, unsigned long key)
 	if (LIST_IS_EMPTY(&bo->user_data_list))
 		return 0;
 
-	old_data = _user_data_lookup(&bo->user_data_list, key);
+	old_data = user_data_lookup(&bo->user_data_list, key);
 	if (!old_data)
 		return 0;
 
-	_user_data_delete(old_data);
+	user_data_delete(old_data);
 
 	return 1;
 }
