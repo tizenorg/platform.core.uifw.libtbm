@@ -569,7 +569,7 @@ tbm_fd tbm_bo_export_fd(tbm_bo bo);
    ...
 
    bufmgr = tbm_bufmgr_init (bufmgr_fd);
-   bo = tbm_bo_import (key);
+   bo = tbm_bo_import (bufmgr, key);
    if (bo == NULL)
    {
       error = tbm_get_last_error ();
