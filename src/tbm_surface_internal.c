@@ -792,9 +792,14 @@ int tbm_surface_internal_get_plane_data(tbm_surface_h surface, int plane_idx, ui
 		return 0;
 	}
 
-	*size = surf->info.planes[plane_idx].size;
-	*offset = surf->info.planes[plane_idx].offset;
-	*pitch = surf->info.planes[plane_idx].stride;
+	if (size)
+		*size = surf->info.planes[plane_idx].size;
+
+	if (offset)
+		*offset = surf->info.planes[plane_idx].offset;
+
+	if (pitch)
+		*pitch = surf->info.planes[plane_idx].stride;
 
 	_tbm_surface_mutex_unlock();
 
