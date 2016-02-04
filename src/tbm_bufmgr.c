@@ -36,7 +36,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "tbm_bufmgr_backend.h"
 #include "tbm_bufmgr_tgl.h"
 #include "list.h"
-#include "tbm_user_data.h"
 
 #define DEBUG
 #ifdef DEBUG
@@ -245,6 +244,49 @@ static inline unsigned int _tgl_get_data(int fd, unsigned int key, unsigned int 
 
 	return arg.data1;
 }
+
+tbm_user_data *user_data_lookup(struct list_head *user_data_list, unsigned long key)
+{
+	tbm_user_data *user_data = NULL;
+	tbm_user_data *old_data = NULL, *tmp = NULL;
+
+	if (!LIST_IS_EMPTY(user_data_list)) {
+		LIST_FOR_EACH_ENTRY_SAFE(old_data, tmp, user_data_list, item_link) {
+			if (old_data->key == key) {
+				user_data = old_data;
+				return user_data;
+			}
+		}
+	}
+
+	return user_data;
+}
+
+tbm_user_data *user_data_create(unsigned long key, tbm_data_free data_free_func)
+{
+	tbm_user_data *user_data = NULL;
+
+	user_data = calloc(1, sizeof(tbm_user_data));
+	if (!user_data)
+		return NULL;
+
+	user_data->key = key;
+	user_data->free_func = data_free_func;
+	user_data->data = (void *)0;
+
+	return user_data;
+}
+
+void user_data_delete(tbm_user_data * user_data)
+{
+	if (user_data->data && user_data->free_func)
+		user_data->free_func(user_data->data);
+
+	LIST_DEL(&user_data->item_link);
+
+	free(user_data);
+}
+
 static int _bo_lock(tbm_bo bo, int device, int opt)
 {
 	tbm_bufmgr bufmgr = bo->bufmgr;

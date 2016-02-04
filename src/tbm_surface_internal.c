@@ -34,7 +34,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "tbm_bufmgr_int.h"
 #include "tbm_surface_internal.h"
 #include "list.h"
-#include "tbm_user_data.h"
 
 static tbm_bufmgr g_surface_bufmgr = NULL;
 static pthread_mutex_t tbm_surface_lock;

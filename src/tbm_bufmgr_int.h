@@ -201,6 +201,15 @@ struct _tbm_surface {
 	struct list_head user_data_list;	/* list of the user_date in surface */
 };
 
+typedef struct {
+	unsigned long key;
+	void *data;
+	tbm_data_free free_func;
+
+	/* link of user_data */
+	struct list_head item_link;
+} tbm_user_data;
+
 int tbm_bufmgr_get_drm_fd_x11(void);
 int tbm_bufmgr_get_drm_fd_wayland(void);
 
@@ -214,5 +223,9 @@ unsigned int tbm_surface_internal_get_height(tbm_surface_h surface);
 tbm_format tbm_surface_internal_get_format(tbm_surface_h surface);
 unsigned int _tbm_surface_internal_get_debug_pid(tbm_surface_h surface);
 char * _tbm_surface_internal_format_to_str(tbm_format format);
+
+tbm_user_data *user_data_lookup(struct list_head *user_data_list, unsigned long key);
+tbm_user_data *user_data_create(unsigned long key, tbm_data_free data_free_func);
+void user_data_delete(tbm_user_data * user_data);
 
 #endif							/* _TBM_BUFMGR_INT_H_ */
