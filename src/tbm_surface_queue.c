@@ -33,7 +33,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "list.h"
 
 #define FREE_QUEUE	1
-#define DUTY_QUEUE	2
+#define DIRTY_QUEUE	2
 #define NODE_LIST	4
 
 #define DEBUG 0
@@ -171,7 +171,7 @@ static queue_node* _queue_get_node(tbm_surface_queue_h surface_queue, int type, 
 	queue_node *tmp = NULL;
 
 	if (type == 0)
-		type = FREE_QUEUE | DUTY_QUEUE | NODE_LIST;
+		type = FREE_QUEUE | DIRTY_QUEUE | NODE_LIST;
 	if (out_type)
 		*out_type = 0;
 
@@ -186,12 +186,12 @@ static queue_node* _queue_get_node(tbm_surface_queue_h surface_queue, int type, 
 		}
 	}
 
-	if (type & DUTY_QUEUE)
+	if (type & DIRTY_QUEUE)
 	{
 		LIST_FOR_EACH_ENTRY_SAFE(node, tmp, &surface_queue->dirty_queue.head, item_link) {
 			if (node->surface == surface)
 			{
-				if (out_type) *out_type = DUTY_QUEUE;
+				if (out_type) *out_type = DIRTY_QUEUE;
 				return node;
 			}
 		}
