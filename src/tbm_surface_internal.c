@@ -578,6 +578,8 @@ tbm_surface_h tbm_surface_internal_create_with_flags(int width, int height, int 
 
 	}
 
+	LIST_INITHEAD(&surf->user_data_list);
+
 	LIST_ADD(&surf->item_link, &mgr->surf_list);
 
 	_tbm_surface_mutex_unlock();
@@ -657,6 +659,8 @@ tbm_surface_h tbm_surface_internal_create_with_bos(tbm_surface_info_s * info, tb
 		surf->bos[i] = tbm_bo_ref(bos[i]);
 		_tbm_bo_set_surface(bos[i], surf);
 	}
+
+	LIST_INITHEAD(&surf->user_data_list);
 
 	LIST_ADD(&surf->item_link, &mgr->surf_list);
 
