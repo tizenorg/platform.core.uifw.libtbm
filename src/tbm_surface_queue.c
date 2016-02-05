@@ -442,10 +442,15 @@ tbm_surface_queue_error_e tbm_surface_queue_dequeue(tbm_surface_queue_h surface_
 	else
 		node = _tbm_surface_queue_dequeue(surface_queue);
 
-	if (node == NULL || node->surface == NULL) {
-		TBM_LOG("_queue_node_pop_front is failed\n");
+	if (node == NULL) {
+		*surface = NULL;
+		pthread_mutex_unlock(&surface_queue->lock);
+		return TBM_SURFACE_QUEUE_ERROR_EMPTY;
+	}
 
-        *surface = NULL;
+	if (node->surface == NULL) {
+		*surface = NULL;
+		TBM_LOG("_queue_node_pop_front  failed\n");
 		pthread_mutex_unlock(&surface_queue->lock);
 		return TBM_SURFACE_QUEUE_ERROR_INVALID_QUEUE;
 	}
@@ -535,10 +540,15 @@ tbm_surface_queue_error_e tbm_surface_queue_acquire(tbm_surface_queue_h surface_
 	else
 		node = _tbm_surface_queue_acquire(surface_queue);
 
-	if (node == NULL || node->surface == NULL) {
-		TBM_LOG("_queue_node_pop_front  failed\n");
+	if (node == NULL) {
+		*surface = NULL;
+		pthread_mutex_unlock(&surface_queue->lock);
+		return TBM_SURFACE_QUEUE_ERROR_EMPTY;
+	}
 
-        *surface = NULL;
+	if (node->surface == NULL) {
+		*surface = NULL;
+		TBM_LOG("_queue_node_pop_front  failed\n");
 		pthread_mutex_unlock(&surface_queue->lock);
 		return TBM_SURFACE_QUEUE_ERROR_INVALID_QUEUE;
 	}
