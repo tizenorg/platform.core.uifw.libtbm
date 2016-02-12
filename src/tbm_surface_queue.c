@@ -64,6 +64,13 @@ typedef struct {
 	unsigned int priv_flags;	/*for each queue*/
 } queue_node;
 
+typedef struct {
+	struct list_head link;
+
+	tbm_surface_queue_notify_cb cb;
+	void *data;
+} queue_notify;
+
 typedef struct _tbm_surface_queue_interface {
 	void (*init)(tbm_surface_queue_h queue);
 	void (*reset)(tbm_surface_queue_h queue);
@@ -84,6 +91,11 @@ struct _tbm_surface_queue {
 	queue free_queue;
 	queue dirty_queue;
 	struct list_head list;
+
+	struct list_head destory_noti;
+	struct list_head dequeuable_noti;
+	struct list_head acquirable_noti;
+	struct list_head reset_noti;
 
 	tbm_surface_queue_notify_cb destroy_cb;
 	void *destroy_cb_data;
@@ -219,6 +231,54 @@ static void _queue_init(queue * queue)
 	queue->count = 0;
 }
 
+static void _notify_add(struct list_head *list, tbm_surface_queue_notify_cb cb, void* data)
+{
+	TBM_RETURN_IF_FAIL(cb != NULL);
+
+	queue_notify *item = (queue_notify*)calloc(1, sizeof(queue_notify));
+	TBM_RETURN_IF_FAIL(item != NULL);
+
+	LIST_INITHEAD(&item->link);
+	item->cb = cb;
+	item->data = data;
+
+	LIST_ADDTAIL(&item->link, list);
+}
+
+static void _notify_remove(struct list_head *list, tbm_surface_queue_notify_cb cb, void* data)
+{
+	queue_notify *item = NULL, *tmp = NULL;
+
+	LIST_FOR_EACH_ENTRY_SAFE(item, tmp, list, link) {
+		if (item->cb == cb && item->data == data) {
+			LIST_DEL(&item->link);
+			free(item);
+			return;
+		}
+	}
+
+	TBM_LOG("Cannot find notifiy\n");
+}
+
+static void _notify_remove_all(struct list_head *list)
+{
+	queue_notify *item = NULL, *tmp = NULL;
+
+	LIST_FOR_EACH_ENTRY_SAFE(item, tmp, list, link) {
+		LIST_DEL(&item->link);
+		free(item);
+	}
+}
+
+static void _notify_emit(tbm_surface_queue_h surface_queue, struct list_head *list)
+{
+	queue_notify *item = NULL, *tmp = NULL;
+
+	LIST_FOR_EACH_ENTRY_SAFE(item, tmp, list, link) {
+		item->cb(surface_queue, item->data);
+	}
+}
+
 void _tbm_surface_queue_attach(tbm_surface_queue_h surface_queue, tbm_surface_h surface)
 {
 	queue_node *node = NULL;
@@ -313,6 +373,11 @@ void _tbm_surface_queue_init(tbm_surface_queue_h surface_queue,
 	_queue_init(&surface_queue->dirty_queue);
 	LIST_INITHEAD(&surface_queue->list);
 
+	LIST_INITHEAD(&surface_queue->destory_noti);
+	LIST_INITHEAD(&surface_queue->acquirable_noti);
+	LIST_INITHEAD(&surface_queue->dequeuable_noti);
+	LIST_INITHEAD(&surface_queue->reset_noti);
+
 	if (surface_queue->impl && surface_queue->impl->init)
 		surface_queue->impl->init(surface_queue);
 }
@@ -325,6 +390,32 @@ tbm_surface_queue_error_e tbm_surface_queue_set_destroy_cb(tbm_surface_queue_h s
 
 	surface_queue->destroy_cb = destroy_cb;
 	surface_queue->destroy_cb_data = data;
+
+	pthread_mutex_unlock(&surface_queue->lock);
+
+	return TBM_SURFACE_QUEUE_ERROR_NONE;
+}
+
+tbm_surface_queue_error_e tbm_surface_queue_add_destroy_cb(tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb destroy_cb, void *data)
+{
+	TBM_RETURN_VAL_IF_FAIL(surface_queue != NULL, TBM_SURFACE_QUEUE_ERROR_INVALID_QUEUE);
+
+	pthread_mutex_lock(&surface_queue->lock);
+
+	_notify_add(&surface_queue->destory_noti, destroy_cb, data);
+
+	pthread_mutex_unlock(&surface_queue->lock);
+
+	return TBM_SURFACE_QUEUE_ERROR_NONE;
+}
+
+tbm_surface_queue_error_e tbm_surface_queue_remove_destroy_cb(tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb destroy_cb, void *data)
+{
+	TBM_RETURN_VAL_IF_FAIL(surface_queue != NULL, TBM_SURFACE_QUEUE_ERROR_INVALID_QUEUE);
+
+	pthread_mutex_lock(&surface_queue->lock);
+
+	_notify_remove(&surface_queue->destory_noti, destroy_cb, data);
 
 	pthread_mutex_unlock(&surface_queue->lock);
 
@@ -345,6 +436,32 @@ tbm_surface_queue_error_e tbm_surface_queue_set_dequeuable_cb(tbm_surface_queue_
 	return TBM_SURFACE_QUEUE_ERROR_NONE;
 }
 
+tbm_surface_queue_error_e tbm_surface_queue_add_dequeuable_cb(tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb dequeuable_cb, void *data)
+{
+	TBM_RETURN_VAL_IF_FAIL(surface_queue != NULL, TBM_SURFACE_QUEUE_ERROR_INVALID_QUEUE);
+
+	pthread_mutex_lock(&surface_queue->lock);
+
+	_notify_add(&surface_queue->dequeuable_noti, dequeuable_cb, data);
+
+	pthread_mutex_unlock(&surface_queue->lock);
+
+	return TBM_SURFACE_QUEUE_ERROR_NONE;
+}
+
+tbm_surface_queue_error_e tbm_surface_queue_remove_dequeuable_cb(tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb dequeuable_cb, void *data)
+{
+	TBM_RETURN_VAL_IF_FAIL(surface_queue != NULL, TBM_SURFACE_QUEUE_ERROR_INVALID_QUEUE);
+
+	pthread_mutex_lock(&surface_queue->lock);
+
+	_notify_remove(&surface_queue->dequeuable_noti, dequeuable_cb, data);
+
+	pthread_mutex_unlock(&surface_queue->lock);
+
+	return TBM_SURFACE_QUEUE_ERROR_NONE;
+}
+
 tbm_surface_queue_error_e tbm_surface_queue_set_acquirable_cb(tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb acquirable_cb, void *data)
 {
 	TBM_RETURN_VAL_IF_FAIL(surface_queue != NULL, TBM_SURFACE_QUEUE_ERROR_INVALID_QUEUE);
@@ -353,6 +470,32 @@ tbm_surface_queue_error_e tbm_surface_queue_set_acquirable_cb(tbm_surface_queue_
 
 	surface_queue->acquirable_cb = acquirable_cb;
 	surface_queue->acquirable_cb_data = data;
+
+	pthread_mutex_unlock(&surface_queue->lock);
+
+	return TBM_SURFACE_QUEUE_ERROR_NONE;
+}
+
+tbm_surface_queue_error_e tbm_surface_queue_add_acquirable_cb(tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb acquirable_cb, void *data)
+{
+	TBM_RETURN_VAL_IF_FAIL(surface_queue != NULL, TBM_SURFACE_QUEUE_ERROR_INVALID_QUEUE);
+
+	pthread_mutex_lock(&surface_queue->lock);
+
+	_notify_add(&surface_queue->acquirable_noti, acquirable_cb, data);
+
+	pthread_mutex_unlock(&surface_queue->lock);
+
+	return TBM_SURFACE_QUEUE_ERROR_NONE;
+}
+
+tbm_surface_queue_error_e tbm_surface_queue_remove_acquirable_cb(tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb acquirable_cb, void *data)
+{
+	TBM_RETURN_VAL_IF_FAIL(surface_queue != NULL, TBM_SURFACE_QUEUE_ERROR_INVALID_QUEUE);
+
+	pthread_mutex_lock(&surface_queue->lock);
+
+	_notify_remove(&surface_queue->acquirable_noti, acquirable_cb, data);
 
 	pthread_mutex_unlock(&surface_queue->lock);
 
@@ -390,6 +533,31 @@ tbm_surface_queue_error_e tbm_surface_queue_set_reset_cb(tbm_surface_queue_h sur
 	return TBM_SURFACE_QUEUE_ERROR_NONE;
 }
 
+tbm_surface_queue_error_e tbm_surface_queue_add_reset_cb(tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb reset_cb, void *data)
+{
+	TBM_RETURN_VAL_IF_FAIL(surface_queue != NULL, TBM_SURFACE_QUEUE_ERROR_INVALID_QUEUE);
+
+	pthread_mutex_lock(&surface_queue->lock);
+
+	_notify_add(&surface_queue->acquirable_noti, reset_cb, data);
+
+	pthread_mutex_unlock(&surface_queue->lock);
+
+	return TBM_SURFACE_QUEUE_ERROR_NONE;
+}
+
+tbm_surface_queue_error_e tbm_surface_queue_remove_reset_cb(tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb reset_cb, void *data)
+{
+	TBM_RETURN_VAL_IF_FAIL(surface_queue != NULL, TBM_SURFACE_QUEUE_ERROR_INVALID_QUEUE);
+
+	pthread_mutex_lock(&surface_queue->lock);
+
+	_notify_remove(&surface_queue->acquirable_noti, reset_cb, data);
+
+	pthread_mutex_unlock(&surface_queue->lock);
+
+	return TBM_SURFACE_QUEUE_ERROR_NONE;
+}
 
 tbm_surface_queue_error_e tbm_surface_queue_enqueue(tbm_surface_queue_h surface_queue, tbm_surface_h surface)
 {
@@ -422,6 +590,7 @@ tbm_surface_queue_error_e tbm_surface_queue_enqueue(tbm_surface_queue_h surface_
 	pthread_mutex_unlock(&surface_queue->lock);
 	pthread_cond_signal(&surface_queue->dirty_cond);
 
+	_notify_emit(surface_queue, &surface_queue->acquirable_noti);
 	if (surface_queue->acquirable_cb)
 		surface_queue->acquirable_cb(surface_queue, surface_queue->acquirable_cb_data);
 
@@ -520,6 +689,7 @@ tbm_surface_queue_error_e tbm_surface_queue_release(tbm_surface_queue_h surface_
 	pthread_mutex_unlock(&surface_queue->lock);
 	pthread_cond_signal(&surface_queue->free_cond);
 
+	_notify_emit(surface_queue, &surface_queue->dequeuable_noti);
 	if (surface_queue->dequeuable_cb)
 		surface_queue->dequeuable_cb(surface_queue, surface_queue->dequeuable_cb_data);
 
@@ -591,12 +761,19 @@ void tbm_surface_queue_destroy(tbm_surface_queue_h surface_queue)
 	if (surface_queue->destroy_cb)
 		surface_queue->destroy_cb(surface_queue, surface_queue->destroy_cb_data);
 
+	_notify_emit(surface_queue, &surface_queue->destory_noti);
+
 	if (surface_queue->impl && surface_queue->impl->destroy)
 		surface_queue->impl->destroy(surface_queue);
 
 	LIST_FOR_EACH_ENTRY_SAFE(node, tmp, &surface_queue->list, link) {
 		_queue_node_delete(node);
 	}
+
+	_notify_remove_all(&surface_queue->destory_noti);
+	_notify_remove_all(&surface_queue->acquirable_noti);
+	_notify_remove_all(&surface_queue->dequeuable_noti);
+	_notify_remove_all(&surface_queue->reset_noti);
 
 	pthread_mutex_destroy(&surface_queue->lock);
 	free(surface_queue);
@@ -634,6 +811,7 @@ tbm_surface_queue_error_e tbm_surface_queue_reset(tbm_surface_queue_h surface_qu
 	pthread_mutex_unlock(&surface_queue->lock);
 	pthread_cond_signal(&surface_queue->free_cond);
 
+	_notify_emit(surface_queue, &surface_queue->reset_noti);
 	if (surface_queue->reset_cb)
 		surface_queue->reset_cb(surface_queue, surface_queue->reset_cb_data);
 
