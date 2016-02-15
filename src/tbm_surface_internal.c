@@ -845,18 +845,11 @@ int tbm_surface_internal_get_info(tbm_surface_h surface, int opt, tbm_surface_in
 			if (bo_handles[i].ptr == NULL) {
 				for (j = 0; j < i; j++)
 					tbm_bo_unmap(surf->bos[j]);
-
-				_tbm_surface_mutex_unlock();
-				return 0;
 			}
 		}
 	} else {
 		for (i = 0; i < surf->num_bos; i++) {
 			bo_handles[i] = tbm_bo_get_handle(surf->bos[i], TBM_DEVICE_CPU);
-			if (bo_handles[i].ptr == NULL) {
-				_tbm_surface_mutex_unlock();
-				return 0;
-			}
 		}
 	}
 
