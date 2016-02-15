@@ -51,6 +51,7 @@ int bDebug = 0;
 #define SUFFIX_LIB    ".so"
 #define DEFAULT_LIB   PREFIX_LIB"default"SUFFIX_LIB
 
+/* unneeded version 2.0 */
 #define BO_IS_CACHEABLE(bo) ((bo->flags & TBM_BO_NONCACHABLE) ? 0 : 1)
 #define DEVICE_IS_CACHE_AWARE(device) ((device == TBM_DEVICE_CPU) ? (1) : (0))
 
@@ -61,6 +62,7 @@ int bDebug = 0;
 #define CACHE_OP_CREATE     (-1)
 #define CACHE_OP_ATTACH     (-2)
 #define CACHE_OP_IMPORT     (-3)
+/* unneeded version 2.0 */
 
 /* values to indicate unspecified fields in XF86ModReqInfo. */
 #define MAJOR_UNSPEC        0xFF
@@ -80,11 +82,13 @@ enum {
 	LOCK_TRY_NEVER
 };
 
+/* unneeded version 2.0 */
 enum {
 	DEVICE_NONE = 0,
 	DEVICE_CA,					/* cache aware device */
 	DEVICE_CO					/* cache oblivious device */
 };
+/* unneeded version 2.0 */
 
 pthread_mutex_t gLock = PTHREAD_MUTEX_INITIALIZER;
 tbm_bufmgr gBufMgr = NULL;
@@ -146,6 +150,8 @@ static void _tbm_util_get_appname_from_pid(long pid, char *str)
 	snprintf(str, sizeof(cmdline), "%s", cmdline);
 }
 
+
+/* unneeded version 2.0 */
 static inline int _tgl_init(int fd, unsigned int key)
 {
 	struct tgl_attribute attr;
@@ -244,6 +250,7 @@ static inline unsigned int _tgl_get_data(int fd, unsigned int key, unsigned int 
 
 	return arg.data1;
 }
+/* unneeded version 2.0 */
 
 tbm_user_data *user_data_lookup(struct list_head *user_data_list, unsigned long key)
 {
@@ -292,7 +299,7 @@ static int _bo_lock(tbm_bo bo, int device, int opt)
 	tbm_bufmgr bufmgr = bo->bufmgr;
 	int ret = 0;
 
-	if (TBM_LOCK_CTRL_BACKEND_VALID(bufmgr->backend->flags)) {
+	if (bufmgr->use_2_0) {
 		if (bufmgr->backend->bo_lock2) {
 			/* use bo_lock2 backend lock */
 			ret = bufmgr->backend->bo_lock2(bo, device, opt);
@@ -305,8 +312,22 @@ static int _bo_lock(tbm_bo bo, int device, int opt)
 				getpid(), __FUNCTION__, __LINE__);
 		}
 	} else {
-		/* use tizen global lock */
-		ret = _tgl_lock(bufmgr->lock_fd, bo->tgl_key);
+		if (TBM_LOCK_CTRL_BACKEND_VALID(bufmgr->backend->flags)) {
+			if (bufmgr->backend->bo_lock2) {
+				/* use bo_lock2 backend lock */
+				ret = bufmgr->backend->bo_lock2(bo, device, opt);
+			} else if (bufmgr->backend->bo_lock) {
+				/* use bo_lock backend lock */
+				ret = bufmgr->backend->bo_lock(bo);
+			} else {
+				TBM_LOG("[libtbm:%d] "
+					"error %s:%d no backend lock functions\n",
+					getpid(), __FUNCTION__, __LINE__);
+			}
+		} else {
+			/* use tizen global lock */
+			ret = _tgl_lock(bufmgr->lock_fd, bo->tgl_key);
+		}
 	}
 
 	return ret;
@@ -316,7 +337,7 @@ static void _bo_unlock(tbm_bo bo)
 {
 	tbm_bufmgr bufmgr = bo->bufmgr;
 
-	if (TBM_LOCK_CTRL_BACKEND_VALID(bufmgr->backend->flags)) {
+	if (bufmgr->use_2_0) {
 		if (bufmgr->backend->bo_unlock) {
 			/* use backend unlock */
 			bufmgr->backend->bo_unlock(bo);
@@ -325,9 +346,21 @@ static void _bo_unlock(tbm_bo bo)
 				"error %s:%d no backend unlock functions\n",
 				getpid(), __FUNCTION__, __LINE__);
 		}
-	} else {
-		/* use tizen global unlock */
-		_tgl_unlock(bufmgr->lock_fd, bo->tgl_key);
+	}
+	else {
+		if (TBM_LOCK_CTRL_BACKEND_VALID(bufmgr->backend->flags)) {
+			if (bufmgr->backend->bo_unlock) {
+				/* use backend unlock */
+				bufmgr->backend->bo_unlock(bo);
+			} else {
+				TBM_LOG("[libtbm:%d] "
+					"error %s:%d no backend unlock functions\n",
+					getpid(), __FUNCTION__, __LINE__);
+			}
+		} else {
+			/* use tizen global unlock */
+			_tgl_unlock(bufmgr->lock_fd, bo->tgl_key);
+		}
 	}
 }
 
@@ -593,8 +626,10 @@ static void _tbm_bo_unref(tbm_bo bo)
 			_bo_unlock(bo);
 		}
 
-		/* Destroy Global Lock */
-		_tbm_bo_destroy_state(bo);
+		if (!bufmgr->use_2_0) {
+			/* Destroy Global Lock */
+			_tbm_bo_destroy_state(bo);
+		}
 
 		/* call the bo_free */
 		bufmgr->backend->bo_free(bo);
@@ -892,6 +927,11 @@ tbm_bufmgr tbm_bufmgr_init(int fd)
 			DBG("TBM ");
 		}
 
+		if (backend_flag & TBM_USE_2_0_BACKEND) {
+			gBufMgr->use_2_0 = 1;
+			DBG("USE 2.0 backend");
+		}
+
 		DBG("\n");
 	}
 
@@ -915,22 +955,33 @@ tbm_bufmgr tbm_bufmgr_init(int fd)
 		return NULL;
 	}
 
-	/* intialize the tizen global status */
-	if (!_tbm_bufmgr_init_state(gBufMgr)) {
-		_tbm_set_last_result(TBM_BO_ERROR_INIT_STATE_FAILED);
-		TBM_LOG("[libtbm:%d] " "error: Fail to init state\n", getpid());
-		gBufMgr->backend->bufmgr_deinit(gBufMgr->backend->priv);
-		tbm_backend_free(gBufMgr->backend);
-		pthread_mutex_destroy(&gBufMgr->lock);
-		dlclose(gBufMgr->module_data);
+	if (!gBufMgr->use_2_0) {
+		/* intialize the tizen global status */
+		if (!_tbm_bufmgr_init_state(gBufMgr)) {
+			_tbm_set_last_result(TBM_BO_ERROR_INIT_STATE_FAILED);
+			TBM_LOG("[libtbm:%d] " "error: Fail to init state\n", getpid());
+			gBufMgr->backend->bufmgr_deinit(gBufMgr->backend->priv);
+			tbm_backend_free(gBufMgr->backend);
+			pthread_mutex_destroy(&gBufMgr->lock);
+			dlclose(gBufMgr->module_data);
 
-		if (gBufMgr->fd > 0)
-			close(gBufMgr->fd);
+			if (gBufMgr->fd > 0)
+				close(gBufMgr->fd);
 
-		free(gBufMgr);
-		gBufMgr = NULL;
-		pthread_mutex_unlock(&gLock);
-		return NULL;
+			free(gBufMgr);
+			gBufMgr = NULL;
+			pthread_mutex_unlock(&gLock);
+			return NULL;
+		}
+
+		/* setup the map_cache */
+		env = getenv("BUFMGR_MAP_CACHE");
+		if (env && !strcmp(env, "false"))
+			gBufMgr->use_map_cache = 0;
+		else
+			gBufMgr->use_map_cache = 1;
+		DBG("[libtbm:%d] BUFMGR_MAP_CACHE=%s\n",
+			getpid(), env ? env : "default:true");
 	}
 
 	/* setup the lock_type */
@@ -946,15 +997,6 @@ tbm_bufmgr tbm_bufmgr_init(int fd)
 
 	DBG("[libtbm:%d] BUFMGR_LOCK_TYPE=%s\n",
 		getpid(), env ? env : "default:once");
-
-	/* setup the map_cache */
-	env = getenv("BUFMGR_MAP_CACHE");
-	if (env && !strcmp(env, "false"))
-		gBufMgr->use_map_cache = 0;
-	else
-		gBufMgr->use_map_cache = 1;
-	DBG("[libtbm:%d] BUFMGR_MAP_CACHE=%s\n",
-		getpid(), env ? env : "default:true");
 
 	/* intialize bo_list */
 	LIST_INITHEAD(&gBufMgr->bo_list);
@@ -1008,8 +1050,10 @@ void tbm_bufmgr_deinit(tbm_bufmgr bufmgr)
 		}
 	}
 
-	/* destroy the tizen global status */
-	_tbm_bufmgr_destroy_state(bufmgr);
+	if (!bufmgr->use_2_0) {
+		/* destroy the tizen global status */
+		_tbm_bufmgr_destroy_state(bufmgr);
+	}
 
 	/* destroy bufmgr priv */
 	bufmgr->backend->bufmgr_deinit(bufmgr->backend->priv);
@@ -1106,16 +1150,19 @@ tbm_bo tbm_bo_alloc(tbm_bufmgr bufmgr, int size, int flags)
 
 	bo->ref_cnt = 1;
 	bo->flags = flags;
-	bo->tgl_key = INITIAL_KEY;
 	bo->priv = bo_priv;
-	bo->default_handle.u32 = 0;
 
-	/* init bo state */
-	if (!_tbm_bo_init_state(bo, CACHE_OP_CREATE)) {
-		_tbm_set_last_result(TBM_BO_ERROR_INIT_STATE_FAILED);
-		_tbm_bo_unref(bo);
-		pthread_mutex_unlock(&bufmgr->lock);
-		return NULL;
+	if (!bufmgr->use_2_0) {
+		bo->tgl_key = INITIAL_KEY;
+		bo->default_handle.u32 = 0;
+
+		/* init bo state */
+		if (!_tbm_bo_init_state(bo, CACHE_OP_CREATE)) {
+			_tbm_set_last_result(TBM_BO_ERROR_INIT_STATE_FAILED);
+			_tbm_bo_unref(bo);
+			pthread_mutex_unlock(&bufmgr->lock);
+			return NULL;
+		}
 	}
 
 	LIST_INITHEAD(&bo->user_data_list);
@@ -1138,17 +1185,19 @@ tbm_bo tbm_bo_import(tbm_bufmgr bufmgr, unsigned int key)
 
 	pthread_mutex_lock(&bufmgr->lock);
 
-	/* find bo in list */
-	if (!LIST_IS_EMPTY(&bufmgr->bo_list)) {
-		LIST_FOR_EACH_ENTRY_SAFE(bo2, tmp, &bufmgr->bo_list, item_link) {
-			if (bo2->tgl_key == key) {
-				DBG("[libtbm:%d] "
-					"find bo(%p, ref:%d key:%d) in list \n",
-					getpid(), bo2, bo2->ref_cnt, bo2->tgl_key);
+	if (!bufmgr->use_2_0) {
+		/* find bo in list */
+		if (!LIST_IS_EMPTY(&bufmgr->bo_list)) {
+			LIST_FOR_EACH_ENTRY_SAFE(bo2, tmp, &bufmgr->bo_list, item_link) {
+				if (bo2->tgl_key == key) {
+					DBG("[libtbm:%d] "
+						"find bo(%p, ref:%d key:%d) in list \n",
+						getpid(), bo2, bo2->ref_cnt, bo2->tgl_key);
 
-				bo2->ref_cnt++;
-				pthread_mutex_unlock(&bufmgr->lock);
-				return bo2;
+					bo2->ref_cnt++;
+					pthread_mutex_unlock(&bufmgr->lock);
+					return bo2;
+				}
 			}
 		}
 	}
@@ -1169,23 +1218,43 @@ tbm_bo tbm_bo_import(tbm_bufmgr bufmgr, unsigned int key)
 		return NULL;
 	}
 
+	if (bufmgr->use_2_0) {
+		if (!LIST_IS_EMPTY(&bufmgr->bo_list)) {
+			LIST_FOR_EACH_ENTRY_SAFE(bo2, tmp, &bufmgr->bo_list, item_link) {
+				if (bo2->priv == bo_priv) {
+					DBG("[libtbm:%d] "
+						"find bo(%p, ref:%d key:%d) in list \n",
+						getpid(), bo2, bo2->ref_cnt, bo2->tgl_key);
+
+					bo2->ref_cnt++;
+					free(bo);
+					pthread_mutex_unlock(&bufmgr->lock);
+					return bo2;
+				}
+			}
+		}
+	}
+
 	bo->ref_cnt = 1;
-	bo->tgl_key = INITIAL_KEY;
 	bo->priv = bo_priv;
-	bo->default_handle.u32 = 0;
+
+	if (!bufmgr->use_2_0) {
+		bo->tgl_key = INITIAL_KEY;
+		bo->default_handle.u32 = 0;
+
+		/* init bo state */
+		if (!_tbm_bo_init_state(bo, CACHE_OP_IMPORT)) {
+			_tbm_set_last_result(TBM_BO_ERROR_INIT_STATE_FAILED);
+			_tbm_bo_unref(bo);
+			pthread_mutex_unlock(&bufmgr->lock);
+			return NULL;
+		}
+	}
 
 	if (bufmgr->backend->bo_get_flags)
 		bo->flags = bufmgr->backend->bo_get_flags(bo);
 	else
 		bo->flags = TBM_BO_DEFAULT;
-
-	/* init bo state */
-	if (!_tbm_bo_init_state(bo, CACHE_OP_IMPORT)) {
-		_tbm_set_last_result(TBM_BO_ERROR_INIT_STATE_FAILED);
-		_tbm_bo_unref(bo);
-		pthread_mutex_unlock(&bufmgr->lock);
-		return NULL;
-	}
 
 	LIST_INITHEAD(&bo->user_data_list);
 
@@ -1208,19 +1277,21 @@ tbm_bo tbm_bo_import_fd(tbm_bufmgr bufmgr, tbm_fd fd)
 
 	pthread_mutex_lock(&bufmgr->lock);
 
-	default_handle = bufmgr->backend->fd_to_handle(bufmgr, fd, TBM_DEVICE_DEFAULT);
+	if (!bufmgr->use_2_0) {
+		default_handle = bufmgr->backend->fd_to_handle(bufmgr, fd, TBM_DEVICE_DEFAULT);
 
-	/* find bo in list */
-	if (!LIST_IS_EMPTY(&bufmgr->bo_list)) {
-		LIST_FOR_EACH_ENTRY_SAFE(bo2, tmp, &bufmgr->bo_list, item_link) {
-			if (bo2->default_handle.u32 == default_handle.u32) {
-				DBG("[libtbm:%d] "
-					"find bo(%p, ref:%d handle:%d) in list \n",
-					getpid(), bo2, bo2->ref_cnt, bo2->default_handle.u32);
+		/* find bo in list */
+		if (!LIST_IS_EMPTY(&bufmgr->bo_list)) {
+			LIST_FOR_EACH_ENTRY_SAFE(bo2, tmp, &bufmgr->bo_list, item_link) {
+				if (bo2->default_handle.u32 == default_handle.u32) {
+					DBG("[libtbm:%d] "
+						"find bo(%p, ref:%d handle:%d) in list \n",
+						getpid(), bo2, bo2->ref_cnt, bo2->default_handle.u32);
 
-				bo2->ref_cnt++;
-				pthread_mutex_unlock(&bufmgr->lock);
-				return bo2;
+					bo2->ref_cnt++;
+					pthread_mutex_unlock(&bufmgr->lock);
+					return bo2;
+				}
 			}
 		}
 	}
@@ -1241,23 +1312,43 @@ tbm_bo tbm_bo_import_fd(tbm_bufmgr bufmgr, tbm_fd fd)
 		return NULL;
 	}
 
+	if (bufmgr->use_2_0) {
+		if (!LIST_IS_EMPTY(&bufmgr->bo_list)) {
+			LIST_FOR_EACH_ENTRY_SAFE(bo2, tmp, &bufmgr->bo_list, item_link) {
+				if (bo2->priv == bo_priv) {
+					DBG("[libtbm:%d] "
+						"find bo(%p, ref:%d key:%d) in list \n",
+						getpid(), bo2, bo2->ref_cnt, bo2->tgl_key);
+
+					bo2->ref_cnt++;
+					free(bo);
+					pthread_mutex_unlock(&bufmgr->lock);
+					return bo2;
+				}
+			}
+		}
+	}
+
 	bo->ref_cnt = 1;
-	bo->tgl_key = INITIAL_KEY;
 	bo->priv = bo_priv;
-	bo->default_handle.u32 = 0;
+
+	if (!bufmgr->use_2_0) {
+		bo->tgl_key = INITIAL_KEY;
+		bo->default_handle.u32 = 0;
+
+		/* init bo state */
+		if (!_tbm_bo_init_state(bo, CACHE_OP_IMPORT)) {
+			_tbm_set_last_result(TBM_BO_ERROR_INIT_STATE_FAILED);
+			_tbm_bo_unref(bo);
+			pthread_mutex_unlock(&bufmgr->lock);
+			return NULL;
+		}
+	}
 
 	if (bufmgr->backend->bo_get_flags)
 		bo->flags = bufmgr->backend->bo_get_flags(bo);
 	else
 		bo->flags = TBM_BO_DEFAULT;
-
-	/* init bo state */
-	if (!_tbm_bo_init_state(bo, CACHE_OP_IMPORT)) {
-		_tbm_set_last_result(TBM_BO_ERROR_INIT_STATE_FAILED);
-		_tbm_bo_unref(bo);
-		pthread_mutex_unlock(&bufmgr->lock);
-		return NULL;
-	}
 
 	LIST_INITHEAD(&bo->user_data_list);
 
@@ -1342,8 +1433,6 @@ tbm_bo_handle tbm_bo_map(tbm_bo bo, int device, int opt)
 
 	pthread_mutex_lock(&bufmgr->lock);
 
-	bo_handle = bufmgr->backend->bo_get_handle(bo, device);
-
 	if (!_tbm_bo_lock(bo, device, opt)) {
 		_tbm_set_last_result(TBM_BO_ERROR_LOCK_FAILED);
 		TBM_LOG("[libtbm:%d] "
@@ -1365,8 +1454,10 @@ tbm_bo_handle tbm_bo_map(tbm_bo bo, int device, int opt)
 		return (tbm_bo_handle) NULL;
 	}
 
-	if (bufmgr->use_map_cache == 1 && bo->map_cnt == 0)
-		_tbm_bo_set_state(bo, device, opt);
+	if (!bufmgr->use_2_0) {
+		if (bufmgr->use_map_cache == 1 && bo->map_cnt == 0)
+			_tbm_bo_set_state(bo, device, opt);
+	}
 
 	/* increase the map_count */
 	bo->map_cnt++;
@@ -1398,8 +1489,10 @@ int tbm_bo_unmap(tbm_bo bo)
 	/* decrease the map_count */
 	bo->map_cnt--;
 
-	if (bo->map_cnt == 0)
-		_tbm_bo_save_state(bo);
+	if (!bufmgr->use_2_0) {
+		if (bo->map_cnt == 0)
+			_tbm_bo_save_state(bo);
+	}
 
 	_tbm_bo_unlock(bo);
 
@@ -1425,13 +1518,15 @@ int tbm_bo_swap(tbm_bo bo1, tbm_bo bo2)
 		return 0;
 	}
 
-	tmp_key = bo1->tgl_key;
-	bo1->tgl_key = bo2->tgl_key;
-	bo2->tgl_key = tmp_key;
+	if (!bo1->bufmgr->use_2_0) {
+		tmp_key = bo1->tgl_key;
+		bo1->tgl_key = bo2->tgl_key;
+		bo2->tgl_key = tmp_key;
 
-	tmp_defualt_handle = bo1->default_handle;
-	bo1->default_handle = bo2->default_handle;
-	bo2->default_handle = tmp_defualt_handle;
+		tmp_defualt_handle = bo1->default_handle;
+		bo1->default_handle = bo2->default_handle;
+		bo2->default_handle = tmp_defualt_handle;
+	}
 
 	temp = bo1->priv;
 	bo1->priv = bo2->priv;

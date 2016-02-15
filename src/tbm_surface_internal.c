@@ -208,27 +208,6 @@ static void _deinit_surface_bufmgr()
 	g_surface_bufmgr = NULL;
 }
 
-static int _tbm_surface_internal_query_size(tbm_surface_h surface)
-{
-	TBM_RETURN_VAL_IF_FAIL(surface, 0);
-
-	struct _tbm_surface *surf = (struct _tbm_surface *)surface;
-	struct _tbm_bufmgr *mgr = surf->bufmgr;
-	int size = 0;
-
-	TBM_RETURN_VAL_IF_FAIL(mgr != NULL, 0);
-	TBM_RETURN_VAL_IF_FAIL(surf->info.width > 0, 0);
-	TBM_RETURN_VAL_IF_FAIL(surf->info.height > 0, 0);
-	TBM_RETURN_VAL_IF_FAIL(surf->info.format > 0, 0);
-
-	if (!mgr->backend->surface_get_size)
-		return 0;
-
-	size = mgr->backend->surface_get_size(surf, surf->info.width, surf->info.height, surf->info.format);
-
-	return size;
-}
-
 static int _tbm_surface_internal_query_plane_data(tbm_surface_h surface, int plane_idx, uint32_t * size, uint32_t * offset, uint32_t * pitch, int *bo_idx)
 {
 	TBM_RETURN_VAL_IF_FAIL(surface, 0);
@@ -534,7 +513,6 @@ tbm_surface_h tbm_surface_internal_create_with_flags(int width, int height, int 
 	surf->info.height = height;
 	surf->info.format = format;
 	surf->info.bpp = tbm_surface_internal_get_bpp(format);
-	surf->info.size = _tbm_surface_internal_query_size(surf);
 	surf->info.num_planes = tbm_surface_internal_get_num_planes(format);
 	surf->num_bos = _tbm_surface_internal_query_num_bos(format);
 	surf->refcnt = 1;
@@ -547,6 +525,9 @@ tbm_surface_h tbm_surface_internal_create_with_flags(int width, int height, int 
 		surf->info.planes[i].stride = stride;
 		surf->planes_bo_idx[i] = bo_idx;
 	}
+
+	for (i = 0; i < surf->info.num_planes; i++)
+		surf->info.size += surf->info.planes[i].size;
 
 	surf->flags = flags;
 

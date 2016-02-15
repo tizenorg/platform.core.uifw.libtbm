@@ -63,6 +63,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #define TBM_ABI_VERSION	SET_ABI_VERSION(1, 1) /**< current abi vertion  */
 
+/* unneeded version 2.0 */
 /* TBM_CACHE */
 #define TBM_CACHE_INV       0x01 /**< cache invalidate  */
 #define TBM_CACHE_CLN       0x02 /**< cache clean */
@@ -80,6 +81,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * TBM_LOCK_CTRL_BACKEND indicates  that the backend control the lock of bos.
  */
 #define TBM_LOCK_CTRL_BACKEND    (1 << 1)
+/* unneeded version 2.0 */
+
+#define TBM_USE_2_0_BACKEND      (1 << 2)
 
 typedef struct _tbm_bufmgr_backend *tbm_bufmgr_backend;
 
@@ -164,6 +168,7 @@ struct _tbm_bufmgr_backend {
     */
 	int (*bo_unmap) (tbm_bo bo);
 
+	/* version 2.0 dosen't need to backend function bo_cache_flush */
 	/**
     * @brief flush the cache of the buffer object.
     * @param[in] bo : the buffer object
@@ -172,6 +177,7 @@ struct _tbm_bufmgr_backend {
     */
 	int (*bo_cache_flush) (tbm_bo bo, int flags);
 
+	/* version 2.0 dosen't need to backend function bo_get_global_key */
 	/**
     * @brief get the global key associated with the buffer object.
     * @param[in] bo : the buffer object
@@ -213,6 +219,7 @@ struct _tbm_bufmgr_backend {
     */
 	int (*surface_supported_format) (uint32_t ** formats, uint32_t * num);
 
+	/* version 2.0 dosen't need to backend function surface get size*/
 	/**
     * @brief get the size of the surface with a format.
     * @param[in] surface : the surface
@@ -259,6 +266,8 @@ struct _tbm_bufmgr_backend {
     */
 	 tbm_fd(*bo_export_fd) (tbm_bo bo);
 
+
+	/* version 2.0 dosen't need to backend function fd_to_handle */
 	/**
     * @brief get the tbm_bo_handle according to the device type and the prime fd.
     * @param[in] bufmgr : the tizen buffer manager
