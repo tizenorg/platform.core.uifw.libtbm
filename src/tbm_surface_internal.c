@@ -832,6 +832,7 @@ int tbm_surface_internal_get_info(tbm_surface_h surface, int opt, tbm_surface_in
 
 	surf = (struct _tbm_surface *)surface;
 
+	memset(info, 0x00, sizeof (tbm_surface_info_s));
 	info->width = surf->info.width;
 	info->height = surf->info.height;
 	info->format = surf->info.format;
