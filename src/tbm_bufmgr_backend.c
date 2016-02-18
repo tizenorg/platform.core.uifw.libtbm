@@ -73,7 +73,7 @@ int tbm_backend_init(tbm_bufmgr bufmgr, tbm_bufmgr_backend backend)
 
 	flags = backend->flags;
 	/* check the backend flags */
-	if (!(flags & TBM_CACHE_CTRL_BACKEND)) {
+	if (flags & TBM_CACHE_CTRL_BACKEND) {
 		if (!backend->bo_cache_flush) {
 			TBM_LOG("[libtbm:%d] " "error (%s): TBM_FLAG_CACHE_CTRL_TBM needs backend->bo_cache_flush\n", getpid(), __FUNCTION__);
 			return 0;
