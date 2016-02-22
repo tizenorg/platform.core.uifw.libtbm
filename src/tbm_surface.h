@@ -485,7 +485,7 @@ extern "C" {
    free (formats);
    @endcode
  */
-int tbm_surface_query_formats(uint32_t ** formats, uint32_t * num);
+int tbm_surface_query_formats(uint32_t **formats, uint32_t *num);
 
 /**
  * @brief Creates the tbm_surface.
@@ -594,7 +594,7 @@ int tbm_surface_destroy(tbm_surface_h surface);
    tbm_surface_destroy (surface);
    @endcode
  */
-int tbm_surface_map(tbm_surface_h surface, int opt, tbm_surface_info_s * info);
+int tbm_surface_map(tbm_surface_h surface, int opt, tbm_surface_info_s *info);
 
 /**
  * @brief Unmaps the tbm_surface.
@@ -665,7 +665,7 @@ int tbm_surface_unmap(tbm_surface_h surface);
    tbm_surface_destroy (surface);
    @endcode
  */
-int tbm_surface_get_info(tbm_surface_h surface, tbm_surface_info_s * info);
+int tbm_surface_get_info(tbm_surface_h surface, tbm_surface_info_s *info);
 
 /**
  * @brief Gets the width of the tbm_surface.

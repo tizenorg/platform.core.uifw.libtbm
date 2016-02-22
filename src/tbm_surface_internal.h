@@ -65,7 +65,8 @@ extern "C" {
    tbm_surface_bufmgr_deinit (bufmgr);
    @endcode
  */
-int tbm_surface_internal_query_supported_formats(uint32_t ** formats, uint32_t * num);
+int tbm_surface_internal_query_supported_formats(uint32_t **formats,
+						 uint32_t *num);
 
 /**
  * @brief Creates the tbm_surface with memory type.
@@ -103,7 +104,8 @@ int tbm_surface_internal_query_supported_formats(uint32_t ** formats, uint32_t *
    tbm_surface_bufmgr_deinit (bufmgr);
    @endcode
  */
-tbm_surface_h tbm_surface_internal_create_with_flags(int width, int height, int format, int flags);
+tbm_surface_h tbm_surface_internal_create_with_flags(int width, int height,
+						     int format, int flags);
 
 /**
  * @brief Creates the tbm_surface with buffer objects.
@@ -151,7 +153,8 @@ tbm_surface_h tbm_surface_internal_create_with_flags(int width, int height, int 
    tbm_surface_bufmgr_deinit (bufmgr);
    @endcode
  */
-tbm_surface_h tbm_surface_internal_create_with_bos(tbm_surface_info_s * info, tbm_bo * bos, int num);
+tbm_surface_h tbm_surface_internal_create_with_bos(tbm_surface_info_s *info,
+						   tbm_bo *bos, int num);
 
 /**
  * @brief Destroy the tbm surface
@@ -271,7 +274,8 @@ int tbm_surface_internal_get_size(tbm_surface_h surface);
    tbm_surface_destroy (surface);
    @endcode
  */
-int tbm_surface_internal_get_plane_data(tbm_surface_h surface, int plane_idx, uint32_t * size, uint32_t * offset, uint32_t * pitch);
+int tbm_surface_internal_get_plane_data(tbm_surface_h surface, int plane_idx,
+					uint32_t *size, uint32_t *offset, uint32_t *pitch);
 
 /**
  * @brief Gets number of planes by the format.
@@ -342,7 +346,8 @@ int tbm_surface_internal_get_plane_bo_idx(tbm_surface_h surface, int plane_idx);
  * @param[in] surface : the tbm_surface_h
  * @param[in] pid : the pid
  */
-void tbm_surface_internal_set_debug_pid(tbm_surface_h surface, unsigned int pid);
+void tbm_surface_internal_set_debug_pid(tbm_surface_h surface,
+					unsigned int pid);
 
 /**
  * @brief Adds a user_data to the tbm surface.
@@ -357,7 +362,8 @@ void tbm_surface_internal_set_debug_pid(tbm_surface_h surface, unsigned int pid)
  * @see tbm_surface_get_user_data()
  * @see tbm_surface_delete_user_data()
  */
-int tbm_surface_internal_add_user_data(tbm_surface_h surface, unsigned long key, tbm_data_free data_free_func);
+int tbm_surface_internal_add_user_data(tbm_surface_h surface, unsigned long key,
+				       tbm_data_free data_free_func);
 
 /**
  * @brief Sets a user_date to the tbm surface.
@@ -367,7 +373,8 @@ int tbm_surface_internal_add_user_data(tbm_surface_h surface, unsigned long key,
  * @param[in] data : a pointer of the user_data
  * @return 1 if this function succeeds, otherwise 0.
  */
-int tbm_surface_internal_set_user_data(tbm_surface_h surface, unsigned long key, void *data);
+int tbm_surface_internal_set_user_data(tbm_surface_h surface, unsigned long key,
+				       void *data);
 
 /**
  * @brief Gets a user_data from the tbm surface with the key.
@@ -377,7 +384,8 @@ int tbm_surface_internal_set_user_data(tbm_surface_h surface, unsigned long key,
  * @param[out] data : to get the user data
  * @return 1 if this function succeeds, otherwise 0.
  */
-int tbm_surface_internal_get_user_data(tbm_surface_h surface, unsigned long key, void **data);
+int tbm_surface_internal_get_user_data(tbm_surface_h surface, unsigned long key,
+				       void **data);
 
 /**
  * @brief Deletes the user_data in the tbm surface.
@@ -386,7 +394,8 @@ int tbm_surface_internal_get_user_data(tbm_surface_h surface, unsigned long key,
  * @param[in] key : the key associated with the user_date
  * @return 1 if this function succeeds, otherwise 0.
  */
-int tbm_surface_internal_delete_user_data(tbm_surface_h surface, unsigned long key);
+int tbm_surface_internal_delete_user_data(tbm_surface_h surface,
+					  unsigned long key);
 
 #ifdef __cplusplus
 }

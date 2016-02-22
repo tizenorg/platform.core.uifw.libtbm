@@ -45,19 +45,24 @@ typedef enum {
 
 typedef struct _tbm_surface_queue *tbm_surface_queue_h;
 
-typedef void (*tbm_surface_queue_notify_cb) (tbm_surface_queue_h surface_queue, void *data);
+typedef void (*tbm_surface_queue_notify_cb) (tbm_surface_queue_h surface_queue,
+		void *data);
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-tbm_surface_queue_error_e tbm_surface_queue_enqueue(tbm_surface_queue_h surface_queue, tbm_surface_h surface);
+tbm_surface_queue_error_e tbm_surface_queue_enqueue(
+		tbm_surface_queue_h surface_queue, tbm_surface_h surface);
 
-tbm_surface_queue_error_e tbm_surface_queue_dequeue(tbm_surface_queue_h surface_queue, tbm_surface_h * surface);
+tbm_surface_queue_error_e tbm_surface_queue_dequeue(
+		tbm_surface_queue_h surface_queue, tbm_surface_h *surface);
 
-tbm_surface_queue_error_e tbm_surface_queue_release(tbm_surface_queue_h surface_queue, tbm_surface_h surface);
+tbm_surface_queue_error_e tbm_surface_queue_release(
+		tbm_surface_queue_h surface_queue, tbm_surface_h surface);
 
-tbm_surface_queue_error_e tbm_surface_queue_acquire(tbm_surface_queue_h surface_queue, tbm_surface_h * surface);
+tbm_surface_queue_error_e tbm_surface_queue_acquire(
+		tbm_surface_queue_h surface_queue, tbm_surface_h *surface);
 
 int tbm_surface_queue_can_dequeue(tbm_surface_queue_h surface_queue, int wait);
 
@@ -71,37 +76,64 @@ int tbm_surface_queue_get_height(tbm_surface_queue_h surface_queue);
 
 int tbm_surface_queue_get_format(tbm_surface_queue_h surface_queue);
 
-tbm_surface_queue_error_e tbm_surface_queue_reset(tbm_surface_queue_h surface_queue, int width, int height, int format);
+tbm_surface_queue_error_e tbm_surface_queue_reset(
+		tbm_surface_queue_h surface_queue, int width, int height, int format);
 
-tbm_surface_queue_error_e tbm_surface_queue_add_reset_cb(tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb reset_cb, void *data);
+tbm_surface_queue_error_e tbm_surface_queue_add_reset_cb(
+	tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb reset_cb,
+	void *data);
 
-tbm_surface_queue_error_e tbm_surface_queue_remove_reset_cb(tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb reset_cb, void *data);
+tbm_surface_queue_error_e tbm_surface_queue_remove_reset_cb(
+	tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb reset_cb,
+	void *data);
 
-tbm_surface_queue_error_e tbm_surface_queue_add_destroy_cb(tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb destroy_cb, void *data);
+tbm_surface_queue_error_e tbm_surface_queue_add_destroy_cb(
+	tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb destroy_cb,
+	void *data);
 
-tbm_surface_queue_error_e tbm_surface_queue_remove_destroy_cb(tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb destroy_cb, void *data);
+tbm_surface_queue_error_e tbm_surface_queue_remove_destroy_cb(
+	tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb destroy_cb,
+	void *data);
 
-tbm_surface_queue_error_e tbm_surface_queue_add_dequeuable_cb(tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb dequeuable_cb, void *data);
+tbm_surface_queue_error_e tbm_surface_queue_add_dequeuable_cb(
+	tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb dequeuable_cb,
+	void *data);
 
-tbm_surface_queue_error_e tbm_surface_queue_remove_dequeuable_cb(tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb dequeuable_cb, void *data);
+tbm_surface_queue_error_e tbm_surface_queue_remove_dequeuable_cb(
+	tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb dequeuable_cb,
+	void *data);
 
-tbm_surface_queue_error_e tbm_surface_queue_add_acquirable_cb(tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb acquirable_cb, void *data);
+tbm_surface_queue_error_e tbm_surface_queue_add_acquirable_cb(
+	tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb acquirable_cb,
+	void *data);
 
-tbm_surface_queue_error_e tbm_surface_queue_remove_acquirable_cb(tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb acquirable_cb, void *data);
+tbm_surface_queue_error_e tbm_surface_queue_remove_acquirable_cb(
+	tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb acquirable_cb,
+	void *data);
 
 /*The functions of queue factory*/
-tbm_surface_queue_h tbm_surface_queue_create(int queue_size, int width, int height, int format, int flags);
-tbm_surface_queue_h tbm_surface_queue_sequence_create(int queue_size, int width, int height, int format, int flags);
+tbm_surface_queue_h tbm_surface_queue_create(int queue_size, int width,
+		int height, int format, int flags);
+tbm_surface_queue_h tbm_surface_queue_sequence_create(int queue_size, int width,
+		int height, int format, int flags);
 
 
 /*DEPRECATED apis*/
-tbm_surface_queue_error_e tbm_surface_queue_set_destroy_cb(tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb destroy_cb, void *data);
+tbm_surface_queue_error_e tbm_surface_queue_set_destroy_cb(
+	tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb destroy_cb,
+	void *data);
 
-tbm_surface_queue_error_e tbm_surface_queue_set_dequeuable_cb(tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb dequeuable_cb, void *data);
+tbm_surface_queue_error_e tbm_surface_queue_set_dequeuable_cb(
+	tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb dequeuable_cb,
+	void *data);
 
-tbm_surface_queue_error_e tbm_surface_queue_set_acquirable_cb(tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb acquirable_cb, void *data);
+tbm_surface_queue_error_e tbm_surface_queue_set_acquirable_cb(
+	tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb acquirable_cb,
+	void *data);
 
-tbm_surface_queue_error_e tbm_surface_queue_set_reset_cb(tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb reset_cb, void *data);
+tbm_surface_queue_error_e tbm_surface_queue_set_reset_cb(
+	tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb reset_cb,
+	void *data);
 #ifdef __cplusplus
 }
 #endif

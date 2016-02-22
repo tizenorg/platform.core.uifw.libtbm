@@ -785,7 +785,8 @@ typedef void (*tbm_data_free) (void *user_data);
    @endcode
  */
 
-int tbm_bo_add_user_data(tbm_bo bo, unsigned long key, tbm_data_free data_free_func);
+int tbm_bo_add_user_data(tbm_bo bo, unsigned long key,
+			 tbm_data_free data_free_func);
 
 /**
  * @brief Deletes the user_data in the buffer object.
@@ -1037,7 +1038,7 @@ int tbm_bo_get_flags(tbm_bo bo);
  * @since_tizen 3.0
  * @param[in] bufmgr : the buffer manager
  */
-void tbm_bufmgr_debug_show (tbm_bufmgr bufmgr);
+void tbm_bufmgr_debug_show(tbm_bufmgr bufmgr);
 
 /**
  * @brief Print out the trace of tbm_bos.
@@ -1045,7 +1046,7 @@ void tbm_bufmgr_debug_show (tbm_bufmgr bufmgr);
  * @param[in] bufmgr : the buffer manager
  * @param[in] onoff : 1 is on, and 0 is off
  */
-void tbm_bufmgr_debug_trace (tbm_bufmgr bufmgr, int onoff);
+void tbm_bufmgr_debug_trace(tbm_bufmgr bufmgr, int onoff);
 
 
 

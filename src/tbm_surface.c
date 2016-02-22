@@ -34,7 +34,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "tbm_bufmgr_int.h"
 #include "tbm_surface_internal.h"
 
-int tbm_surface_query_formats(uint32_t ** formats, uint32_t * num)
+int
+tbm_surface_query_formats(uint32_t **formats, uint32_t *num)
 {
 	if (!tbm_surface_internal_query_supported_formats(formats, num))
 		return TBM_SURFACE_ERROR_INVALID_OPERATION;
@@ -42,7 +43,8 @@ int tbm_surface_query_formats(uint32_t ** formats, uint32_t * num)
 	return TBM_SURFACE_ERROR_NONE;
 }
 
-tbm_surface_h tbm_surface_create(int width, int height, tbm_format format)
+tbm_surface_h
+tbm_surface_create(int width, int height, tbm_format format)
 {
 	if (!(width > 0) || !(height > 0)) {
 #ifdef HAVE_CAPI_0_1_1
@@ -53,7 +55,8 @@ tbm_surface_h tbm_surface_create(int width, int height, tbm_format format)
 
 	struct _tbm_surface *surf = NULL;
 
-	surf = tbm_surface_internal_create_with_flags(width, height, format, TBM_BO_DEFAULT);
+	surf = tbm_surface_internal_create_with_flags(width, height, format,
+						      TBM_BO_DEFAULT);
 	if (!surf) {
 #ifdef HAVE_CAPI_0_1_1
 		set_last_result(TBM_SURFACE_ERROR_INVALID_OPERATION);
@@ -66,7 +69,8 @@ tbm_surface_h tbm_surface_create(int width, int height, tbm_format format)
 	return surf;
 }
 
-int tbm_surface_destroy(tbm_surface_h surface)
+int
+tbm_surface_destroy(tbm_surface_h surface)
 {
 	if (!surface)
 		return TBM_SURFACE_ERROR_INVALID_PARAMETER;
@@ -76,7 +80,8 @@ int tbm_surface_destroy(tbm_surface_h surface)
 	return TBM_SURFACE_ERROR_NONE;
 }
 
-int tbm_surface_map(tbm_surface_h surface, int opt, tbm_surface_info_s * info)
+int
+tbm_surface_map(tbm_surface_h surface, int opt, tbm_surface_info_s *info)
 {
 	TBM_RETURN_VAL_IF_FAIL(surface != NULL, TBM_SURFACE_ERROR_INVALID_PARAMETER);
 	TBM_RETURN_VAL_IF_FAIL(info != NULL, TBM_SURFACE_ERROR_INVALID_PARAMETER);
@@ -90,7 +95,8 @@ int tbm_surface_map(tbm_surface_h surface, int opt, tbm_surface_info_s * info)
 	return TBM_SURFACE_ERROR_NONE;
 }
 
-int tbm_surface_unmap(tbm_surface_h surface)
+int
+tbm_surface_unmap(tbm_surface_h surface)
 {
 	TBM_RETURN_VAL_IF_FAIL(surface != NULL, TBM_SURFACE_ERROR_INVALID_PARAMETER);
 
@@ -99,7 +105,8 @@ int tbm_surface_unmap(tbm_surface_h surface)
 	return TBM_SURFACE_ERROR_NONE;
 }
 
-int tbm_surface_get_info(tbm_surface_h surface, tbm_surface_info_s * info)
+int
+tbm_surface_get_info(tbm_surface_h surface, tbm_surface_info_s *info)
 {
 	TBM_RETURN_VAL_IF_FAIL(surface != NULL, TBM_SURFACE_ERROR_INVALID_PARAMETER);
 	TBM_RETURN_VAL_IF_FAIL(info != NULL, TBM_SURFACE_ERROR_INVALID_PARAMETER);
@@ -113,21 +120,24 @@ int tbm_surface_get_info(tbm_surface_h surface, tbm_surface_info_s * info)
 	return TBM_SURFACE_ERROR_NONE;
 }
 
-int tbm_surface_get_width(tbm_surface_h surface)
+int
+tbm_surface_get_width(tbm_surface_h surface)
 {
 	TBM_RETURN_VAL_IF_FAIL(surface != NULL, TBM_SURFACE_ERROR_INVALID_PARAMETER);
 
 	return tbm_surface_internal_get_width(surface);
 }
 
-int tbm_surface_get_height(tbm_surface_h surface)
+int
+tbm_surface_get_height(tbm_surface_h surface)
 {
 	TBM_RETURN_VAL_IF_FAIL(surface != NULL, TBM_SURFACE_ERROR_INVALID_PARAMETER);
 
 	return tbm_surface_internal_get_height(surface);
 }
 
-tbm_format tbm_surface_get_format(tbm_surface_h surface)
+tbm_format
+tbm_surface_get_format(tbm_surface_h surface)
 {
 	if (!surface) {
 #ifdef HAVE_CAPI_0_1_1
