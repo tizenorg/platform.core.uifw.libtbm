@@ -279,6 +279,7 @@ struct _tbm_bufmgr_backend {
 	*/
 	tbm_bo_handle(*fd_to_handle)(tbm_bufmgr bufmgr, tbm_fd fd, int device);
 
+	/* version 2.0 dosen't need to backend function surface_get_num_bos */
 	/**
 	* @brief get the num of bos with a format.
 	* @param[in] format : the format of the surface
