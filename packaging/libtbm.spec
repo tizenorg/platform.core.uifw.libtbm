@@ -11,6 +11,8 @@ Source0:        %{name}-%{version}.tar.gz
 Source1001:		%name.manifest
 
 BuildRequires:  pkgconfig(libdrm)
+BuildRequires:  pkgconfig(wayland-server)
+BuildRequires:  pkgconfig(wayland-client)
 BuildRequires:  pkgconfig(pthread-stubs)
 BuildRequires:  pkgconfig(capi-base-common)
 
@@ -74,5 +76,6 @@ rm -rf %{buildroot}
 %{_includedir}/tbm_surface_queue.h
 %{_includedir}/tbm_bufmgr_backend.h
 %{_includedir}/tbm_type.h
+%{_includedir}/tbm_drm_helper.h
 %{_libdir}/libtbm.so
 %{_libdir}/pkgconfig/libtbm.pc
