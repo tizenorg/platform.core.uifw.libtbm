@@ -40,8 +40,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define DEBUG
 #ifdef DEBUG
 int bDebug;
-#define DBG(...) {if (bDebug&0x1) TBM_LOG(__VA_ARGS__)}
-#define DBG_LOCK(...) {if (bDebug&0x2) TBM_LOG(__VA_ARGS__)}
+#define DBG(...) {if (bDebug&0x1) TBM_LOG(__VA_ARGS__);}
+#define DBG_LOCK(...) {if (bDebug&0x2) TBM_LOG(__VA_ARGS__);}
 #else
 #define DBG(...)
 #define DBG_LOCK(...)
