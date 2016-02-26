@@ -116,3 +116,14 @@ void *tbm_backend_get_bo_priv(tbm_bo bo)
 {
 	return bo->priv;
 }
+
+int tbm_backend_is_display_server(void)
+{
+	const char *value;
+
+	value = (const char*)getenv("TIZEN_TBM_DISPLAY_SERVER");
+	if (!value)
+		return 0;
+
+	return 1;
+}

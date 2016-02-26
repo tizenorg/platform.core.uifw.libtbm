@@ -342,5 +342,6 @@ int tbm_backend_init(tbm_bufmgr bufmgr, tbm_bufmgr_backend backend);
 void *tbm_backend_get_bufmgr_priv(tbm_bo bo);
 void *tbm_backend_get_priv_from_bufmgr(tbm_bufmgr bufmgr);
 void *tbm_backend_get_bo_priv(tbm_bo bo);
+int tbm_backend_is_display_server(void);
 
 #endif							/* _TBM_BUFMGR_BACKEND_H_ */
