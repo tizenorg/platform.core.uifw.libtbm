@@ -1832,3 +1832,23 @@ _tbm_bo_set_surface(tbm_bo bo, tbm_surface_h surface)
 	return 1;
 }
 
+int
+tbm_bufmgr_bind_native_display(tbm_bufmgr bufmgr, void *NativeDisplay)
+{
+	TBM_RETURN_VAL_IF_FAIL(TBM_BUFMGR_IS_VALID(bufmgr), 0);
+
+	int ret;
+
+	pthread_mutex_lock(&bufmgr->lock);
+
+	ret = bufmgr->backend->bufmgr_bind_native_display(bufmgr, NativeDisplay);
+	if (!ret) {
+		pthread_mutex_unlock(&bufmgr->lock);
+		return 0;
+	}
+
+	pthread_mutex_unlock(&bufmgr->lock);
+
+	return 1;
+}
+
