@@ -295,6 +295,14 @@ struct _tbm_bufmgr_backend {
 	*/
 	int (*bo_get_flags)(tbm_bo bo);
 
+	/**
+	* @brief get the tbm flags of memory type
+	* @param[in] bo : the buffer object
+	* @see #TBM_BO_FLAGS
+	* @return tbm flags of memory type is this function succeeds, otherwise 0.
+	*/
+	int (*bufmgr_bind_native_display)(tbm_bufmgr bufmgr, void *NativeDisplay);
+
 	/* Padding for future extension */
 	void (*reserved1)(void);
 	void (*reserved2)(void);
