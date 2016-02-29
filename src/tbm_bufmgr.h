@@ -1048,7 +1048,7 @@ void tbm_bufmgr_debug_show(tbm_bufmgr bufmgr);
  */
 void tbm_bufmgr_debug_trace(tbm_bufmgr bufmgr, int onoff);
 
-
+int tbm_bufmgr_bind_native_display(tbm_bufmgr bufmgr, void *NativeDisplay);
 
 #ifdef __cplusplus
 }
