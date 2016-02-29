@@ -121,7 +121,7 @@ int tbm_backend_is_display_server(void)
 {
 	const char *value;
 
-	value = (const char*)getenv("TIZEN_TBM_DISPLAY_SERVER");
+	value = (const char*)getenv("TBM_DISPLAY_SERVER");
 	if (!value)
 		return 0;
 
