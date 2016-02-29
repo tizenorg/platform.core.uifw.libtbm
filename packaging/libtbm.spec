@@ -53,12 +53,27 @@ cp -af COPYING %{buildroot}/usr/share/license/%{name}
 %make_install
 
 
+%__mkdir_p %{buildroot}%{_unitdir}
+install -m 644 service/tbm-drm.service %{buildroot}%{_unitdir}
+install -m 644 service/tbm-drm.path %{buildroot}%{_unitdir}
+%__mkdir_p %{buildroot}%{_unitdir_user}
+install -m 644 service/tbm-drm-user.service %{buildroot}%{_unitdir_user}
+install -m 644 service/tbm-drm-user.path %{buildroot}%{_unitdir_user}
+
 %clean
 rm -rf %{buildroot}
 
+%pre
+%__mkdir_p %{_unitdir}/graphical.target.wants
+ln -sf ../tbm-drm.path %{_unitdir}/graphical.target.wants/
+
+%__mkdir_p %{_unitdir_user}/default.target.wants
+ln -sf ../tbm-drm-user.path %{_unitdir_user}/default.target.wants/
+
 %post -p /sbin/ldconfig
 %postun -p /sbin/ldconfig
-
+rm -f %{_unitdir}/graphical.target.wants/tbm-drm.path
+rm -f %{_unitdir_user}/default.target.wants/tbm-drm-user.path
 
 %files
 %manifest %{name}.manifest
@@ -77,5 +92,9 @@ rm -rf %{buildroot}
 %{_includedir}/tbm_bufmgr_backend.h
 %{_includedir}/tbm_type.h
 %{_includedir}/tbm_drm_helper.h
+%{_unitdir}/tbm-drm.path
+%{_unitdir}/tbm-drm.service
+%{_unitdir_user}/tbm-drm-user.path
+%{_unitdir_user}/tbm-drm-user.service
 %{_libdir}/libtbm.so
 %{_libdir}/pkgconfig/libtbm.pc

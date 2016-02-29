@@ -1,0 +1,5 @@
+[Unit]
+Description=Wait for tbm-drm display daemon socket
+
+[Path]
+PathExists=/run/tbm_drm
