@@ -1,0 +1,11 @@
+[Unit]
+Description=Display manager setup service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/chmod g+w /run/tbm_drm
+ExecStart=/usr/bin/chgrp display /run/tbm_drm
+ExecStart=/usr/bin/chsmack -a User /run/tbm_drm
+
+[Install]
+WantedBy=graphical.target
