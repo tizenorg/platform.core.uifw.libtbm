@@ -59,7 +59,7 @@ handle_tbm_drm_authentication_info(void *data, struct wl_tbm_drm *wl_tbm_drm, co
 	tbm_drm_client->auth_fd = auth_fd;
 	tbm_drm_client->capabilities = capabilities;
 	if (device_name)
-	    tbm_drm_client->device = strndup(device_name, 256);
+	    tbm_drm_client->device = strdup(device_name);
 }
 
 static const struct wl_tbm_drm_listener wl_tbm_drm_client_listener = {
@@ -76,9 +76,6 @@ _wayland_tbm_drm_client_registry_handle_global(void *data, struct wl_registry *r
 		TBM_RETURN_IF_FAIL(tbm_drm_client->wl_tbm_drm != NULL);
 
 		wl_tbm_drm_add_listener(tbm_drm_client->wl_tbm_drm, &wl_tbm_drm_client_listener, tbm_drm_client);
-
-		wl_tbm_drm_get_authentication_info(tbm_drm_client->wl_tbm_drm);
-	        wl_display_roundtrip(tbm_drm_client->display);
 	}
 }
 
@@ -88,7 +85,7 @@ static const struct wl_registry_listener registry_listener = {
 };
 
 int
-wayland_tbm_drm_client_get_auth_info(int *auth_fd, char **device, uint32_t *capabilities)
+tbm_drm_helper_get_auth_info(int *auth_fd, char **device, uint32_t *capabilities)
 {
 	struct wl_display *display;
 	struct wl_registry *wl_registry;
@@ -111,15 +108,17 @@ wayland_tbm_drm_client_get_auth_info(int *auth_fd, char **device, uint32_t *capa
 
 	wl_registry = wl_display_get_registry(display);
 	if (!wl_registry) {
-		TBM_LOG("Failed to connect display\n");
+		TBM_LOG("Failed to get registry\n");
 		wl_display_disconnect(display);
 		free(tbm_drm_client);
 
 		return 0;
 	}
 
-	wl_registry_add_listener(wl_registry, &registry_listener, &tbm_drm_client);
+	wl_registry_add_listener(wl_registry, &registry_listener, tbm_drm_client);
 	wl_display_roundtrip(display); //For Gloabl registry
+        wl_tbm_drm_get_authentication_info(tbm_drm_client->wl_tbm_drm);
+	wl_display_roundtrip(display);
 
 	if (!tbm_drm_client->wl_tbm_drm) {
 		TBM_LOG("Failed to get wl_tbm_drm interface\n");
@@ -149,10 +148,12 @@ wayland_tbm_drm_client_get_auth_info(int *auth_fd, char **device, uint32_t *capa
 	if (capabilities)
 		*capabilities = tbm_drm_client->capabilities;
 
-	if (tbm_drm_client->device && device)
-		*device = strdup(tbm_drm_client->device);
-	else
-		*device = NULL;
+	if (device) {
+		if (tbm_drm_client->device)
+			*device = strdup(tbm_drm_client->device);
+		else
+			*device = NULL;
+	}
 
 	wl_tbm_drm_set_user_data(tbm_drm_client->wl_tbm_drm, NULL);
 	wl_tbm_drm_destroy(tbm_drm_client->wl_tbm_drm);
