@@ -40,20 +40,20 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "tbm_bufmgr_int.h"
 
-#include "wayland-tbm-drm-client-protocol.h"
+#include "wayland-tbm-drm-auth-client-protocol.h"
 
-struct wayland_tbm_drm_client {
+struct wayland_tbm_drm_auth_client {
 	struct wl_display *display;
-	struct wl_tbm_drm *wl_tbm_drm;
+	struct wl_tbm_drm_auth *wl_tbm_drm_auth;
 	int auth_fd;
 	char *device;
 	uint32_t capabilities;
 };
 
 static void
-handle_tbm_drm_authentication_info(void *data, struct wl_tbm_drm *wl_tbm_drm, const char *device_name, uint32_t capabilities, int32_t auth_fd)
+handle_tbm_drm_authentication_info(void *data, struct wl_tbm_drm_auth *wl_tbm_drm_auth, const char *device_name, uint32_t capabilities, int32_t auth_fd)
 {
-	struct wayland_tbm_drm_client *tbm_drm_client = (struct wayland_tbm_drm_client *)data;
+	struct wayland_tbm_drm_auth_client *tbm_drm_client = (struct wayland_tbm_drm_auth_client *)data;
 
 	/* client authentication infomation */
 	tbm_drm_client->auth_fd = auth_fd;
@@ -62,25 +62,25 @@ handle_tbm_drm_authentication_info(void *data, struct wl_tbm_drm *wl_tbm_drm, co
 	    tbm_drm_client->device = strdup(device_name);
 }
 
-static const struct wl_tbm_drm_listener wl_tbm_drm_client_listener = {
+static const struct wl_tbm_drm_auth_listener wl_tbm_drm_auth_client_listener = {
     handle_tbm_drm_authentication_info
 };
 
 static void
-_wayland_tbm_drm_client_registry_handle_global(void *data, struct wl_registry *registry, uint32_t name, const char *interface, uint32_t version)
+_wayland_tbm_drm_auth_client_registry_handle_global(void *data, struct wl_registry *registry, uint32_t name, const char *interface, uint32_t version)
 {
-	struct wayland_tbm_drm_client *tbm_drm_client = (struct wayland_tbm_drm_client *)data;
+	struct wayland_tbm_drm_auth_client *tbm_drm_client = (struct wayland_tbm_drm_auth_client *)data;
 
-	if (!strcmp(interface, "wl_tbm_drm")) {
-		tbm_drm_client->wl_tbm_drm = wl_registry_bind(registry, name, &wl_tbm_drm_interface, version);
-		TBM_RETURN_IF_FAIL(tbm_drm_client->wl_tbm_drm != NULL);
+	if (!strcmp(interface, "wl_tbm_drm_auth")) {
+		tbm_drm_client->wl_tbm_drm_auth = wl_registry_bind(registry, name, &wl_tbm_drm_auth_interface, version);
+		TBM_RETURN_IF_FAIL(tbm_drm_client->wl_tbm_drm_auth != NULL);
 
-		wl_tbm_drm_add_listener(tbm_drm_client->wl_tbm_drm, &wl_tbm_drm_client_listener, tbm_drm_client);
+		wl_tbm_drm_auth_add_listener(tbm_drm_client->wl_tbm_drm_auth, &wl_tbm_drm_auth_client_listener, tbm_drm_client);
 	}
 }
 
 static const struct wl_registry_listener registry_listener = {
-    _wayland_tbm_drm_client_registry_handle_global,
+    _wayland_tbm_drm_auth_client_registry_handle_global,
     NULL
 };
 
@@ -89,14 +89,14 @@ tbm_drm_helper_get_auth_info(int *auth_fd, char **device, uint32_t *capabilities
 {
 	struct wl_display *display;
 	struct wl_registry *wl_registry;
-	struct wayland_tbm_drm_client *tbm_drm_client;
+	struct wayland_tbm_drm_auth_client *tbm_drm_client;
 
-	tbm_drm_client = calloc(1, sizeof(struct wayland_tbm_drm_client));
+	tbm_drm_client = calloc(1, sizeof(struct wayland_tbm_drm_auth_client));
 	TBM_RETURN_VAL_IF_FAIL(tbm_drm_client != NULL, 0);
 
 	tbm_drm_client->auth_fd = -1;
 
-	display = wl_display_connect("tbm-drm");
+	display = wl_display_connect("tbm-drm-auth");
 	if (!display) {
 		TBM_LOG("Failed to connect display\n");
 		free(tbm_drm_client);
@@ -117,11 +117,11 @@ tbm_drm_helper_get_auth_info(int *auth_fd, char **device, uint32_t *capabilities
 
 	wl_registry_add_listener(wl_registry, &registry_listener, tbm_drm_client);
 	wl_display_roundtrip(display); //For Gloabl registry
-        wl_tbm_drm_get_authentication_info(tbm_drm_client->wl_tbm_drm);
+        wl_tbm_drm_auth_get_authentication_info(tbm_drm_client->wl_tbm_drm_auth);
 	wl_display_roundtrip(display);
 
-	if (!tbm_drm_client->wl_tbm_drm) {
-		TBM_LOG("Failed to get wl_tbm_drm interface\n");
+	if (!tbm_drm_client->wl_tbm_drm_auth) {
+		TBM_LOG("Failed to get wl_tbm_drm_auth interface\n");
 		wl_registry_destroy(wl_registry);
 		wl_display_disconnect(display);
 		free(tbm_drm_client);
@@ -131,8 +131,8 @@ tbm_drm_helper_get_auth_info(int *auth_fd, char **device, uint32_t *capabilities
 
 	if (tbm_drm_client->auth_fd < 0) {
 		TBM_LOG("Failed to get auth info\n");
-		wl_tbm_drm_set_user_data(tbm_drm_client->wl_tbm_drm, NULL);
-		wl_tbm_drm_destroy(tbm_drm_client->wl_tbm_drm);
+		wl_tbm_drm_auth_set_user_data(tbm_drm_client->wl_tbm_drm_auth, NULL);
+		wl_tbm_drm_auth_destroy(tbm_drm_client->wl_tbm_drm_auth);
 		wl_registry_destroy(wl_registry);
 		wl_display_disconnect(display);
 		free(tbm_drm_client);
@@ -155,8 +155,8 @@ tbm_drm_helper_get_auth_info(int *auth_fd, char **device, uint32_t *capabilities
 			*device = NULL;
 	}
 
-	wl_tbm_drm_set_user_data(tbm_drm_client->wl_tbm_drm, NULL);
-	wl_tbm_drm_destroy(tbm_drm_client->wl_tbm_drm);
+	wl_tbm_drm_auth_set_user_data(tbm_drm_client->wl_tbm_drm_auth, NULL);
+	wl_tbm_drm_auth_destroy(tbm_drm_client->wl_tbm_drm_auth);
 
 	if (tbm_drm_client->device)
 		free(tbm_drm_client->device);

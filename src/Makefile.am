@@ -23,9 +23,9 @@ libtbm_la_SOURCES = \
 	tbm_drm_helper_client.c
 
 nodist_libtbm_la_SOURCES =		\
-	wayland-tbm-drm-server-protocol.h	\
-	wayland-tbm-drm-client-protocol.h	\
-	wayland-tbm-drm-protocol.c
+	wayland-tbm-drm-auth-server-protocol.h	\
+	wayland-tbm-drm-auth-client-protocol.h	\
+	wayland-tbm-drm-auth-protocol.c
 
 %-protocol.c : $(top_srcdir)/protocol/%.xml
 	$(AM_V_GEN)$(MKDIR_P) $(dir $@) && $(wayland_scanner) code < $< > $@
