@@ -2,4 +2,4 @@
 Description=Wait for tbm_drm daemon socket
 
 [Path]
-PathExists=/run/tbm_drm
+PathExists=/run/tbm-drm
