@@ -303,6 +303,22 @@ struct _tbm_bufmgr_backend {
 	*/
 	int (*bufmgr_bind_native_display)(tbm_bufmgr bufmgr, void *NativeDisplay);
 
+	/**
+	* @brief get the plane data of the surface.
+ 	* @param[in] width : the width of the surface
+	* @param[in] height : the height of the surface
+	* @param[in] format : the format of the surface
+	* @param[in] plane_idx : the format of the surface
+	* @param[out] size : the size of the plane
+	* @param[out] offset : the offset of the plane
+	* @param[out] pitch : the pitch of the plane
+	* @param[out] bo_idx : the bo index of the plane
+	* @return 1 if this function succeeds, otherwise 0.
+	*/
+	int (*surface_get_plane_data2)(int width, int height,
+				       tbm_format format, int plane_idx, uint32_t *size, uint32_t *offset,
+				       uint32_t *pitch, int *bo_idx);
+
 	/* Padding for future extension */
 	void (*reserved1)(void);
 	void (*reserved2)(void);
