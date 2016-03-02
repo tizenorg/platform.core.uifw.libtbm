@@ -211,7 +211,7 @@ tbm_drm_helper_get_master_fd(void)
     if (ret <= 0)
         return -1;
 
-    TBM_LOG("TIZEN_DRM_MASTER_FD: %d", fd);
+    TBM_LOG("TIZEN_DRM_MASTER_FD: %d\n", fd);
 
     return fd;
 }
@@ -231,5 +231,5 @@ tbm_drm_helper_set_master_fd(int fd)
         return;
     }
 
-    TBM_LOG("TIZEN_DRM_MASTER_FD: %d", fd);
+    TBM_LOG("TIZEN_DRM_MASTER_FD: %d\n", fd);
 }
