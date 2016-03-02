@@ -1,0 +1,6 @@
+[Unit]
+Description=Creating a link file for user to access tbm-drm-auth
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/ln -sf /run/tbm-drm-auth /run/user/%U/
