@@ -1841,8 +1841,10 @@ tbm_bufmgr_bind_native_display(tbm_bufmgr bufmgr, void *NativeDisplay)
 
 	pthread_mutex_lock(&bufmgr->lock);
 
-	if (!bufmgr->backend->bufmgr_bind_native_display)
-		return 0;
+	if (!bufmgr->backend->bufmgr_bind_native_display) {
+		pthread_mutex_unlock(&bufmgr->lock);
+		return 1;
+	}
 
 	ret = bufmgr->backend->bufmgr_bind_native_display(bufmgr, NativeDisplay);
 	if (!ret) {
