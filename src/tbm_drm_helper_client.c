@@ -96,7 +96,7 @@ tbm_drm_helper_get_auth_info(int *auth_fd, char **device, uint32_t *capabilities
 
 	tbm_drm_client->auth_fd = -1;
 
-	display = wl_display_connect("tbm_drm");
+	display = wl_display_connect("tbm-drm");
 	if (!display) {
 		TBM_LOG("Failed to connect display\n");
 		free(tbm_drm_client);

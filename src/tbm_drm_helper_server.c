@@ -163,7 +163,7 @@ tbm_drm_helper_wl_server_init(void *wl_display,   int fd, const char *device_nam
 		tbm_drm_srv->fd = fd;
 		tbm_drm_srv->flags = flags;
 
-		if(wl_display_add_socket(tbm_drm_srv->display, "tbm_drm")) {
+		if(wl_display_add_socket(tbm_drm_srv->display, "tbm-drm")) {
 			TBM_LOG("[TBM_DRM] fail to add socket\n");
 
 			if (tbm_drm_srv->device_name)

@@ -1,6 +1,6 @@
 [Unit]
-Description=Creating a link file for user to access tbm_drm
+Description=Creating a link file for user to access tbm-drm
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/ln -sf /run/tbm_drm /run/user/%U/
+ExecStart=/usr/bin/ln -sf /run/tbm-drm /run/user/%U/
