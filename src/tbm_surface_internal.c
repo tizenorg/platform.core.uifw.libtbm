@@ -230,6 +230,15 @@ _tbm_surface_internal_query_plane_data(tbm_surface_h surface,
 	TBM_RETURN_VAL_IF_FAIL(surf->info.height > 0, 0);
 	TBM_RETURN_VAL_IF_FAIL(surf->info.format > 0, 0);
 
+	if (mgr->backend->surface_get_plane_data2) {
+		ret = mgr->backend->surface_get_plane_data2(surf->info.width,
+				surf->info.height, surf->info.format, plane_idx, size, offset, pitch, bo_idx);
+		if (!ret)
+			return 0;
+
+		return 1;
+	}
+
 	if (!mgr->backend->surface_get_plane_data)
 		return 0;
 
