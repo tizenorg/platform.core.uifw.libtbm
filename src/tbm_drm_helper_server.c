@@ -43,11 +43,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "tbm_bufmgr_int.h"
 
-#include "wayland-tbm-drm-server-protocol.h"
+#include "wayland-tbm-drm-auth-server-protocol.h"
 
-struct wayland_tbm_drm_server {
+struct wayland_tbm_drm_auth_server {
 	struct wl_display *display;
-	struct wl_global *wl_tbm_drm_global;
+	struct wl_global *wl_tbm_drm_auth_global;
 
 	char *device_name;
 	uint32_t fd;
@@ -56,10 +56,10 @@ struct wayland_tbm_drm_server {
 
 #define MIN(x,y) (((x)<(y))?(x):(y))
 
-struct wayland_tbm_drm_server *tbm_drm_srv;
+struct wayland_tbm_drm_auth_server *tbm_drm_auth_srv;
 
 static void
-_send_server_auth_info(struct wayland_tbm_drm_server *tbm_drm_srv,
+_send_server_auth_info(struct wayland_tbm_drm_auth_server *tbm_drm_auth_srv,
 		       struct wl_resource *resource)
 {
 	int fd = -1;
@@ -67,17 +67,17 @@ _send_server_auth_info(struct wayland_tbm_drm_server *tbm_drm_srv,
 	char *device_name = NULL;
 	drm_magic_t magic = 0;
 
-	fd = open(tbm_drm_srv->device_name, O_RDWR | O_CLOEXEC);
+	fd = open(tbm_drm_auth_srv->device_name, O_RDWR | O_CLOEXEC);
 	if (fd == -1 && errno == EINVAL) {
-		fd = open(tbm_drm_srv->device_name, O_RDWR);
+		fd = open(tbm_drm_auth_srv->device_name, O_RDWR);
 		if (fd != -1)
 			fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC);
 	}
 
 	if (fd < 0) {
-		TBM_LOG("failed to open drm : device_name, %s\n", tbm_drm_srv->device_name);
+		TBM_LOG("failed to open drm : device_name, %s\n", tbm_drm_auth_srv->device_name);
 
-		wl_resource_post_error(resource, WL_TBM_DRM_ERROR_AUTHENTICATE_FAIL,
+		wl_resource_post_error(resource, WL_TBM_DRM_AUTH_ERROR_AUTHENTICATE_FAIL,
 				       "authenicate failed::open_drm");
 		goto fini;
 	}
@@ -86,114 +86,114 @@ _send_server_auth_info(struct wayland_tbm_drm_server *tbm_drm_srv,
 		if (errno != EACCES) {
 			TBM_LOG("failed to get magic\n");
 
-			wl_resource_post_error(resource, WL_TBM_DRM_ERROR_AUTHENTICATE_FAIL,
+			wl_resource_post_error(resource, WL_TBM_DRM_AUTH_ERROR_AUTHENTICATE_FAIL,
 					       "authenicate failed::get_magic");
 			goto fini;
 		}
 	}
 
-	if (drmAuthMagic(tbm_drm_srv->fd, magic) < 0) {
+	if (drmAuthMagic(tbm_drm_auth_srv->fd, magic) < 0) {
 		TBM_LOG("failed to authenticate magic\n");
 
-		wl_resource_post_error(resource, WL_TBM_DRM_ERROR_AUTHENTICATE_FAIL,
+		wl_resource_post_error(resource, WL_TBM_DRM_AUTH_ERROR_AUTHENTICATE_FAIL,
 				       "authenicate failed::auth_magic");
 		goto fini;
 	}
 
-	capabilities = tbm_drm_srv->flags;
-	device_name = tbm_drm_srv->device_name;
+	capabilities = tbm_drm_auth_srv->flags;
+	device_name = tbm_drm_auth_srv->device_name;
 
 	/* send */
-	wl_tbm_drm_send_authentication_info(resource, device_name, capabilities, fd);
+	wl_tbm_drm_auth_send_authentication_info(resource, device_name, capabilities, fd);
 
 fini:
 	if (fd >= 0)
 		close(fd);
 
-	if (device_name && device_name != tbm_drm_srv->device_name)
+	if (device_name && device_name != tbm_drm_auth_srv->device_name)
 		free(device_name);
 
 }
 
 static void
-_wayland_tbm_drm_server_impl_get_authentication_info(struct wl_client *client,
+_wayland_tbm_drm_auth_server_impl_get_authentication_info(struct wl_client *client,
 		struct wl_resource *resource)
 {
-	struct wayland_tbm_drm_server *tbm_drm_srv = wl_resource_get_user_data(resource);
+	struct wayland_tbm_drm_auth_server *tbm_drm_auth_srv = wl_resource_get_user_data(resource);
 
 	/* if display server is the client of the host display server, for embedded server */
-	_send_server_auth_info(tbm_drm_srv, resource);
+	_send_server_auth_info(tbm_drm_auth_srv, resource);
 }
 
 
-static const struct wl_tbm_drm_interface _wayland_tbm_drm_server_implementation = {
-	_wayland_tbm_drm_server_impl_get_authentication_info,
+static const struct wl_tbm_drm_auth_interface _wayland_tbm_drm_auth_server_implementation = {
+	_wayland_tbm_drm_auth_server_impl_get_authentication_info,
 };
 
 static void
-_wayland_tbm_drm_server_bind_cb(struct wl_client *client, void *data,
+_wayland_tbm_drm_auth_server_bind_cb(struct wl_client *client, void *data,
 			    uint32_t version,
 			    uint32_t id)
 {
 	struct wl_resource *resource;
 
-	resource = wl_resource_create(client, &wl_tbm_drm_interface, MIN(version, 1), id);
+	resource = wl_resource_create(client, &wl_tbm_drm_auth_interface, MIN(version, 1), id);
 	if (!resource) {
 		wl_client_post_no_memory(client);
 		return;
 	}
 
 	wl_resource_set_implementation(resource,
-				       &_wayland_tbm_drm_server_implementation,
+				       &_wayland_tbm_drm_auth_server_implementation,
 				       data,
 				       NULL);
 }
 
 int
-tbm_drm_helper_wl_server_init(void *wl_display,   int fd, const char *device_name, uint32_t flags)
+tbm_drm_helper_wl_auth_server_init(void *wl_display,   int fd, const char *device_name, uint32_t flags)
 {
-	if (!tbm_drm_srv) {
+	if (!tbm_drm_auth_srv) {
 		TBM_RETURN_VAL_IF_FAIL(wl_display != NULL, 0);
 
-		tbm_drm_srv = calloc(1, sizeof(struct wayland_tbm_drm_server));
-		TBM_RETURN_VAL_IF_FAIL(tbm_drm_srv != NULL, 0);
+		tbm_drm_auth_srv = calloc(1, sizeof(struct wayland_tbm_drm_auth_server));
+		TBM_RETURN_VAL_IF_FAIL(tbm_drm_auth_srv != NULL, 0);
 
-		tbm_drm_srv->display = (struct wl_display *)wl_display;
-		tbm_drm_srv->device_name = strdup(device_name);
-		tbm_drm_srv->fd = fd;
-		tbm_drm_srv->flags = flags;
+		tbm_drm_auth_srv->display = (struct wl_display *)wl_display;
+		tbm_drm_auth_srv->device_name = strdup(device_name);
+		tbm_drm_auth_srv->fd = fd;
+		tbm_drm_auth_srv->flags = flags;
 
-		if(wl_display_add_socket(tbm_drm_srv->display, "tbm-drm")) {
+		if(wl_display_add_socket(tbm_drm_auth_srv->display, "tbm-drm-auth")) {
 			TBM_LOG("[TBM_DRM] fail to add socket\n");
 
-			if (tbm_drm_srv->device_name)
-				free(tbm_drm_srv->device_name);
+			if (tbm_drm_auth_srv->device_name)
+				free(tbm_drm_auth_srv->device_name);
 
-			free(tbm_drm_srv);
-			tbm_drm_srv = NULL;
+			free(tbm_drm_auth_srv);
+			tbm_drm_auth_srv = NULL;
 
 			return 0;
 		}
 
 		/* init the client resource list */
-		tbm_drm_srv->wl_tbm_drm_global = wl_global_create(tbm_drm_srv->display, &wl_tbm_drm_interface, 1,
-					 tbm_drm_srv, _wayland_tbm_drm_server_bind_cb);
+		tbm_drm_auth_srv->wl_tbm_drm_auth_global = wl_global_create(tbm_drm_auth_srv->display, &wl_tbm_drm_auth_interface, 1,
+					 tbm_drm_auth_srv, _wayland_tbm_drm_auth_server_bind_cb);
 	}
 
 	return 1;
 }
 
 void
-tbm_drm_helper_wl_server_deinit(void)
+tbm_drm_helper_wl_auth_server_deinit(void)
 {
-	if (tbm_drm_srv) {
-		wl_global_destroy(tbm_drm_srv->wl_tbm_drm_global);
+	if (tbm_drm_auth_srv) {
+		wl_global_destroy(tbm_drm_auth_srv->wl_tbm_drm_auth_global);
 
-		if (tbm_drm_srv->device_name)
-			free(tbm_drm_srv->device_name);
+		if (tbm_drm_auth_srv->device_name)
+			free(tbm_drm_auth_srv->device_name);
 
-		free(tbm_drm_srv);
-		tbm_drm_srv = NULL;
+		free(tbm_drm_auth_srv);
+		tbm_drm_auth_srv = NULL;
 	}
 }
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<protocol name="tbm_drm">
+<protocol name="tbm_drm_auth">
 
   <copyright>
     Copyright 2015 Samsung Electronics co., Ltd. All Rights Reserved.
@@ -28,7 +28,7 @@
 
   <!-- tbm support. This object is created by the server and published
        using the display's global event. -->
-  <interface name="wl_tbm_drm" version="1">
+  <interface name="wl_tbm_drm_auth" version="1">
     <enum name="error">
       <entry name="authenticate_fail" value="0"/>
     </enum>
