@@ -279,6 +279,7 @@ struct _tbm_bufmgr_backend {
 	*/
 	tbm_bo_handle(*fd_to_handle)(tbm_bufmgr bufmgr, tbm_fd fd, int device);
 
+	/* version 2.0 dosen't need to backend function surface_get_num_bos */
 	/**
 	* @brief get the num of bos with a format.
 	* @param[in] format : the format of the surface
@@ -293,6 +294,30 @@ struct _tbm_bufmgr_backend {
 	* @return tbm flags of memory type is this function succeeds, otherwise 0.
 	*/
 	int (*bo_get_flags)(tbm_bo bo);
+
+	/**
+	* @brief get the tbm flags of memory type
+	* @param[in] bo : the buffer object
+	* @see #TBM_BO_FLAGS
+	* @return tbm flags of memory type is this function succeeds, otherwise 0.
+	*/
+	int (*bufmgr_bind_native_display)(tbm_bufmgr bufmgr, void *NativeDisplay);
+
+	/**
+	* @brief get the plane data of the surface.
+ 	* @param[in] width : the width of the surface
+	* @param[in] height : the height of the surface
+	* @param[in] format : the format of the surface
+	* @param[in] plane_idx : the format of the surface
+	* @param[out] size : the size of the plane
+	* @param[out] offset : the offset of the plane
+	* @param[out] pitch : the pitch of the plane
+	* @param[out] bo_idx : the bo index of the plane
+	* @return 1 if this function succeeds, otherwise 0.
+	*/
+	int (*surface_get_plane_data2)(int width, int height,
+				       tbm_format format, int plane_idx, uint32_t *size, uint32_t *offset,
+				       uint32_t *pitch, int *bo_idx);
 
 	/* Padding for future extension */
 	void (*reserved1)(void);
@@ -333,5 +358,6 @@ int tbm_backend_init(tbm_bufmgr bufmgr, tbm_bufmgr_backend backend);
 void *tbm_backend_get_bufmgr_priv(tbm_bo bo);
 void *tbm_backend_get_priv_from_bufmgr(tbm_bufmgr bufmgr);
 void *tbm_backend_get_bo_priv(tbm_bo bo);
+int tbm_backend_is_display_server(void);
 
 #endif							/* _TBM_BUFMGR_BACKEND_H_ */

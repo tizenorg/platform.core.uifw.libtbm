@@ -58,6 +58,10 @@ AC_CHECK_FUNCS([clock_gettime], [CLOCK_LIB=],
                              [AC_MSG_ERROR([Couldn't find clock_gettime])])])
 AC_SUBST([CLOCK_LIB])
 
+AC_PATH_PROG([wayland_scanner], [wayland-scanner])
+if test x$wayland_scanner = x; then
+      AC_MSG_ERROR([wayland-scanner is needed to compile wayland-tbm])
+fi
 
 PKG_CHECK_MODULES(CAPI, [capi-base-common >= 0.1.1], [capi_0_1_1=yes], [capi_0_1_1=no])
 if test x"$capi_0_1_1" = xyes; then
@@ -66,9 +70,12 @@ fi
 
 PKG_CHECK_MODULES(LIBDRM, libdrm)
 PKG_CHECK_MODULES(PTHREADSTUBS, pthread-stubs)
+PKG_CHECK_MODULES(WL_CLIENT, wayland-client)
+PKG_CHECK_MODULES(WL_SERVER, wayland-server)
+PKG_CHECK_MODULES(WL_SCANNER, wayland-scanner)
 
-LIBTBM_CFLAGS+="$LIBTBM_CFALGS $LIBDRM_CFLAGS $PTHREADSTUBS_CFLAGS $CAPI_CFLAGS"
-LIBTBM_LIBS+="$LIBTBM_LIBS $LIBDRM_LIBS $PTHREADSTUBS_LIBS $CAPI_LIBS"
+LIBTBM_CFLAGS+="$LIBTBM_CFALGS $LIBDRM_CFLAGS $PTHREADSTUBS_CFLAGS $CAPI_CFLAGS $WL_CLIENT_CFLAGS $WL_SERVER_CFLAGS"
+LIBTBM_LIBS+="$LIBTBM_LIBS $LIBDRM_LIBS $PTHREADSTUBS_LIBS $CAPI_LIBS $WL_CLIENT_LIBS $WL_SERVER_LIBS"
 AC_SUBST(LIBTBM_CFLAGS)
 AC_SUBST(LIBTBM_LIBS)
 
