@@ -95,17 +95,6 @@ typedef int32_t tbm_fd;
  */
 #define TBM_DEVICE_MM        4
 
-/**
- * @brief Definition for the cache invalidate
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
- */
-#define TBM_CACHE_INV            0x01
-/**
- * @brief Definition for the cache clean
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
- */
-#define TBM_CACHE_CLN            0x02
-
 /* TBM_OPTION */
 
 /**
@@ -123,6 +112,19 @@ typedef int32_t tbm_fd;
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  */
 #define TBM_OPTION_VENDOR    (0xffff0000)
+
+/* unneeded version 2.0 */
+/**
+ * @brief Definition for the cache invalidate
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ */
+#define TBM_CACHE_INV            0x01
+/**
+ * @brief Definition for the cache clean
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ */
+#define TBM_CACHE_CLN            0x02
+/* unneeded version 2.0 */
 
 /**
  * @brief tbm_bo_handle abstraction of the memory handle by TBM_DEVICE_TYPE
@@ -783,7 +785,8 @@ typedef void (*tbm_data_free) (void *user_data);
    @endcode
  */
 
-int tbm_bo_add_user_data(tbm_bo bo, unsigned long key, tbm_data_free data_free_func);
+int tbm_bo_add_user_data(tbm_bo bo, unsigned long key,
+			 tbm_data_free data_free_func);
 
 /**
  * @brief Deletes the user_data in the buffer object.
@@ -1035,7 +1038,7 @@ int tbm_bo_get_flags(tbm_bo bo);
  * @since_tizen 3.0
  * @param[in] bufmgr : the buffer manager
  */
-void tbm_bufmgr_debug_show (tbm_bufmgr bufmgr);
+void tbm_bufmgr_debug_show(tbm_bufmgr bufmgr);
 
 /**
  * @brief Print out the trace of tbm_bos.
@@ -1043,9 +1046,9 @@ void tbm_bufmgr_debug_show (tbm_bufmgr bufmgr);
  * @param[in] bufmgr : the buffer manager
  * @param[in] onoff : 1 is on, and 0 is off
  */
-void tbm_bufmgr_debug_trace (tbm_bufmgr bufmgr, int onoff);
+void tbm_bufmgr_debug_trace(tbm_bufmgr bufmgr, int onoff);
 
-
+int tbm_bufmgr_bind_native_display(tbm_bufmgr bufmgr, void *NativeDisplay);
 
 #ifdef __cplusplus
 }

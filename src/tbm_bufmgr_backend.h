@@ -63,6 +63,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #define TBM_ABI_VERSION	SET_ABI_VERSION(1, 1) /**< current abi vertion  */
 
+/* unneeded version 2.0 */
 /* TBM_CACHE */
 #define TBM_CACHE_INV       0x01 /**< cache invalidate  */
 #define TBM_CACHE_CLN       0x02 /**< cache clean */
@@ -80,6 +81,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * TBM_LOCK_CTRL_BACKEND indicates  that the backend control the lock of bos.
  */
 #define TBM_LOCK_CTRL_BACKEND    (1 << 1)
+/* unneeded version 2.0 */
+
+#define TBM_USE_2_0_BACKEND      (1 << 2)
 
 typedef struct _tbm_bufmgr_backend *tbm_bufmgr_backend;
 
@@ -93,203 +97,235 @@ struct _tbm_bufmgr_backend {
 	void *priv;	/**< bufmgr private */
 
 	/**
-    * @brief deinitialize the bufmgr private.
-    * @param[in] bufmgr : the private of the bufmgr
-    * @return 1 if this function succeeds, otherwise 0.
-    */
-	void (*bufmgr_deinit) (void *priv);
+	* @brief deinitialize the bufmgr private.
+	* @param[in] bufmgr : the private of the bufmgr
+	* @return 1 if this function succeeds, otherwise 0.
+	*/
+	void (*bufmgr_deinit)(void *priv);
 
 	/**
-    * @brief get the size of a bo.
-    * @param[in] bo : the buffer object
-    * @return 1 if this function succeeds, otherwise 0.
-    */
-	int (*bo_size) (tbm_bo bo);
+	* @brief get the size of a bo.
+	* @param[in] bo : the buffer object
+	* @return 1 if this function succeeds, otherwise 0.
+	*/
+	int (*bo_size)(tbm_bo bo);
 
 	/**
-    * @brief allocate the buffer object
-    * @param[in] bo : the buffer object
-    * @param[in] size : the size of buffer object
-    * @param[in] flags : the flags of memory type
-    * @return pointer of the bo private.
-    */
-	void *(*bo_alloc) (tbm_bo bo, int size, int flags);
+	* @brief allocate the buffer object
+	* @param[in] bo : the buffer object
+	* @param[in] size : the size of buffer object
+	* @param[in] flags : the flags of memory type
+	* @return pointer of the bo private.
+	*/
+	void *(*bo_alloc)(tbm_bo bo, int size, int flags);
 
 	/**
-    * @brief free the buffer object.
-    * @param[in] bo : the buffer object
-    */
-	void (*bo_free) (tbm_bo bo);
+	* @brief free the buffer object.
+	* @param[in] bo : the buffer object
+	*/
+	void (*bo_free)(tbm_bo bo);
 
 	/**
-    * @brief import the buffer object associated with the key.
-    * @remarks If the backend doesn't support a buffer sharing by tbm key,
+	* @brief import the buffer object associated with the key.
+	* @remarks If the backend doesn't support a buffer sharing by tbm key,
 			fucntion pointer must be set to NULL.
-    * @param[in] bo : the buffer object
-    * @param[in] key : the key associated with the buffer object
-    * @return pointer of the bo private.
-    */
-	void *(*bo_import) (tbm_bo bo, unsigned int key);
+	* @param[in] bo : the buffer object
+	* @param[in] key : the key associated with the buffer object
+	* @return pointer of the bo private.
+	*/
+	void *(*bo_import)(tbm_bo bo, unsigned int key);
 
 	/**
-    * @brief export the buffer object
-    * @remarks If the backend doesn't support a buffer sharing by tbm key,
+	* @brief export the buffer object
+	* @remarks If the backend doesn't support a buffer sharing by tbm key,
 			fucntion pointer must be set to NULL.
-    * @param[in] bo : the buffer object
-    * @return key associated with the buffer object
-    */
-	unsigned int (*bo_export) (tbm_bo bo);
+	* @param[in] bo : the buffer object
+	* @return key associated with the buffer object
+	*/
+	unsigned int (*bo_export)(tbm_bo bo);
 
 	/**
-    * @brief get the tbm_bo_handle according to the device type.
-    * @param[in] bo : the buffer object
-    * @param[in] device : the device type to get a handle
-    * @return the handle of the buffer object
-    */
-	 tbm_bo_handle(*bo_get_handle) (tbm_bo bo, int device);
+	* @brief get the tbm_bo_handle according to the device type.
+	* @param[in] bo : the buffer object
+	* @param[in] device : the device type to get a handle
+	* @return the handle of the buffer object
+	*/
+	tbm_bo_handle(*bo_get_handle)(tbm_bo bo, int device);
 
 	/**
-    * @brief map the buffer object according to the device type and the option.
-    * @param[in] bo : the buffer object
-    * @param[in] device : the device type to get a handle
-    * @param[in] option : the option to access the buffer object
-    * @return the handle of the buffer object
-    */
-	 tbm_bo_handle(*bo_map) (tbm_bo bo, int device, int opt);
+	* @brief map the buffer object according to the device type and the option.
+	* @param[in] bo : the buffer object
+	* @param[in] device : the device type to get a handle
+	* @param[in] option : the option to access the buffer object
+	* @return the handle of the buffer object
+	*/
+	tbm_bo_handle(*bo_map)(tbm_bo bo, int device, int opt);
 
 	/**
-    * @brief unmap the buffer object.
-    * @param[in] bo : the buffer object
-    * @return 1 if this function succeeds, otherwise 0.
-    */
-	int (*bo_unmap) (tbm_bo bo);
+	* @brief unmap the buffer object.
+	* @param[in] bo : the buffer object
+	* @return 1 if this function succeeds, otherwise 0.
+	*/
+	int (*bo_unmap)(tbm_bo bo);
+
+	/* version 2.0 dosen't need to backend function bo_cache_flush */
+	/**
+	* @brief flush the cache of the buffer object.
+	* @param[in] bo : the buffer object
+	* @param[in] flags : the flags of cache flush type
+	* @return 1 if this function succeeds, otherwise 0.
+	*/
+	int (*bo_cache_flush)(tbm_bo bo, int flags);
+
+	/* version 2.0 dosen't need to backend function bo_get_global_key */
+	/**
+	* @brief get the global key associated with the buffer object.
+	* @param[in] bo : the buffer object
+	* @return global key associated with the buffer object.
+	*/
+	int (*bo_get_global_key)(tbm_bo bo);
 
 	/**
-    * @brief flush the cache of the buffer object.
-    * @param[in] bo : the buffer object
-    * @param[in] flags : the flags of cache flush type
-    * @return 1 if this function succeeds, otherwise 0.
-    */
-	int (*bo_cache_flush) (tbm_bo bo, int flags);
+	* @brief lock the buffer object.
+	* @param[in] bo : the buffer object
+	* @return 1 if this function succeeds, otherwise 0.
+	* @remark This function pointer could be null. (default: use the tizen global lock)
+	*/
+	int (*bo_lock)(tbm_bo bo);
 
 	/**
-    * @brief get the global key associated with the buffer object.
-    * @param[in] bo : the buffer object
-    * @return global key associated with the buffer object.
-    */
-	int (*bo_get_global_key) (tbm_bo bo);
+	* @brief unlock the buffer object.
+	* @param[in] bo : the buffer object
+	* @return 1 if this function succeeds, otherwise 0.
+	* @remark This function pointer could be null. (default: use the tizen global lock)
+	*/
+	int (*bo_unlock)(tbm_bo bo);
 
 	/**
-    * @brief lock the buffer object.
-    * @param[in] bo : the buffer object
-    * @return 1 if this function succeeds, otherwise 0.
-    * @remark This function pointer could be null. (default: use the tizen global lock)
-    */
-	int (*bo_lock) (tbm_bo bo);
+	* @brief lock the buffer object with a device and an opt.
+	* @param[in] bo : the buffer object
+	* @param[in] device : the device type to get a handle
+	* @param[in] option : the option to access the buffer object
+	* @return 1 if this function succeeds, otherwise 0.
+	* @remark This function pointer could be null. (default: use the tizen global lock)
+	*/
+	int (*bo_lock2)(tbm_bo bo, int device, int opt);
 
 	/**
-    * @brief unlock the buffer object.
-    * @param[in] bo : the buffer object
-    * @return 1 if this function succeeds, otherwise 0.
-    * @remark This function pointer could be null. (default: use the tizen global lock)
-    */
-	int (*bo_unlock) (tbm_bo bo);
+	* @brief query the formats list and the num to be supported by backend.
+	* @param[out] *formats : format array list. this array has to be allocated by backend funtion
+	* @param[out] *num : the number of the formats to be supported by backend
+	* @return 1 if this function succeeds, otherwise 0.
+	*/
+	int (*surface_supported_format)(uint32_t **formats, uint32_t *num);
+
+	/* version 2.0 dosen't need to backend function surface get size*/
+	/**
+	* @brief get the size of the surface with a format.
+	* @param[in] surface : the surface
+	* @param[in] width : the width of the surface
+	* @param[in] height : the height of the surface
+	* @param[in] format : the format of the surface
+	* @return size of the surface if this function succeeds, otherwise 0.
+	*/
+	int (*surface_get_size)(tbm_surface_h surface, int width, int height,
+				tbm_format format);
 
 	/**
-    * @brief lock the buffer object with a device and an opt.
-    * @param[in] bo : the buffer object
-    * @param[in] device : the device type to get a handle
-    * @param[in] option : the option to access the buffer object
-    * @return 1 if this function succeeds, otherwise 0.
-    * @remark This function pointer could be null. (default: use the tizen global lock)
-    */
-	int (*bo_lock2) (tbm_bo bo, int device, int opt);
+	* @brief get the plane data of the surface.
+	* @param[in] surface : the surface
+	* @param[in] width : the width of the surface
+	* @param[in] height : the height of the surface
+	* @param[in] format : the format of the surface
+	* @param[in] plane_idx : the format of the surface
+	* @param[out] size : the size of the plane
+	* @param[out] offset : the offset of the plane
+	* @param[out] pitch : the pitch of the plane
+	* @param[out] bo_idx : the bo index of the plane
+	* @return 1 if this function succeeds, otherwise 0.
+	*/
+	int (*surface_get_plane_data)(tbm_surface_h surface, int width, int height,
+				      tbm_format format, int plane_idx, uint32_t *size, uint32_t *offset,
+				      uint32_t *pitch, int *bo_idx);
 
 	/**
-    * @brief query the formats list and the num to be supported by backend.
-    * @param[out] *formats : format array list. this array has to be allocated by backend funtion
-    * @param[out] *num : the number of the formats to be supported by backend
-    * @return 1 if this function succeeds, otherwise 0.
-    */
-	int (*surface_supported_format) (uint32_t ** formats, uint32_t * num);
-
-	/**
-    * @brief get the size of the surface with a format.
-    * @param[in] surface : the surface
-    * @param[in] width : the width of the surface
-    * @param[in] height : the height of the surface
-    * @param[in] format : the format of the surface
-    * @return size of the surface if this function succeeds, otherwise 0.
-    */
-	int (*surface_get_size) (tbm_surface_h surface, int width, int height, tbm_format format);
-
-	/**
-    * @brief get the plane data of the surface.
-    * @param[in] surface : the surface
-    * @param[in] width : the width of the surface
-    * @param[in] height : the height of the surface
-    * @param[in] format : the format of the surface
-    * @param[in] plane_idx : the format of the surface
-    * @param[out] size : the size of the plane
-    * @param[out] offset : the offset of the plane
-    * @param[out] pitch : the pitch of the plane
-    * @param[out] bo_idx : the bo index of the plane
-    * @return 1 if this function succeeds, otherwise 0.
-    */
-	int (*surface_get_plane_data) (tbm_surface_h surface, int width, int height, tbm_format format, int plane_idx, uint32_t * size, uint32_t * offset, uint32_t * pitch, int *bo_idx);
-
-	/**
-    * @brief import the buffer object associated with the prime fd.
-    * @remarks tbm_fd must be free by user.
-    * @remarks If the backend doesn't support a buffer sharing by tbm fd,
+	* @brief import the buffer object associated with the prime fd.
+	* @remarks tbm_fd must be free by user.
+	* @remarks If the backend doesn't support a buffer sharing by tbm fd,
 			fucntion pointer must be set to NULL.
-    * @param[in] bo : the buffer object
-    * @param[in] fd : the prime fd associated with the buffer object
-    * @return pointer of the bo private.
-    */
-	void *(*bo_import_fd) (tbm_bo bo, tbm_fd fd);
+	* @param[in] bo : the buffer object
+	* @param[in] fd : the prime fd associated with the buffer object
+	* @return pointer of the bo private.
+	*/
+	void *(*bo_import_fd)(tbm_bo bo, tbm_fd fd);
 
 	/**
-    * @brief export the buffer object
-    * @remarks tbm_fd must be free by user.
-    * @remarks If the backend doesn't support a buffer sharing by tbm fd,
+	* @brief export the buffer object
+	* @remarks tbm_fd must be free by user.
+	* @remarks If the backend doesn't support a buffer sharing by tbm fd,
 			fucntion pointer must be set to NULL.
-    * @param[in] bo : the buffer object
-    * @return tbm_fd associated with the buffer object
-    */
-	 tbm_fd(*bo_export_fd) (tbm_bo bo);
+	* @param[in] bo : the buffer object
+	* @return tbm_fd associated with the buffer object
+	*/
+	tbm_fd (*bo_export_fd)(tbm_bo bo);
+
+	/* version 2.0 dosen't need to backend function fd_to_handle */
+	/**
+	* @brief get the tbm_bo_handle according to the device type and the prime fd.
+	* @param[in] bufmgr : the tizen buffer manager
+	* @param[in] fd : the prime fd associated with the buffer object
+	* @param[in] device : the option to access the buffer object
+	* @return the handle of the buffer object
+	*/
+	tbm_bo_handle(*fd_to_handle)(tbm_bufmgr bufmgr, tbm_fd fd, int device);
+
+	/* version 2.0 dosen't need to backend function surface_get_num_bos */
+	/**
+	* @brief get the num of bos with a format.
+	* @param[in] format : the format of the surface
+	* @return num of the bos if this function succeeds, otherwise 0.
+	*/
+	int (*surface_get_num_bos)(tbm_format format);
 
 	/**
-    * @brief get the tbm_bo_handle according to the device type and the prime fd.
-    * @param[in] bufmgr : the tizen buffer manager
-    * @param[in] fd : the prime fd associated with the buffer object
-    * @param[in] device : the option to access the buffer object
-    * @return the handle of the buffer object
-    */
-	 tbm_bo_handle(*fd_to_handle) (tbm_bufmgr bufmgr, tbm_fd fd, int device);
+	* @brief get the tbm flags of memory type
+	* @param[in] bo : the buffer object
+	* @see #TBM_BO_FLAGS
+	* @return tbm flags of memory type is this function succeeds, otherwise 0.
+	*/
+	int (*bo_get_flags)(tbm_bo bo);
 
 	/**
-    * @brief get the num of bos with a format.
-    * @param[in] format : the format of the surface
-    * @return num of the bos if this function succeeds, otherwise 0.
-    */
-	int (*surface_get_num_bos) (tbm_format format);
+	* @brief get the tbm flags of memory type
+	* @param[in] bo : the buffer object
+	* @see #TBM_BO_FLAGS
+	* @return tbm flags of memory type is this function succeeds, otherwise 0.
+	*/
+	int (*bufmgr_bind_native_display)(tbm_bufmgr bufmgr, void *NativeDisplay);
 
 	/**
-    * @brief get the tbm flags of memory type
-    * @param[in] bo : the buffer object
-    * @see #TBM_BO_FLAGS
-    * @return tbm flags of memory type is this function succeeds, otherwise 0.
-    */
-	int (*bo_get_flags) (tbm_bo bo);
+	* @brief get the plane data of the surface.
+ 	* @param[in] width : the width of the surface
+	* @param[in] height : the height of the surface
+	* @param[in] format : the format of the surface
+	* @param[in] plane_idx : the format of the surface
+	* @param[out] size : the size of the plane
+	* @param[out] offset : the offset of the plane
+	* @param[out] pitch : the pitch of the plane
+	* @param[out] bo_idx : the bo index of the plane
+	* @return 1 if this function succeeds, otherwise 0.
+	*/
+	int (*surface_get_plane_data2)(int width, int height,
+				       tbm_format format, int plane_idx, uint32_t *size, uint32_t *offset,
+				       uint32_t *pitch, int *bo_idx);
 
 	/* Padding for future extension */
-	void (*reserved1) (void);
-	void (*reserved2) (void);
-	void (*reserved3) (void);
-	void (*reserved4) (void);
-	void (*reserved5) (void);
-	void (*reserved6) (void);
+	void (*reserved1)(void);
+	void (*reserved2)(void);
+	void (*reserved3)(void);
+	void (*reserved4)(void);
+	void (*reserved5)(void);
+	void (*reserved6)(void);
 };
 
 /**
@@ -322,5 +358,6 @@ int tbm_backend_init(tbm_bufmgr bufmgr, tbm_bufmgr_backend backend);
 void *tbm_backend_get_bufmgr_priv(tbm_bo bo);
 void *tbm_backend_get_priv_from_bufmgr(tbm_bufmgr bufmgr);
 void *tbm_backend_get_bo_priv(tbm_bo bo);
+int tbm_backend_is_display_server(void);
 
 #endif							/* _TBM_BUFMGR_BACKEND_H_ */

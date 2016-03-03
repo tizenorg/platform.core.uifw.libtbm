@@ -54,13 +54,13 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /* check condition */
 #define TBM_RETURN_IF_FAIL(cond) {\
 	if (!(cond)) {\
-		TBM_LOG("[%s] : '%s' failed.\n", __FUNCTION__, #cond);\
+		TBM_LOG("[%s] : '%s' failed.\n", __func__, #cond);\
 		return;\
 	} \
 }
 #define TBM_RETURN_VAL_IF_FAIL(cond, val) {\
 	if (!(cond)) {\
-		TBM_LOG("[%s] : '%s' failed.\n", __FUNCTION__, #cond);\
+		TBM_LOG("[%s] : '%s' failed.\n", __func__, #cond);\
 		return val;\
 	} \
 }
@@ -80,14 +80,23 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /* check validation */
 #define TBM_BUFMGR_IS_VALID(mgr) (mgr)
 #define TBM_BO_IS_VALID(bo) (bo && \
-						TBM_BUFMGR_IS_VALID(bo->bufmgr) && \
-						bo->item_link.next && \
-						bo->item_link.next->prev == &bo->item_link)
+			    TBM_BUFMGR_IS_VALID(bo->bufmgr) && \
+			    bo->item_link.next && \
+			    bo->item_link.next->prev == &bo->item_link)
 #define TBM_SURFACE_IS_VALID(surf) (surf && \
-						TBM_BUFMGR_IS_VALID(surf->bufmgr) && \
-						surf->item_link.next && \
-						surf->item_link.next->prev == &surf->item_link)
+				   TBM_BUFMGR_IS_VALID(surf->bufmgr) && \
+				   surf->item_link.next && \
+				   surf->item_link.next->prev == &surf->item_link)
 
+#define TBM_DEBUG(fmt, ...)   fprintf(stderr, "[TBM:DEBUG(%d)] " fmt, getpid(), ##__VA_ARGS__)
+#define TBM_LOG(fmt, ...)  fprintf(stderr, "[TBM(%d):%s] " fmt, getpid(), __func__, ##__VA_ARGS__)
+
+struct list_head {
+	struct list_head *prev;
+	struct list_head *next;
+};
+
+/* unneeded version 2.0 */
 #define TBM_ALL_CTRL_BACKEND_VALID(flags) \
 		((flags&TBM_CACHE_CTRL_BACKEND) &&\
 		(flags&TBM_LOCK_CTRL_BACKEND))
@@ -96,25 +105,18 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define TBM_LOCK_CTRL_BACKEND_VALID(flags) \
 		(flags&TBM_LOCK_CTRL_BACKEND)
 
-#define TBM_DEBUG(fmt, ...)   fprintf(stderr, "[TBM:DEBUG(%d)] " fmt, getpid(), ##__VA_ARGS__)
-#define TBM_LOG(fmt, ...)  fprintf(stderr, "[TBM(%d):%s] " fmt, getpid(), __func__, ##__VA_ARGS__)
-
 typedef union _tbm_bo_cache_state tbm_bo_cache_state;
-
-struct list_head {
-	struct list_head *prev;
-	struct list_head *next;
-};
 
 union _tbm_bo_cache_state {
 	unsigned int val;
 	struct {
-		unsigned int cntFlush:16;	/*Flush all index for sync */
-		unsigned int isCacheable:1;
-		unsigned int isCached:1;
-		unsigned int isDirtied:2;
+		unsigned int cntFlush: 16;	/*Flush all index for sync */
+		unsigned int isCacheable: 1;
+		unsigned int isCached: 1;
+		unsigned int isDirtied: 2;
 	} data;
 };
+/* unneeded version 2.0 */
 
 /**
  * @brief tbm_bo : buffer object of Tizen Buffer Manager
@@ -126,23 +128,26 @@ struct _tbm_bo {
 
 	int flags;					/* TBM_BO_FLAGS :bo memory type */
 
-	unsigned int tgl_key;		/*global key for tizen global lock */
-
-	/* for cache control */
-	unsigned int map_cnt;		/* device map count */
-	tbm_bo_cache_state cache_state;	/*cache state */
-
-	int lock_cnt;				/* lock count of bo */
-
 	struct list_head user_data_list;	/* list of the user_date in bo */
 
 	void *priv;					/* bo private */
 
 	struct list_head item_link;	/* link of bo */
 
+	tbm_surface_h surface; /* tbm_surface */
+
+	int lock_cnt;				/* lock count of bo */
+
+	unsigned int map_cnt;		/* device map count */
+
+	/* unneeded version 2.0 */
 	tbm_bo_handle default_handle; /*default handle */
 
-	tbm_surface_h surface; /* tbm_surface */
+	unsigned int tgl_key;		/*global key for tizen global lock */
+
+	/* for cache control */
+	tbm_bo_cache_state cache_state;	/*cache state */
+	/* unneeded version 2.0 */
 };
 
 /**
@@ -156,13 +161,7 @@ struct _tbm_bufmgr {
 
 	int fd;						/* bufmgr fd */
 
-	int fd_flag;				/* flag set 1 when bufmgr fd open in tbm_bufmgr_init */
-
-	int lock_fd;				/* fd of tizen global lock */
-
 	int lock_type;				/* lock_type of bufmgr */
-
-	int use_map_cache;			/* flag to use the map_cahce */
 
 	struct list_head bo_list;	/* list of bos belonging to bufmgr */
 
@@ -171,6 +170,16 @@ struct _tbm_bufmgr {
 	void *module_data;
 
 	tbm_bufmgr_backend backend;	/* bufmgr backend */
+
+	int use_2_0;
+
+	/* unneeded version 2.0 */
+	int lock_fd;				/* fd of tizen global lock */
+
+	int fd_flag;				/* flag set 1 when bufmgr fd open in tbm_bufmgr_init */
+
+	int use_map_cache;			/* flag to use the map_cahce */
+	/* unneeded version 2.0 */
 };
 
 /**
@@ -216,16 +225,19 @@ int tbm_bufmgr_get_drm_fd_wayland(void);
 int _tbm_bo_set_surface(tbm_bo bo, tbm_surface_h surface);
 
 /* functions for mutex */
-int tbm_surface_internal_get_info(tbm_surface_h surface, int opt, tbm_surface_info_s * info, int map);
+int tbm_surface_internal_get_info(tbm_surface_h surface, int opt,
+				  tbm_surface_info_s *info, int map);
 void tbm_surface_internal_unmap(tbm_surface_h surface);
 unsigned int tbm_surface_internal_get_width(tbm_surface_h surface);
 unsigned int tbm_surface_internal_get_height(tbm_surface_h surface);
 tbm_format tbm_surface_internal_get_format(tbm_surface_h surface);
 unsigned int _tbm_surface_internal_get_debug_pid(tbm_surface_h surface);
-char * _tbm_surface_internal_format_to_str(tbm_format format);
+char *_tbm_surface_internal_format_to_str(tbm_format format);
 
-tbm_user_data *user_data_lookup(struct list_head *user_data_list, unsigned long key);
-tbm_user_data *user_data_create(unsigned long key, tbm_data_free data_free_func);
-void user_data_delete(tbm_user_data * user_data);
+tbm_user_data *user_data_lookup(struct list_head *user_data_list,
+				unsigned long key);
+tbm_user_data *user_data_create(unsigned long key,
+				tbm_data_free data_free_func);
+void user_data_delete(tbm_user_data *user_data);
 
 #endif							/* _TBM_BUFMGR_INT_H_ */
