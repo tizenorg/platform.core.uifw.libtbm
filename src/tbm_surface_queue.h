@@ -48,6 +48,12 @@ typedef struct _tbm_surface_queue *tbm_surface_queue_h;
 typedef void (*tbm_surface_queue_notify_cb) (tbm_surface_queue_h surface_queue,
 		void *data);
 
+typedef tbm_surface_h (*tbm_surface_alloc_cb) (tbm_surface_queue_h surface_queue,
+		void *data);
+
+typedef void (*tbm_surface_free_cb) (tbm_surface_queue_h surface_queue,
+		void *data, tbm_surface_h surface);
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -79,6 +85,8 @@ int tbm_surface_queue_get_format(tbm_surface_queue_h surface_queue);
 tbm_surface_queue_error_e tbm_surface_queue_reset(
 		tbm_surface_queue_h surface_queue, int width, int height, int format);
 
+tbm_surface_queue_error_e tbm_surface_queue_flush(tbm_surface_queue_h surface_queue);
+
 tbm_surface_queue_error_e tbm_surface_queue_add_reset_cb(
 	tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb reset_cb,
 	void *data);
@@ -109,6 +117,12 @@ tbm_surface_queue_error_e tbm_surface_queue_add_acquirable_cb(
 
 tbm_surface_queue_error_e tbm_surface_queue_remove_acquirable_cb(
 	tbm_surface_queue_h surface_queue, tbm_surface_queue_notify_cb acquirable_cb,
+	void *data);
+
+tbm_surface_queue_error_e tbm_surface_queue_set_alloc_cb(
+	tbm_surface_queue_h surface_queue,
+	tbm_surface_alloc_cb alloc_cb,
+	tbm_surface_free_cb free_cb,
 	void *data);
 
 /*The functions of queue factory*/
