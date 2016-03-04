@@ -2,7 +2,7 @@
 %bcond_with wayland
 
 Name:           libtbm
-Version:        1.2.3
+Version:        1.2.4
 Release:        1
 License:        MIT
 Summary:        The library for Tizen Buffer Manager
@@ -80,6 +80,10 @@ rm -f %{_unitdir_user}/default.target.wants/tbm-drm-auth-user.path
 %defattr(-,root,root,-)
 /usr/share/license/%{name}
 %{_libdir}/libtbm.so.*
+%{_unitdir}/tbm-drm-auth.path
+%{_unitdir}/tbm-drm-auth.service
+%{_unitdir_user}/tbm-drm-auth-user.path
+%{_unitdir_user}/tbm-drm-auth-user.service
 
 %files devel
 %manifest %{name}.manifest
@@ -92,9 +96,5 @@ rm -f %{_unitdir_user}/default.target.wants/tbm-drm-auth-user.path
 %{_includedir}/tbm_bufmgr_backend.h
 %{_includedir}/tbm_type.h
 %{_includedir}/tbm_drm_helper.h
-%{_unitdir}/tbm-drm-auth.path
-%{_unitdir}/tbm-drm-auth.service
-%{_unitdir_user}/tbm-drm-auth-user.path
-%{_unitdir_user}/tbm-drm-auth-user.service
 %{_libdir}/libtbm.so
 %{_libdir}/pkgconfig/libtbm.pc
