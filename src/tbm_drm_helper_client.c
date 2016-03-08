@@ -143,7 +143,7 @@ tbm_drm_helper_get_auth_info(int *auth_fd, char **device, uint32_t *capabilities
 	if (auth_fd)
 		*auth_fd = tbm_drm_client->auth_fd;
 	else
-		close(*auth_fd);
+		close(tbm_drm_client->auth_fd);
 
 	if (capabilities)
 		*capabilities = tbm_drm_client->capabilities;
