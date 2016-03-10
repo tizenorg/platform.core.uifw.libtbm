@@ -219,9 +219,6 @@ typedef struct {
 	struct list_head item_link;
 } tbm_user_data;
 
-int tbm_bufmgr_get_drm_fd_x11(void);
-int tbm_bufmgr_get_drm_fd_wayland(void);
-
 int _tbm_bo_set_surface(tbm_bo bo, tbm_surface_h surface);
 
 /* functions for mutex */
