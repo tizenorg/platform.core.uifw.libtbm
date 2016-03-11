@@ -30,6 +30,8 @@ The library for Tizen Buffer Manager.
 
 Development Files.
 
+%global TZ_SYS_RO_SHARE  %{?TZ_SYS_RO_SHARE:%TZ_SYS_RO_SHARE}%{!?TZ_SYS_RO_SHARE:/usr/share}
+
 %prep
 %setup -q
 cp %{SOURCE1001} .
@@ -48,8 +50,8 @@ make %{?_smp_mflags}
 
 %install
 rm -rf %{buildroot}
-mkdir -p %{buildroot}/usr/share/license
-cp -af COPYING %{buildroot}/usr/share/license/%{name}
+mkdir -p %{buildroot}/%{TZ_SYS_RO_SHARE}/license
+cp -af COPYING %{buildroot}/%{TZ_SYS_RO_SHARE}/license/%{name}
 %make_install
 
 
@@ -78,7 +80,7 @@ rm -f %{_unitdir_user}/default.target.wants/tbm-drm-auth-user.path
 %files
 %manifest %{name}.manifest
 %defattr(-,root,root,-)
-/usr/share/license/%{name}
+%{TZ_SYS_RO_SHARE}/license/%{name}
 %{_libdir}/libtbm.so.*
 %{_unitdir}/tbm-drm-auth.path
 %{_unitdir}/tbm-drm-auth.service
