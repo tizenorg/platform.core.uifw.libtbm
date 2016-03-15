@@ -87,6 +87,7 @@ struct _tbm_surface_queue {
 	int width;
 	int height;
 	int format;
+	int queue_size;
 
 	queue free_queue;
 	queue dirty_queue;
@@ -397,6 +398,7 @@ _tbm_surface_queue_release(tbm_surface_queue_h surface_queue,
 
 void
 _tbm_surface_queue_init(tbm_surface_queue_h surface_queue,
+			int queue_size,
 			int width, int height, int format,
 			const tbm_surface_queue_interface *impl, void *data)
 {
@@ -409,6 +411,7 @@ _tbm_surface_queue_init(tbm_surface_queue_h surface_queue,
 	pthread_cond_init(&surface_queue->free_cond, NULL);
 	pthread_cond_init(&surface_queue->dirty_cond, NULL);
 
+	surface_queue->queue_size = queue_size;
 	surface_queue->width = width;
 	surface_queue->height = height;
 	surface_queue->format = format;
@@ -623,6 +626,12 @@ int
 tbm_surface_queue_get_format(tbm_surface_queue_h surface_queue)
 {
 	return surface_queue->format;
+}
+
+int
+tbm_surface_queue_get_size(tbm_surface_queue_h surface_queue)
+{
+	return surface_queue->queue_size;
 }
 
 tbm_surface_queue_error_e
@@ -1079,6 +1088,7 @@ tbm_surface_queue_create(int queue_size, int width,
 	data->queue_size = queue_size;
 	data->flags = flags;
 	_tbm_surface_queue_init(surface_queue,
+				data->queue_size,
 				width, height, format,
 				&tbm_queue_default_impl, data);
 
@@ -1210,6 +1220,7 @@ tbm_surface_queue_sequence_create(int queue_size, int width,
 	data->queue_size = queue_size;
 	data->flags = flags;
 	_tbm_surface_queue_init(surface_queue,
+				data->queue_size,
 				width, height, format,
 				&tbm_queue_sequence_impl, data);
 

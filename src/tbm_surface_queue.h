@@ -82,6 +82,8 @@ int tbm_surface_queue_get_height(tbm_surface_queue_h surface_queue);
 
 int tbm_surface_queue_get_format(tbm_surface_queue_h surface_queue);
 
+int tbm_surface_queue_get_size(tbm_surface_queue_h surface_queue);
+
 tbm_surface_queue_error_e tbm_surface_queue_reset(
 		tbm_surface_queue_h surface_queue, int width, int height, int format);
 
