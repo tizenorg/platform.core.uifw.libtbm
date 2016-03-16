@@ -244,9 +244,9 @@ _queue_delete_node(tbm_surface_queue_h surface_queue, queue_node *node)
 			surface_queue->free_cb(surface_queue,
 					surface_queue->alloc_cb_data,
 					node->surface);
-		} else {
-			tbm_surface_destroy(node->surface);
 		}
+
+		tbm_surface_destroy(node->surface);
 	}
 
 	_queue_node_delete(node);
