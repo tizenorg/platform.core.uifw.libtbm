@@ -113,19 +113,6 @@ typedef int32_t tbm_fd;
  */
 #define TBM_OPTION_VENDOR    (0xffff0000)
 
-/* unneeded version 2.0 */
-/**
- * @brief Definition for the cache invalidate
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
- */
-#define TBM_CACHE_INV            0x01
-/**
- * @brief Definition for the cache clean
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
- */
-#define TBM_CACHE_CLN            0x02
-/* unneeded version 2.0 */
-
 /**
  * @brief tbm_bo_handle abstraction of the memory handle by TBM_DEVICE_TYPE
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif

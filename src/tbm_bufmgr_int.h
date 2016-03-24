@@ -96,28 +96,6 @@ struct list_head {
 	struct list_head *next;
 };
 
-/* unneeded version 2.0 */
-#define TBM_ALL_CTRL_BACKEND_VALID(flags) \
-		((flags&TBM_CACHE_CTRL_BACKEND) &&\
-		(flags&TBM_LOCK_CTRL_BACKEND))
-#define TBM_CACHE_CTRL_BACKEND_VALID(flags) \
-		(flags&TBM_CACHE_CTRL_BACKEND)
-#define TBM_LOCK_CTRL_BACKEND_VALID(flags) \
-		(flags&TBM_LOCK_CTRL_BACKEND)
-
-typedef union _tbm_bo_cache_state tbm_bo_cache_state;
-
-union _tbm_bo_cache_state {
-	unsigned int val;
-	struct {
-		unsigned int cntFlush: 16;	/*Flush all index for sync */
-		unsigned int isCacheable: 1;
-		unsigned int isCached: 1;
-		unsigned int isDirtied: 2;
-	} data;
-};
-/* unneeded version 2.0 */
-
 /**
  * @brief tbm_bo : buffer object of Tizen Buffer Manager
  */
@@ -139,15 +117,6 @@ struct _tbm_bo {
 	int lock_cnt;				/* lock count of bo */
 
 	unsigned int map_cnt;		/* device map count */
-
-	/* unneeded version 2.0 */
-	tbm_bo_handle default_handle; /*default handle */
-
-	unsigned int tgl_key;		/*global key for tizen global lock */
-
-	/* for cache control */
-	tbm_bo_cache_state cache_state;	/*cache state */
-	/* unneeded version 2.0 */
 };
 
 /**
@@ -170,16 +139,6 @@ struct _tbm_bufmgr {
 	void *module_data;
 
 	tbm_bufmgr_backend backend;	/* bufmgr backend */
-
-	int use_2_0;
-
-	/* unneeded version 2.0 */
-	int lock_fd;				/* fd of tizen global lock */
-
-	int fd_flag;				/* flag set 1 when bufmgr fd open in tbm_bufmgr_init */
-
-	int use_map_cache;			/* flag to use the map_cahce */
-	/* unneeded version 2.0 */
 };
 
 /**
