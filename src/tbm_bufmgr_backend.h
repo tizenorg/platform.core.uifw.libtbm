@@ -63,28 +63,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #define TBM_ABI_VERSION	SET_ABI_VERSION(1, 1) /**< current abi vertion  */
 
-/* unneeded version 2.0 */
-/* TBM_CACHE */
-#define TBM_CACHE_INV       0x01 /**< cache invalidate  */
-#define TBM_CACHE_CLN       0x02 /**< cache clean */
-#define TBM_CACHE_ALL       0x10 /**< cache all */
-#define TBM_CACHE_FLUSH     (TBM_CACHE_INV|TBM_CACHE_CLN) /**< cache flush  */
-#define TBM_CACHE_FLUSH_ALL (TBM_CACHE_FLUSH|TBM_CACHE_ALL)	/**< cache flush all */
-
-/*  TBM flag for cache control and lock control */
-/**
- * TBM_CACHE_CTRL_BACKEND indicates that the backend control the cache coherency.
- */
-#define TBM_CACHE_CTRL_BACKEND    (1 << 0)
-
-/**
- * TBM_LOCK_CTRL_BACKEND indicates  that the backend control the lock of bos.
- */
-#define TBM_LOCK_CTRL_BACKEND    (1 << 1)
-/* unneeded version 2.0 */
-
-#define TBM_USE_2_0_BACKEND      (1 << 2)
-
 typedef struct _tbm_bufmgr_backend *tbm_bufmgr_backend;
 
 /**
@@ -168,31 +146,6 @@ struct _tbm_bufmgr_backend {
 	*/
 	int (*bo_unmap)(tbm_bo bo);
 
-	/* version 2.0 dosen't need to backend function bo_cache_flush */
-	/**
-	* @brief flush the cache of the buffer object.
-	* @param[in] bo : the buffer object
-	* @param[in] flags : the flags of cache flush type
-	* @return 1 if this function succeeds, otherwise 0.
-	*/
-	int (*bo_cache_flush)(tbm_bo bo, int flags);
-
-	/* version 2.0 dosen't need to backend function bo_get_global_key */
-	/**
-	* @brief get the global key associated with the buffer object.
-	* @param[in] bo : the buffer object
-	* @return global key associated with the buffer object.
-	*/
-	int (*bo_get_global_key)(tbm_bo bo);
-
-	/**
-	* @brief lock the buffer object.
-	* @param[in] bo : the buffer object
-	* @return 1 if this function succeeds, otherwise 0.
-	* @remark This function pointer could be null. (default: use the tizen global lock)
-	*/
-	int (*bo_lock)(tbm_bo bo);
-
 	/**
 	* @brief unlock the buffer object.
 	* @param[in] bo : the buffer object
@@ -209,7 +162,7 @@ struct _tbm_bufmgr_backend {
 	* @return 1 if this function succeeds, otherwise 0.
 	* @remark This function pointer could be null. (default: use the tizen global lock)
 	*/
-	int (*bo_lock2)(tbm_bo bo, int device, int opt);
+	int (*bo_lock)(tbm_bo bo, int device, int opt);
 
 	/**
 	* @brief query the formats list and the num to be supported by backend.
@@ -218,18 +171,6 @@ struct _tbm_bufmgr_backend {
 	* @return 1 if this function succeeds, otherwise 0.
 	*/
 	int (*surface_supported_format)(uint32_t **formats, uint32_t *num);
-
-	/* version 2.0 dosen't need to backend function surface get size*/
-	/**
-	* @brief get the size of the surface with a format.
-	* @param[in] surface : the surface
-	* @param[in] width : the width of the surface
-	* @param[in] height : the height of the surface
-	* @param[in] format : the format of the surface
-	* @return size of the surface if this function succeeds, otherwise 0.
-	*/
-	int (*surface_get_size)(tbm_surface_h surface, int width, int height,
-				tbm_format format);
 
 	/**
 	* @brief get the plane data of the surface.
@@ -244,7 +185,7 @@ struct _tbm_bufmgr_backend {
 	* @param[out] bo_idx : the bo index of the plane
 	* @return 1 if this function succeeds, otherwise 0.
 	*/
-	int (*surface_get_plane_data)(tbm_surface_h surface, int width, int height,
+	int (*surface_get_plane_data)(int width, int height,
 				      tbm_format format, int plane_idx, uint32_t *size, uint32_t *offset,
 				      uint32_t *pitch, int *bo_idx);
 
@@ -269,24 +210,6 @@ struct _tbm_bufmgr_backend {
 	*/
 	tbm_fd (*bo_export_fd)(tbm_bo bo);
 
-	/* version 2.0 dosen't need to backend function fd_to_handle */
-	/**
-	* @brief get the tbm_bo_handle according to the device type and the prime fd.
-	* @param[in] bufmgr : the tizen buffer manager
-	* @param[in] fd : the prime fd associated with the buffer object
-	* @param[in] device : the option to access the buffer object
-	* @return the handle of the buffer object
-	*/
-	tbm_bo_handle(*fd_to_handle)(tbm_bufmgr bufmgr, tbm_fd fd, int device);
-
-	/* version 2.0 dosen't need to backend function surface_get_num_bos */
-	/**
-	* @brief get the num of bos with a format.
-	* @param[in] format : the format of the surface
-	* @return num of the bos if this function succeeds, otherwise 0.
-	*/
-	int (*surface_get_num_bos)(tbm_format format);
-
 	/**
 	* @brief get the tbm flags of memory type
 	* @param[in] bo : the buffer object
@@ -302,22 +225,6 @@ struct _tbm_bufmgr_backend {
 	* @return tbm flags of memory type is this function succeeds, otherwise 0.
 	*/
 	int (*bufmgr_bind_native_display)(tbm_bufmgr bufmgr, void *NativeDisplay);
-
-	/**
-	* @brief get the plane data of the surface.
- 	* @param[in] width : the width of the surface
-	* @param[in] height : the height of the surface
-	* @param[in] format : the format of the surface
-	* @param[in] plane_idx : the format of the surface
-	* @param[out] size : the size of the plane
-	* @param[out] offset : the offset of the plane
-	* @param[out] pitch : the pitch of the plane
-	* @param[out] bo_idx : the bo index of the plane
-	* @return 1 if this function succeeds, otherwise 0.
-	*/
-	int (*surface_get_plane_data2)(int width, int height,
-				       tbm_format format, int plane_idx, uint32_t *size, uint32_t *offset,
-				       uint32_t *pitch, int *bo_idx);
 
 	/* Padding for future extension */
 	void (*reserved1)(void);

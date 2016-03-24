@@ -59,8 +59,6 @@ void tbm_backend_free(tbm_bufmgr_backend backend)
 
 int tbm_backend_init(tbm_bufmgr bufmgr, tbm_bufmgr_backend backend)
 {
-	int flags = 0;
-
 	if (!bufmgr) {
 		TBM_LOG("[libtbm:%d] "
 			"error (%s): fail to init tbm backend... bufmgr is null\n", getpid(),
@@ -73,19 +71,6 @@ int tbm_backend_init(tbm_bufmgr bufmgr, tbm_bufmgr_backend backend)
 			"error (%s): fail to init tbm backend... backend is null\n", getpid(),
 			__func__);
 		return 0;
-	}
-
-	flags = backend->flags;
-	/* check the backend flags */
-	if (!(flags & TBM_USE_2_0_BACKEND)) {
-		if (flags & TBM_CACHE_CTRL_BACKEND) {
-			if (!backend->bo_cache_flush) {
-				TBM_LOG("[libtbm:%d] "
-					"error (%s): TBM_FLAG_CACHE_CTRL_TBM needs backend->bo_cache_flush\n", getpid(),
-					__func__);
-				return 0;
-			}
-		}
 	}
 
 	bufmgr->backend = backend;
