@@ -35,7 +35,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 int tbm_drm_helper_wl_auth_server_init(void  *wl_display, int fd, const char *device_name, uint32_t flags);
 void tbm_drm_helper_wl_auth_server_deinit(void);
 int tbm_drm_helper_get_master_fd(void);
-void tbm_drm_helper_set_master_fd(int fd);
+void tbm_drm_helper_set_tbm_master_fd(int fd);
+void tbm_drm_helper_unset_tbm_master_fd(void);
 
 int tbm_drm_helper_get_auth_info(int *auth_fd, char **device, uint32_t *capabilities);
 

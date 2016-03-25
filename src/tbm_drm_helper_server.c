@@ -201,9 +201,10 @@ int
 tbm_drm_helper_get_master_fd(void)
 {
     const char *value;
-    int ret, fd = -1;
+    int ret, flags, fd = -1;
+    int new_fd = -1;
 
-    value = (const char*)getenv("TIZEN_DRM_MASTER_FD");
+    value = (const char*)getenv("TDM_DRM_MASTER_FD");
     if (!value)
         return -1;
 
@@ -211,25 +212,55 @@ tbm_drm_helper_get_master_fd(void)
     if (ret <= 0)
         return -1;
 
-    TBM_LOG("TIZEN_DRM_MASTER_FD: %d\n", fd);
+    TBM_LOG("TDM_DRM_MASTER_FD: %d\n", fd);
 
-    return fd;
+    flags = fcntl(fd, F_GETFD);
+    if (flags == -1) {
+        TBM_LOG("fcntl failed: %m");
+        return -1;
+    }
+
+    new_fd = dup(fd);
+    if (new_fd < 0) {
+        TBM_LOG("dup failed: %m");
+        return -1;
+    }
+
+    fcntl(new_fd, F_SETFD, FD_CLOEXEC);
+
+    TBM_LOG("Return MASTER_FD: %d\n", new_fd);
+
+    return new_fd;
 }
 
 void
-tbm_drm_helper_set_master_fd(int fd)
+tbm_drm_helper_set_tbm_master_fd(int fd)
 {
     char buf[32];
     int ret;
 
     snprintf(buf, sizeof(buf), "%d", fd);
 
-    ret = setenv("TIZEN_DRM_MASTER_FD", (const char*)buf, 1);
+    ret = setenv("TBM_DRM_MASTER_FD", (const char*)buf, 1);
     if (ret)
     {
         TBM_LOG("failed to set TIZEN_DRM_MASTER_FD to %d", fd);
         return;
     }
 
-    TBM_LOG("TIZEN_DRM_MASTER_FD: %d\n", fd);
+    TBM_LOG("TBM_DRM_MASTER_FD: %d\n", fd);
 }
+
+void
+tbm_drm_helper_unset_tbm_master_fd(void)
+{
+    int ret;
+
+    ret = unsetenv("TBM_DRM_MASTER_FD");
+    if (ret)
+    {
+        TBM_LOG("failed to unset TBM_DRM_MASTER_FD");
+        return;
+    }
+}
+
