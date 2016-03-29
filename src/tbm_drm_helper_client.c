@@ -117,8 +117,6 @@ tbm_drm_helper_get_auth_info(int *auth_fd, char **device, uint32_t *capabilities
 
 	wl_registry_add_listener(wl_registry, &registry_listener, tbm_drm_client);
 	wl_display_roundtrip(display); //For Gloabl registry
-        wl_tbm_drm_auth_get_authentication_info(tbm_drm_client->wl_tbm_drm_auth);
-	wl_display_roundtrip(display);
 
 	if (!tbm_drm_client->wl_tbm_drm_auth) {
 		TBM_LOG("Failed to get wl_tbm_drm_auth interface\n");
@@ -128,6 +126,9 @@ tbm_drm_helper_get_auth_info(int *auth_fd, char **device, uint32_t *capabilities
 
 		return 0;
 	}
+
+	wl_tbm_drm_auth_get_authentication_info(tbm_drm_client->wl_tbm_drm_auth);
+	wl_display_roundtrip(display);
 
 	if (tbm_drm_client->auth_fd < 0) {
 		TBM_LOG("Failed to get auth info\n");
