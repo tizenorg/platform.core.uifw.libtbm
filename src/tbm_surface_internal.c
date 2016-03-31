@@ -694,6 +694,9 @@ tbm_surface_internal_destroy(tbm_surface_h surface)
 
 	surface->refcnt--;
 
+	printf("###### soolim(%s): pid(%d) surface(%p) refcnt(%d)\n",
+		__func__, getpid(), surface, surface->refcnt);
+
 	if (surface->refcnt > 0) {
 		_tbm_surface_mutex_unlock();
 		return;
@@ -714,6 +717,8 @@ tbm_surface_internal_ref(tbm_surface_h surface)
 
 	surface->refcnt++;
 
+	printf("###### soolim(%s): pid(%d) surface(%p) refcnt(%d)\n",
+		__func__, getpid(), surface, surface->refcnt);
 	_tbm_surface_mutex_unlock();
 }
 
@@ -725,6 +730,9 @@ tbm_surface_internal_unref(tbm_surface_h surface)
 	_tbm_surface_mutex_lock();
 
 	surface->refcnt--;
+
+	printf("###### soolim(%s): pid(%d) surface(%p) refcnt(%d)\n",
+		__func__, getpid(), surface, surface->refcnt);
 
 	if (surface->refcnt > 0) {
 		_tbm_surface_mutex_unlock();
