@@ -365,6 +365,7 @@ tbm_surface_internal_get_num_planes(tbm_format format)
 		num_planes = 1;
 		break;
 	case TBM_FORMAT_NV12:
+	case TBM_FORMAT_NV12MT:
 	case TBM_FORMAT_NV21:
 	case TBM_FORMAT_NV16:
 	case TBM_FORMAT_NV61:
@@ -449,6 +450,7 @@ tbm_surface_internal_get_bpp(tbm_format format)
 		bpp = 32;
 		break;
 	case TBM_FORMAT_NV12:
+	case TBM_FORMAT_NV12MT:
 	case TBM_FORMAT_NV21:
 		bpp = 12;
 		break;
