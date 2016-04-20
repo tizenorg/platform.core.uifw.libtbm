@@ -179,6 +179,7 @@ typedef struct {
 } tbm_user_data;
 
 int _tbm_bo_set_surface(tbm_bo bo, tbm_surface_h surface);
+int _tbm_surface_is_valid(tbm_surface_h surface);
 
 /* functions for mutex */
 int tbm_surface_internal_get_info(tbm_surface_h surface, int opt,

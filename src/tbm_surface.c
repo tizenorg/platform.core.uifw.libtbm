@@ -72,7 +72,7 @@ tbm_surface_create(int width, int height, tbm_format format)
 int
 tbm_surface_destroy(tbm_surface_h surface)
 {
-	if (!surface)
+	if (!_tbm_surface_is_valid(surface))
 		return TBM_SURFACE_ERROR_INVALID_PARAMETER;
 
 	tbm_surface_internal_destroy(surface);
@@ -83,7 +83,7 @@ tbm_surface_destroy(tbm_surface_h surface)
 int
 tbm_surface_map(tbm_surface_h surface, int opt, tbm_surface_info_s *info)
 {
-	TBM_RETURN_VAL_IF_FAIL(surface != NULL, TBM_SURFACE_ERROR_INVALID_PARAMETER);
+	TBM_RETURN_VAL_IF_FAIL(_tbm_surface_is_valid(surface), TBM_SURFACE_ERROR_INVALID_PARAMETER);
 	TBM_RETURN_VAL_IF_FAIL(info != NULL, TBM_SURFACE_ERROR_INVALID_PARAMETER);
 
 	int ret = 0;
@@ -98,7 +98,7 @@ tbm_surface_map(tbm_surface_h surface, int opt, tbm_surface_info_s *info)
 int
 tbm_surface_unmap(tbm_surface_h surface)
 {
-	TBM_RETURN_VAL_IF_FAIL(surface != NULL, TBM_SURFACE_ERROR_INVALID_PARAMETER);
+	TBM_RETURN_VAL_IF_FAIL(_tbm_surface_is_valid(surface), TBM_SURFACE_ERROR_INVALID_PARAMETER);
 
 	tbm_surface_internal_unmap(surface);
 
@@ -108,7 +108,7 @@ tbm_surface_unmap(tbm_surface_h surface)
 int
 tbm_surface_get_info(tbm_surface_h surface, tbm_surface_info_s *info)
 {
-	TBM_RETURN_VAL_IF_FAIL(surface != NULL, TBM_SURFACE_ERROR_INVALID_PARAMETER);
+	TBM_RETURN_VAL_IF_FAIL(_tbm_surface_is_valid(surface), TBM_SURFACE_ERROR_INVALID_PARAMETER);
 	TBM_RETURN_VAL_IF_FAIL(info != NULL, TBM_SURFACE_ERROR_INVALID_PARAMETER);
 
 	int ret = 0;
@@ -123,7 +123,7 @@ tbm_surface_get_info(tbm_surface_h surface, tbm_surface_info_s *info)
 int
 tbm_surface_get_width(tbm_surface_h surface)
 {
-	TBM_RETURN_VAL_IF_FAIL(surface != NULL, TBM_SURFACE_ERROR_INVALID_PARAMETER);
+	TBM_RETURN_VAL_IF_FAIL(_tbm_surface_is_valid(surface), TBM_SURFACE_ERROR_INVALID_PARAMETER);
 
 	return tbm_surface_internal_get_width(surface);
 }
@@ -131,7 +131,7 @@ tbm_surface_get_width(tbm_surface_h surface)
 int
 tbm_surface_get_height(tbm_surface_h surface)
 {
-	TBM_RETURN_VAL_IF_FAIL(surface != NULL, TBM_SURFACE_ERROR_INVALID_PARAMETER);
+	TBM_RETURN_VAL_IF_FAIL(_tbm_surface_is_valid(surface), TBM_SURFACE_ERROR_INVALID_PARAMETER);
 
 	return tbm_surface_internal_get_height(surface);
 }
@@ -139,7 +139,7 @@ tbm_surface_get_height(tbm_surface_h surface)
 tbm_format
 tbm_surface_get_format(tbm_surface_h surface)
 {
-	if (!surface) {
+	if (!_tbm_surface_is_valid(surface)) {
 #ifdef HAVE_CAPI_0_1_1
 		set_last_result(TBM_SURFACE_ERROR_INVALID_PARAMETER);
 #endif
