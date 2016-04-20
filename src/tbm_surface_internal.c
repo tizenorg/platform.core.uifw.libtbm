@@ -543,24 +543,55 @@ tbm_surface_internal_create_with_flags(int width, int height,
 			if (surf->planes_bo_idx[j] == i)
 				bo_size += surf->info.planes[j].size;
 		}
-		surf->bos[i] = tbm_bo_alloc(mgr, bo_size, flags);
-		if (!surf->bos[i]) {
-			for (j = 0; j < i; j++) {
-				if (surf->bos[j])
-					tbm_bo_unref(surf->bos[j]);
+
+		if (surf->bufmgr->backend->surface_bo_alloc) {
+			tbm_bo bo = NULL;
+			void *bo_priv = NULL;
+
+			bo = calloc(1, sizeof(struct _tbm_bo));
+			if (!bo) {
+				TBM_LOG("[libtbm:%d] "
+					"error %s:%d fail to alloc bo struct\n",
+					getpid(), __func__, __LINE__);
+				goto alloc_fail;
 			}
 
-			free(surf);
-			surf = NULL;
+			bo->bufmgr = surf->bufmgr;
 
-			if (LIST_IS_EMPTY(&mgr->surf_list)) {
-				LIST_DELINIT(&mgr->surf_list);
-				_deinit_surface_bufmgr();
+			pthread_mutex_lock(&surf->bufmgr->lock);
+
+			bo_priv = surf->bufmgr->backend->surface_bo_alloc (bo, width, height, format, flags, i);
+			if (!bo_priv) {
+				TBM_LOG("[libtbm:%d] "
+					"error %s:%d fail to alloc bo priv\n",
+					getpid(), __func__, __LINE__);
+				free(bo);
+				pthread_mutex_unlock(&surf->bufmgr->lock);
 			}
 
-			_tbm_surface_mutex_unlock();
-			return NULL;
+			bo->ref_cnt = 1;
+			bo->flags = flags;
+			bo->priv = bo_priv;
+
+			LIST_INITHEAD(&bo->user_data_list);
+
+			LIST_ADD(&bo->item_link, &surf->bufmgr->bo_list);
+
+			pthread_mutex_unlock(&surf->bufmgr->lock);
+
+			surf->bos[i] = bo;
+
+		} else {
+			surf->bos[i] = tbm_bo_alloc(mgr, bo_size, flags);
 		}
+
+		if (!surf->bos[i]) {
+			TBM_LOG("[libtbm:%d] "
+				"error %s:%d fail to alloc bo\n",
+				getpid(), __func__, __LINE__);
+			goto alloc_fail;
+		}
+
 		_tbm_bo_set_surface(surf->bos[i], surf);
 
 	}
@@ -572,6 +603,23 @@ tbm_surface_internal_create_with_flags(int width, int height,
 	_tbm_surface_mutex_unlock();
 
 	return surf;
+
+alloc_fail:
+	for (j = 0; j < i; j++) {
+		if (surf->bos[j])
+			tbm_bo_unref(surf->bos[j]);
+	}
+
+	free(surf);
+	surf = NULL;
+
+	if (LIST_IS_EMPTY(&mgr->surf_list)) {
+		LIST_DELINIT(&mgr->surf_list);
+		_deinit_surface_bufmgr();
+	}
+
+	_tbm_surface_mutex_unlock();
+	return NULL;
 }
 
 tbm_surface_h

@@ -226,6 +226,18 @@ struct _tbm_bufmgr_backend {
 	*/
 	int (*bufmgr_bind_native_display)(tbm_bufmgr bufmgr, void *NativeDisplay);
 
+	/**
+	* @brief allocate the buffer object for tbm surface
+	* @param[in] bo : the buffer object
+	* @param[in] width : the width of surface
+	* @param[in] height : the height of surface
+	* @param[in] format : the format of surface
+	* @param[in] flags : the flags of memory type
+	* @param[in] idx : the index of bo in surface
+	* @return pointer of the bo private.
+	*/
+	void * (*surface_bo_alloc)(tbm_bo bo, int width, int height, int format, int flags, int bo_idx);
+
 	/* Padding for future extension */
 	void (*reserved1)(void);
 	void (*reserved2)(void);
