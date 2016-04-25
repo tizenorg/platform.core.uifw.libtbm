@@ -585,6 +585,7 @@ tbm_surface_internal_create_with_flags(int width, int height,
 					getpid(), __func__, __LINE__);
 				free(bo);
 				pthread_mutex_unlock(&surf->bufmgr->lock);
+				goto alloc_fail;
 			}
 
 			bo->ref_cnt = 1;
