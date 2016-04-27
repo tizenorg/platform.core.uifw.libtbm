@@ -34,6 +34,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "tbm_bufmgr_int.h"
 #include "tbm_surface_internal.h"
 #include "list.h"
+#include <png.h>
 
 static tbm_bufmgr g_surface_bufmgr;
 static pthread_mutex_t tbm_surface_lock;
@@ -1135,5 +1136,320 @@ tbm_surface_internal_delete_user_data(tbm_surface_h surface,
 	user_data_delete(old_data);
 
 	return 1;
+}
+
+typedef struct _tbm_surface_dump_info tbm_surface_dump_info;
+typedef struct _tbm_surface_dump_buf_info tbm_surface_dump_buf_info;
+
+struct _tbm_surface_dump_buf_info
+{
+	int index;
+	tbm_bo bo;
+	int size;
+	int dirty;
+	char name[1024];
+
+	tbm_surface_info_s info;
+
+	struct list_head link;
+};
+
+struct _tbm_surface_dump_info
+{
+	//char path[1024];
+	char *path;
+	int running;
+	struct list_head *link;
+	struct list_head surface_list; /* link of surface */
+};
+
+static tbm_surface_dump_info *g_dump_info = NULL;
+static const char *dump_prefix[2] = {"png", "yuv"};
+
+#if 0
+static void
+_tbm_surface_internal_dump_file_raw(const char *file, void *data1, int size1, void *data2,
+                     int size2, void *data3, int size3)
+{
+	unsigned int *blocks;
+	FILE *fp = fopen(file, "w+");
+	TBM_RETURN_IF_FAIL(fp != NULL);
+
+	blocks = (unsigned int *)data1;
+	fwrite(blocks, 1, size1, fp);
+
+	if (size2 > 0) {
+		blocks = (unsigned int *)data2;
+		fwrite(blocks, 1, size2, fp);
+	}
+
+	if (size3 > 0) {
+		blocks = (unsigned int *)data3;
+		fwrite(blocks, 1, size3, fp);
+	}
+
+	fclose(fp);
+}
+#endif
+
+static void
+_tbm_surface_internal_dump_file_png(const char *file, const void *data, int width,
+                     int height)
+{
+	FILE *fp = fopen(file, "wb");
+	TBM_RETURN_IF_FAIL(fp != NULL);
+	int depth = 8;
+
+	png_structp pPngStruct =
+	        png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+	if (!pPngStruct) {
+		fclose(fp);
+		return;
+	}
+
+	png_infop pPngInfo = png_create_info_struct(pPngStruct);
+	if (!pPngInfo) {
+		png_destroy_write_struct(&pPngStruct, NULL);
+		fclose(fp);
+		return;
+	}
+
+	png_init_io(pPngStruct, fp);
+	png_set_IHDR(pPngStruct,
+	             pPngInfo,
+	             width,
+	             height,
+	             depth,
+	             PNG_COLOR_TYPE_RGBA,
+	             PNG_INTERLACE_NONE,
+	             PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
+
+	png_set_bgr(pPngStruct);
+	png_write_info(pPngStruct, pPngInfo);
+
+	const int pixel_size = 4;	// RGBA
+	png_bytep *row_pointers =
+	        png_malloc(pPngStruct, height * sizeof(png_byte *));
+
+	unsigned int *blocks = (unsigned int *)data;
+	int y = 0;
+	int x = 0;
+
+	for (; y < height; ++y) {
+		png_bytep row =
+		        png_malloc(pPngStruct, sizeof(png_byte) * width * pixel_size);
+		row_pointers[y] = (png_bytep)row;
+		for (x = 0; x < width; ++x) {
+			unsigned int curBlock = blocks[y * width + x];
+			row[x * pixel_size] = (curBlock & 0xFF);
+			row[1 + x * pixel_size] = (curBlock >> 8) & 0xFF;
+			row[2 + x * pixel_size] = (curBlock >> 16) & 0xFF;
+			row[3 + x * pixel_size] = (curBlock >> 24) & 0xFF;
+		}
+	}
+
+	png_write_image(pPngStruct, row_pointers);
+	png_write_end(pPngStruct, pPngInfo);
+
+	for (y = 0; y < height; y++)
+		png_free(pPngStruct, row_pointers[y]);
+	png_free(pPngStruct, row_pointers);
+
+	png_destroy_write_struct(&pPngStruct, &pPngInfo);
+
+	fclose(fp);
+}
+
+void
+tbm_surface_internal_dump_start(char *path, int buffer_size, int count)
+{
+	TBM_RETURN_IF_FAIL(path != NULL);
+	TBM_RETURN_IF_FAIL(buffer_size > 0);
+	TBM_RETURN_IF_FAIL(count > 0);
+
+	tbm_surface_dump_buf_info *buf_info = NULL;
+	tbm_bo bo = NULL;
+	tbm_bo_handle bo_handle;
+	int i;
+
+	/* check running */
+	if (g_dump_info && !g_dump_info->running) {
+		TBM_LOG("[libtbm:%d] "
+			"waring: %s:%d already running the tbm_surface_internal_dump.\n",
+			getpid(), __func__, __LINE__);
+		return;
+	}
+
+	g_dump_info = calloc(1, sizeof (buffer_size *count));
+	TBM_RETURN_IF_FAIL(g_dump_info);
+
+	LIST_INITHEAD(&g_dump_info->surface_list);
+
+	for (i = 0; i < count; i++)	{
+		buf_info = calloc(1, sizeof (tbm_surface_dump_buf_info));
+		TBM_GOTO_VAL_IF_FAIL(buf_info, fail);
+		bo = tbm_bo_alloc(g_surface_bufmgr, buffer_size, TBM_BO_DEFAULT);
+		TBM_GOTO_VAL_IF_FAIL(bo, fail);
+
+		bo_handle = tbm_bo_map(bo, TBM_DEVICE_CPU, TBM_OPTION_WRITE);
+		memset(bo_handle.ptr, 0x00, buffer_size);
+		tbm_bo_unmap(bo);
+
+		buf_info->index = i;
+		buf_info->bo = bo;
+		buf_info->size = buffer_size;
+
+		LIST_ADDTAIL(&buf_info->link, &g_dump_info->surface_list);
+	}
+
+	g_dump_info->path = path;
+	g_dump_info->link = &g_dump_info->surface_list;
+	g_dump_info->running = 1; /* set running */
+
+	TBM_LOG("Dump Start.. path:%s\n", g_dump_info->path);
+
+	return;
+fail:
+// TODO:
+	return;
+}
+
+void
+tbm_surface_internal_dump_end(void)
+{
+	tbm_surface_dump_buf_info *buf_info, *tmp;
+	char file[2048] = {0, };
+	tbm_bo_handle bo_handle;
+
+	/* check running */
+	if (g_dump_info && !g_dump_info->running)
+		return;
+
+	/* make files */
+	if (!LIST_IS_EMPTY(&g_dump_info->surface_list)) {
+		LIST_FOR_EACH_ENTRY_SAFE(buf_info, tmp, &g_dump_info->surface_list, link) {
+			if (buf_info->dirty) {
+				switch (buf_info->info.format) {
+				case TBM_FORMAT_ARGB8888:
+				case TBM_FORMAT_XRGB8888:
+					bo_handle = tbm_bo_map(buf_info->bo, TBM_DEVICE_CPU, TBM_OPTION_READ);
+					if (bo_handle.ptr == NULL)
+						continue;
+					snprintf(file, sizeof(file), "%s/%s", g_dump_info->path, buf_info->name);
+					TBM_LOG("Dump File.. %s generated.\n", file);
+					_tbm_surface_internal_dump_file_png(file, bo_handle.ptr,
+											buf_info->info.planes[0].stride >> 2, buf_info->info.height);
+					break;
+				case TBM_FORMAT_YVU420:
+				case TBM_FORMAT_YUV420:
+					// TODO:
+					break;
+				case TBM_FORMAT_NV12:
+				case TBM_FORMAT_NV21:
+					// TODO:
+					break;
+				case TBM_FORMAT_YUYV:
+				case TBM_FORMAT_UYVY:
+					// TODO:
+					break;
+				default:
+					//TDM_ERR("can't dump %c%c%c%c buffer", FOURCC_STR (info.format));
+					TBM_LOG("can't dump\n");
+					tbm_bo_unmap(buf_info->bo);
+					return;
+				}
+			}
+		}
+	}
+
+
+	/* free resources */
+
+	TBM_LOG("Dump End..\n");
+}
+
+void
+tbm_internal_surface_dump_buffer(tbm_surface_h surface, const char *type)
+{
+	TBM_RETURN_IF_FAIL(surface != NULL);
+	TBM_RETURN_IF_FAIL(type != NULL);
+
+	tbm_surface_dump_buf_info *buf_info;
+	tbm_surface_info_s info;
+	struct list_head *next_link;
+	tbm_bo_handle bo_handle;
+	int ret;
+	const char *prefix;
+
+	/* check running */
+	if (g_dump_info && !g_dump_info->running)
+	{
+		TBM_LOG("[libtbm:%d] "
+			"waring: %s:%d please call tbm_surface_internal_dump_start.\n",
+			getpid(), __func__, __LINE__);
+		return;
+	}
+
+	next_link = g_dump_info->link->next;
+	TBM_RETURN_IF_FAIL(next_link != NULL);
+
+	if (next_link == &g_dump_info->surface_list)
+	{
+		next_link = next_link->next;
+		TBM_RETURN_IF_FAIL(next_link != NULL);
+	}
+
+	buf_info = LIST_ENTRY(tbm_surface_dump_buf_info, next_link, link);
+	TBM_RETURN_IF_FAIL(buf_info != NULL);
+
+	ret = tbm_surface_map(surface, TBM_SURF_OPTION_READ|TBM_SURF_OPTION_WRITE, &info);
+	TBM_RETURN_IF_FAIL(ret == TBM_SURFACE_ERROR_NONE);
+
+	if (info.format == TBM_FORMAT_ARGB8888 || info.format == TBM_FORMAT_XRGB8888)
+		prefix = dump_prefix[0];
+	else
+		prefix = dump_prefix[1];
+
+	/* make the file information */
+    snprintf(buf_info->name, sizeof(buf_info->name), "%d-%s", buf_info->index, prefix);
+	memcpy(&buf_info->info, &info, sizeof(tbm_surface_info_s));
+
+	/* dump */
+	bo_handle = tbm_bo_map(buf_info->bo, TBM_DEVICE_CPU, TBM_OPTION_WRITE);
+	TBM_RETURN_IF_FAIL(bo_handle.ptr != NULL);
+
+	switch (info.format) {
+	case TBM_FORMAT_ARGB8888:
+	case TBM_FORMAT_XRGB8888:
+		//size = (info.planes[0].stride >> 2) * info.height * 4; // pixel_size = 4;
+		memcpy(bo_handle.ptr, info.planes[0].ptr, info.size);
+		break;
+	case TBM_FORMAT_YVU420:
+	case TBM_FORMAT_YUV420:
+		// TODO:
+		break;
+	case TBM_FORMAT_NV12:
+	case TBM_FORMAT_NV21:
+		// TODO:
+		break;
+	case TBM_FORMAT_YUYV:
+	case TBM_FORMAT_UYVY:
+		// TODO:
+		break;
+	default:
+		//TDM_ERR("can't dump %c%c%c%c buffer", FOURCC_STR (info.format));
+		TBM_LOG("can't dump\n");
+		tbm_bo_unmap(buf_info->bo);
+		return;
+	}
+
+	tbm_bo_unmap(buf_info->bo);
+
+	tbm_surface_unmap(surface);
+
+	buf_info->dirty = 1;
+	g_dump_info->link = next_link;
+
+	TBM_LOG("Dump %s \n", buf_info->name);
 }
 
