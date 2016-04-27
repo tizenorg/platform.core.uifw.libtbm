@@ -64,6 +64,12 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		return val;\
 	} \
 }
+#define TBM_GOTO_VAL_IF_FAIL(cond, val) {\
+	if (!(cond)) {\
+		TBM_LOG("[%s] : '%s' failed.\n", __func__, #cond);\
+		goto val;\
+	} \
+}
 
 /* check flags */
 #define RETURN_CHECK_FLAG(cond) {\

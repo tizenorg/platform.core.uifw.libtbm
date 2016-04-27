@@ -397,6 +397,49 @@ int tbm_surface_internal_get_user_data(tbm_surface_h surface, unsigned long key,
 int tbm_surface_internal_delete_user_data(tbm_surface_h surface,
 					  unsigned long key);
 
+/**
+ * @brief Start the dump debugging.
+ * @since_tizen 3.0
+ * @param[in] path The given dump path
+ * @param[in] buffer_size the buffer size of a dump image
+ * @param[in] count The dump count number
+ * @see #tdm_helper_dump_stop()
+ */
+void tbm_surface_internal_dump_start(char *path, int buffer_size, int count);
+
+/**
+ * @brief Stop the dump debugging.
+ * @since_tizen 3.0
+ * @see #tdm_helper_dump_start()
+ */
+void tbm_surface_internal_dump_stop(void);
+
+/**
+ * @brief End the dump debugging.
+ * @since_tizen 3.0
+ * @see #tdm_helper_dump_start()
+ */
+void tbm_surface_internal_dump_end(void);
+
+/**
+ * @brief Dump a buffer
+ * @details
+ * This function supports only if a buffer has below formats.
+ * - TBM_FORMAT_ARGB8888
+ * - TBM_FORMAT_XRGB8888
+ * - TBM_FORMAT_YVU420
+ * - TBM_FORMAT_YUV420
+ * - TBM_FORMAT_NV12
+ * - TBM_FORMAT_NV21
+ * - TBM_FORMAT_YUYV
+ * - TBM_FORMAT_UYVY
+ * The filename extension should be "png" for TBM_FORMAT_ARGB8888 and TBM_FORMAT_XRGB8888
+ * or "yuv" for YUV formats.
+ * @param[in] surface a tbm surface
+ * @param[in] type   a string used by a file name.
+ */
+void tbm_internal_surface_dump_buffer(tbm_surface_h surface, const char *type);
+
 #ifdef __cplusplus
 }
 #endif
