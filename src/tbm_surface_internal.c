@@ -39,23 +39,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 static tbm_bufmgr g_surface_bufmgr;
 static pthread_mutex_t tbm_surface_lock;
 
-int
-_tbm_surface_is_valid(tbm_surface_h surface)
-{
-	tbm_surface_h old_data = NULL, tmp = NULL;
-
-	if (surface == NULL || g_surface_bufmgr == NULL)
-		return 0;
-
-	if (!LIST_IS_EMPTY(&g_surface_bufmgr->surf_list)) {
-		LIST_FOR_EACH_ENTRY_SAFE(old_data, tmp, &g_surface_bufmgr->surf_list, item_link) {
-			if (old_data == surface)
-				return 1;
-		}
-	}
-	return 0;
-}
-
 char *
 _tbm_surface_internal_format_to_str(tbm_format format)
 {
@@ -291,6 +274,23 @@ _tbm_surface_internal_destroy(tbm_surface_h surface)
 		LIST_DELINIT(&bufmgr->surf_list);
 		_deinit_surface_bufmgr();
 	}
+}
+
+int
+tbm_surface_internal_is_valid(tbm_surface_h surface)
+{
+	tbm_surface_h old_data = NULL, tmp = NULL;
+
+	if (surface == NULL || g_surface_bufmgr == NULL)
+		return 0;
+
+	if (!LIST_IS_EMPTY(&g_surface_bufmgr->surf_list)) {
+		LIST_FOR_EACH_ENTRY_SAFE(old_data, tmp, &g_surface_bufmgr->surf_list, item_link) {
+			if (old_data == surface)
+				return 1;
+		}
+	}
+	return 0;
 }
 
 int
@@ -748,7 +748,7 @@ bail1:
 void
 tbm_surface_internal_destroy(tbm_surface_h surface)
 {
-	if (!_tbm_surface_is_valid(surface))
+	if (!tbm_surface_internal_is_valid(surface))
 		return;
 
 	_tbm_surface_mutex_lock();
@@ -769,7 +769,7 @@ tbm_surface_internal_destroy(tbm_surface_h surface)
 void
 tbm_surface_internal_ref(tbm_surface_h surface)
 {
-	TBM_RETURN_IF_FAIL(_tbm_surface_is_valid(surface));
+	TBM_RETURN_IF_FAIL(tbm_surface_internal_is_valid(surface));
 
 	_tbm_surface_mutex_lock();
 
@@ -781,7 +781,7 @@ tbm_surface_internal_ref(tbm_surface_h surface)
 void
 tbm_surface_internal_unref(tbm_surface_h surface)
 {
-	TBM_RETURN_IF_FAIL(_tbm_surface_is_valid(surface));
+	TBM_RETURN_IF_FAIL(tbm_surface_internal_is_valid(surface));
 
 	_tbm_surface_mutex_lock();
 
@@ -801,7 +801,7 @@ tbm_surface_internal_unref(tbm_surface_h surface)
 int
 tbm_surface_internal_get_num_bos(tbm_surface_h surface)
 {
-	TBM_RETURN_VAL_IF_FAIL(_tbm_surface_is_valid(surface), 0);
+	TBM_RETURN_VAL_IF_FAIL(tbm_surface_internal_is_valid(surface), 0);
 
 	struct _tbm_surface *surf;
 	int num;
@@ -819,7 +819,7 @@ tbm_surface_internal_get_num_bos(tbm_surface_h surface)
 tbm_bo
 tbm_surface_internal_get_bo(tbm_surface_h surface, int bo_idx)
 {
-	TBM_RETURN_VAL_IF_FAIL(_tbm_surface_is_valid(surface), NULL);
+	TBM_RETURN_VAL_IF_FAIL(tbm_surface_internal_is_valid(surface), NULL);
 	TBM_RETURN_VAL_IF_FAIL(bo_idx > -1, NULL);
 
 	struct _tbm_surface *surf;
@@ -838,7 +838,7 @@ tbm_surface_internal_get_bo(tbm_surface_h surface, int bo_idx)
 int
 tbm_surface_internal_get_size(tbm_surface_h surface)
 {
-	TBM_RETURN_VAL_IF_FAIL(_tbm_surface_is_valid(surface), 0);
+	TBM_RETURN_VAL_IF_FAIL(tbm_surface_internal_is_valid(surface), 0);
 
 	struct _tbm_surface *surf;
 	unsigned int size;
@@ -857,7 +857,7 @@ int
 tbm_surface_internal_get_plane_data(tbm_surface_h surface, int plane_idx,
 				    uint32_t *size, uint32_t *offset, uint32_t *pitch)
 {
-	TBM_RETURN_VAL_IF_FAIL(_tbm_surface_is_valid(surface), 0);
+	TBM_RETURN_VAL_IF_FAIL(tbm_surface_internal_is_valid(surface), 0);
 	TBM_RETURN_VAL_IF_FAIL(plane_idx > -1, 0);
 
 	struct _tbm_surface *surf;
@@ -889,7 +889,7 @@ int
 tbm_surface_internal_get_info(tbm_surface_h surface, int opt,
 			      tbm_surface_info_s *info, int map)
 {
-	TBM_RETURN_VAL_IF_FAIL(_tbm_surface_is_valid(surface), 0);
+	TBM_RETURN_VAL_IF_FAIL(tbm_surface_internal_is_valid(surface), 0);
 
 	struct _tbm_surface *surf;
 	tbm_bo_handle bo_handles[4];
@@ -943,7 +943,7 @@ tbm_surface_internal_get_info(tbm_surface_h surface, int opt,
 void
 tbm_surface_internal_unmap(tbm_surface_h surface)
 {
-	TBM_RETURN_IF_FAIL(_tbm_surface_is_valid(surface));
+	TBM_RETURN_IF_FAIL(tbm_surface_internal_is_valid(surface));
 
 	struct _tbm_surface *surf;
 	int i;
@@ -961,7 +961,7 @@ tbm_surface_internal_unmap(tbm_surface_h surface)
 unsigned int
 tbm_surface_internal_get_width(tbm_surface_h surface)
 {
-	TBM_RETURN_VAL_IF_FAIL(_tbm_surface_is_valid(surface), 0);
+	TBM_RETURN_VAL_IF_FAIL(tbm_surface_internal_is_valid(surface), 0);
 
 	struct _tbm_surface *surf;
 	unsigned int width;
@@ -979,7 +979,7 @@ tbm_surface_internal_get_width(tbm_surface_h surface)
 unsigned int
 tbm_surface_internal_get_height(tbm_surface_h surface)
 {
-	TBM_RETURN_VAL_IF_FAIL(_tbm_surface_is_valid(surface), 0);
+	TBM_RETURN_VAL_IF_FAIL(tbm_surface_internal_is_valid(surface), 0);
 
 	struct _tbm_surface *surf;
 	unsigned int height;
@@ -998,7 +998,7 @@ tbm_surface_internal_get_height(tbm_surface_h surface)
 tbm_format
 tbm_surface_internal_get_format(tbm_surface_h surface)
 {
-	TBM_RETURN_VAL_IF_FAIL(_tbm_surface_is_valid(surface), 0);
+	TBM_RETURN_VAL_IF_FAIL(tbm_surface_internal_is_valid(surface), 0);
 
 	struct _tbm_surface *surf;
 	tbm_format format;
@@ -1016,7 +1016,7 @@ tbm_surface_internal_get_format(tbm_surface_h surface)
 int
 tbm_surface_internal_get_plane_bo_idx(tbm_surface_h surface, int plane_idx)
 {
-	TBM_RETURN_VAL_IF_FAIL(_tbm_surface_is_valid(surface), 0);
+	TBM_RETURN_VAL_IF_FAIL(tbm_surface_internal_is_valid(surface), 0);
 	TBM_RETURN_VAL_IF_FAIL(plane_idx > -1, 0);
 	struct _tbm_surface *surf;
 	int bo_idx;
@@ -1042,7 +1042,7 @@ _tbm_surface_internal_get_debug_pid(tbm_surface_h surface)
 void
 tbm_surface_internal_set_debug_pid(tbm_surface_h surface, unsigned int pid)
 {
-	TBM_RETURN_IF_FAIL(_tbm_surface_is_valid(surface));
+	TBM_RETURN_IF_FAIL(tbm_surface_internal_is_valid(surface));
 
 	surface->debug_pid = pid;
 }
@@ -1051,7 +1051,7 @@ int
 tbm_surface_internal_add_user_data(tbm_surface_h surface, unsigned long key,
 				   tbm_data_free data_free_func)
 {
-	TBM_RETURN_VAL_IF_FAIL(_tbm_surface_is_valid(surface), 0);
+	TBM_RETURN_VAL_IF_FAIL(tbm_surface_internal_is_valid(surface), 0);
 
 	tbm_user_data *data;
 
@@ -1077,7 +1077,7 @@ int
 tbm_surface_internal_set_user_data(tbm_surface_h surface, unsigned long key,
 				   void *data)
 {
-	TBM_RETURN_VAL_IF_FAIL(_tbm_surface_is_valid(surface), 0);
+	TBM_RETURN_VAL_IF_FAIL(tbm_surface_internal_is_valid(surface), 0);
 
 	tbm_user_data *old_data;
 
@@ -1100,7 +1100,7 @@ int
 tbm_surface_internal_get_user_data(tbm_surface_h surface, unsigned long key,
 				   void **data)
 {
-	TBM_RETURN_VAL_IF_FAIL(_tbm_surface_is_valid(surface), 0);
+	TBM_RETURN_VAL_IF_FAIL(tbm_surface_internal_is_valid(surface), 0);
 
 	tbm_user_data *old_data;
 
@@ -1122,7 +1122,7 @@ int
 tbm_surface_internal_delete_user_data(tbm_surface_h surface,
 				      unsigned long key)
 {
-	TBM_RETURN_VAL_IF_FAIL(_tbm_surface_is_valid(surface), 0);
+	TBM_RETURN_VAL_IF_FAIL(tbm_surface_internal_is_valid(surface), 0);
 
 	tbm_user_data *old_data = (void *)0;
 

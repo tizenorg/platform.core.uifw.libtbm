@@ -433,6 +433,14 @@ void tbm_surface_internal_dump_end(void);
  */
 void tbm_internal_surface_dump_buffer(tbm_surface_h surface, const char *type);
 
+/**
+ * @brief check valid tbm surface.
+ * @since_tizen 3.0
+ * @param[in] surface : the tbm surface.
+ * @return 1 if surface is valid, otherwise 0.
+ */
+int tbm_surface_internal_is_valid(tbm_surface_h surface);
+
 #ifdef __cplusplus
 }
 #endif
