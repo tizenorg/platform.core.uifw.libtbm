@@ -1278,7 +1278,7 @@ tbm_surface_internal_dump_start(char *path, int buffer_size, int count)
 		return;
 	}
 
-	g_dump_info = calloc(1, sizeof (buffer_size *count));
+	g_dump_info = calloc(1, sizeof (struct _tbm_surface_dump_info));
 	TBM_RETURN_IF_FAIL(g_dump_info);
 
 	LIST_INITHEAD(&g_dump_info->surface_list);
