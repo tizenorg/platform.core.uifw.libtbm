@@ -36,6 +36,12 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "list.h"
 #include <png.h>
 
+#define C(b,m)              (((b) >> (m)) & 0xFF)
+#define B(c,s)              ((((unsigned int)(c)) & 0xff) << (s))
+#define FOURCC(a,b,c,d)     (B(d,24) | B(c,16) | B(b,8) | B(a,0))
+#define FOURCC_STR(id)      C(id,0), C(id,8), C(id,16), C(id,24)
+#define FOURCC_ID(str)      FOURCC(((char*)str)[0],((char*)str)[1],((char*)str)[2],((char*)str)[3])
+
 static tbm_bufmgr g_surface_bufmgr;
 static pthread_mutex_t tbm_surface_lock;
 
@@ -1157,6 +1163,8 @@ struct _tbm_surface_dump_buf_info
 struct _tbm_surface_dump_info
 {
 	char *path;  // copy???
+	int dump_max;
+	int count;
 	struct list_head *link;
 	struct list_head surface_list; /* link of surface */
 };
@@ -1164,7 +1172,6 @@ struct _tbm_surface_dump_info
 static tbm_surface_dump_info *g_dump_info = NULL;
 static const char *dump_postfix[2] = {"png", "yuv"};
 
-#if 0
 static void
 _tbm_surface_internal_dump_file_raw(const char *file, void *data1, int size1, void *data2,
                      int size2, void *data3, int size3)
@@ -1188,7 +1195,6 @@ _tbm_surface_internal_dump_file_raw(const char *file, void *data1, int size1, vo
 
 	fclose(fp);
 }
-#endif
 
 static void
 _tbm_surface_internal_dump_file_png(const char *file, const void *data, int width,
@@ -1266,8 +1272,8 @@ tbm_surface_internal_dump_start(char *path, int buffer_size, int count)
 	TBM_RETURN_IF_FAIL(count > 0);
 
 	tbm_surface_dump_buf_info *buf_info = NULL;
+	tbm_surface_dump_buf_info *tmp;
 	tbm_bo bo = NULL;
-	tbm_bo_handle bo_handle;
 	int i;
 
 	/* check running */
@@ -1282,16 +1288,17 @@ tbm_surface_internal_dump_start(char *path, int buffer_size, int count)
 	TBM_RETURN_IF_FAIL(g_dump_info);
 
 	LIST_INITHEAD(&g_dump_info->surface_list);
+	g_dump_info->count = 0;
+	g_dump_info->dump_max = count;
 
 	for (i = 0; i < count; i++)	{
-		buf_info = calloc(1, sizeof (tbm_surface_dump_buf_info));
+		buf_info = calloc(1, sizeof(tbm_surface_dump_buf_info));
 		TBM_GOTO_VAL_IF_FAIL(buf_info, fail);
 		bo = tbm_bo_alloc(g_surface_bufmgr, buffer_size, TBM_BO_DEFAULT);
-		TBM_GOTO_VAL_IF_FAIL(bo, fail);
-
-		bo_handle = tbm_bo_map(bo, TBM_DEVICE_CPU, TBM_OPTION_WRITE);
-		memset(bo_handle.ptr, 0x00, buffer_size);
-		tbm_bo_unmap(bo);
+		if (bo == NULL) {
+			free(buf_info);
+			goto fail;
+		}
 
 		buf_info->index = i;
 		buf_info->bo = bo;
@@ -1303,11 +1310,23 @@ tbm_surface_internal_dump_start(char *path, int buffer_size, int count)
 	g_dump_info->path = path;
 	g_dump_info->link = &g_dump_info->surface_list;
 
-	TBM_LOG("Dump Start.. path:%s\n", g_dump_info->path);
+	TBM_LOG("Dump Start.. path:%s, count:%d\n", g_dump_info->path, count);
 
 	return;
 fail:
-// TODO:
+	/* free resources */
+	if (!LIST_IS_EMPTY(&g_dump_info->surface_list)) {
+		LIST_FOR_EACH_ENTRY_SAFE(buf_info, tmp, &g_dump_info->surface_list, link) {
+			tbm_bo_unref(buf_info->bo);
+			free(buf_info);
+		}
+	}
+
+	TBM_LOG("Dump Start fail.. path:%s\n", g_dump_info->path);
+
+	free(g_dump_info);
+	g_dump_info = NULL;
+
 	return;
 }
 
@@ -1315,7 +1334,6 @@ void
 tbm_surface_internal_dump_end(void)
 {
 	tbm_surface_dump_buf_info *buf_info, *tmp;
-	char file[2048] = {0, };
 	tbm_bo_handle bo_handle;
 
     if (!g_dump_info)
@@ -1325,35 +1343,56 @@ tbm_surface_internal_dump_end(void)
 	if (!LIST_IS_EMPTY(&g_dump_info->surface_list)) {
 		LIST_FOR_EACH_ENTRY_SAFE(buf_info, tmp, &g_dump_info->surface_list, link) {
 			if (buf_info->dirty) {
+				char file[2048];
+				void *ptr1 = NULL;
+				void *ptr2 = NULL;
+
+				bo_handle = tbm_bo_map(buf_info->bo, TBM_DEVICE_CPU, TBM_OPTION_READ);
+				if (bo_handle.ptr == NULL)
+					continue;
+
+				snprintf(file, sizeof(file), "%s/%s", g_dump_info->path, buf_info->name);
+				TBM_LOG("Dump File.. %s generated.\n", file);
+
 				switch (buf_info->info.format) {
 				case TBM_FORMAT_ARGB8888:
 				case TBM_FORMAT_XRGB8888:
-					bo_handle = tbm_bo_map(buf_info->bo, TBM_DEVICE_CPU, TBM_OPTION_READ);
-					if (bo_handle.ptr == NULL)
-						continue;
-					snprintf(file, sizeof(file), "%s/%s", g_dump_info->path, buf_info->name);
-					TBM_LOG("Dump File.. %s generated.\n", file);
 					_tbm_surface_internal_dump_file_png(file, bo_handle.ptr,
 											buf_info->info.planes[0].stride >> 2, buf_info->info.height);
 					break;
 				case TBM_FORMAT_YVU420:
 				case TBM_FORMAT_YUV420:
-					// TODO:
+					ptr1 = bo_handle.ptr + buf_info->info.planes[0].stride * buf_info->info.height;
+					ptr2 = ptr1 + buf_info->info.planes[1].stride * (buf_info->info.height >> 1);
+					_tbm_surface_internal_dump_file_raw(file, bo_handle.ptr,
+									buf_info->info.planes[0].stride * buf_info->info.height,
+									ptr1,
+									buf_info->info.planes[1].stride * (buf_info->info.height >> 1),
+									ptr2,
+									buf_info->info.planes[2].stride * (buf_info->info.height >> 1));
 					break;
 				case TBM_FORMAT_NV12:
 				case TBM_FORMAT_NV21:
-					// TODO:
+					ptr1 = bo_handle.ptr + buf_info->info.planes[0].stride * buf_info->info.height;
+					_tbm_surface_internal_dump_file_raw(file, bo_handle.ptr,
+									buf_info->info.planes[0].stride * buf_info->info.height,
+									ptr1,
+									buf_info->info.planes[1].stride * (buf_info->info.height >> 1),
+									NULL, 0);
 					break;
 				case TBM_FORMAT_YUYV:
 				case TBM_FORMAT_UYVY:
-					// TODO:
+					_tbm_surface_internal_dump_file_raw(file, bo_handle.ptr,
+									buf_info->info.planes[0].stride * buf_info->info.height,
+									NULL, 0, NULL, 0);
 					break;
 				default:
-					//TDM_ERR("can't dump %c%c%c%c buffer", FOURCC_STR (info.format));
-					TBM_LOG("can't dump\n");
+					TBM_LOG("can't dump %c%c%c%c buffer", FOURCC_STR(buf_info->info.format));
 					tbm_bo_unmap(buf_info->bo);
 					return;
 				}
+
+				tbm_bo_unmap(buf_info->bo);
 			}
 		}
 	}
@@ -1392,8 +1431,7 @@ tbm_internal_surface_dump_buffer(tbm_surface_h surface, const char *type)
 	next_link = g_dump_info->link->next;
 	TBM_RETURN_IF_FAIL(next_link != NULL);
 
-	if (next_link == &g_dump_info->surface_list)
-	{
+	if (next_link == &g_dump_info->surface_list) {
 		next_link = next_link->next;
 		TBM_RETURN_IF_FAIL(next_link != NULL);
 	}
@@ -1410,33 +1448,45 @@ tbm_internal_surface_dump_buffer(tbm_surface_h surface, const char *type)
 		postfix = dump_postfix[1];
 
 	/* make the file information */
-    snprintf(buf_info->name, sizeof(buf_info->name), "%d-%s.%s", buf_info->index, type, postfix);
 	memcpy(&buf_info->info, &info, sizeof(tbm_surface_info_s));
 
 	/* dump */
 	bo_handle = tbm_bo_map(buf_info->bo, TBM_DEVICE_CPU, TBM_OPTION_WRITE);
 	TBM_RETURN_IF_FAIL(bo_handle.ptr != NULL);
+	memset(bo_handle.ptr, 0x00, buf_info->size);
 
 	switch (info.format) {
 	case TBM_FORMAT_ARGB8888:
 	case TBM_FORMAT_XRGB8888:
+		snprintf(buf_info->name, sizeof(buf_info->name), "%03d-%s.%s", g_dump_info->count++, type, postfix);
 		memcpy(bo_handle.ptr, info.planes[0].ptr, info.size);
 		break;
 	case TBM_FORMAT_YVU420:
 	case TBM_FORMAT_YUV420:
-		// TODO:
+		snprintf(buf_info->name, sizeof(buf_info->name), "%03d-%s_%dx%d_%c%c%c%c.%s",
+				g_dump_info->count++, type, info.planes[0].stride, info.height, FOURCC_STR(info.format), postfix);
+		memcpy(bo_handle.ptr, info.planes[0].ptr, info.planes[0].stride * info.height);
+		bo_handle.ptr += info.planes[0].stride * info.height;
+		memcpy(bo_handle.ptr, info.planes[1].ptr, info.planes[1].stride * (info.height >> 1));
+		bo_handle.ptr += info.planes[1].stride * (info.height >> 1);
+		memcpy(bo_handle.ptr, info.planes[2].ptr, info.planes[2].stride * (info.height >> 1));
 		break;
 	case TBM_FORMAT_NV12:
 	case TBM_FORMAT_NV21:
-		// TODO:
+		snprintf(buf_info->name, sizeof(buf_info->name), "%03d-%s_%dx%d_%c%c%c%c.%s",
+				g_dump_info->count++, type, info.planes[0].stride, info.height, FOURCC_STR(info.format), postfix);
+		memcpy(bo_handle.ptr, info.planes[0].ptr, info.planes[0].stride * info.height);
+		bo_handle.ptr += info.planes[0].stride * info.height;
+		memcpy(bo_handle.ptr, info.planes[1].ptr, info.planes[1].stride * (info.height >> 1));
 		break;
 	case TBM_FORMAT_YUYV:
 	case TBM_FORMAT_UYVY:
-		// TODO:
+		snprintf(buf_info->name, sizeof(buf_info->name), "%03d-%s_%dx%d_%c%c%c%c.%s",
+				g_dump_info->count++, type, info.planes[0].stride, info.height, FOURCC_STR(info.format), postfix);
+		memcpy(bo_handle.ptr, info.planes[0].ptr, info.planes[0].stride * info.height);
 		break;
 	default:
-		//TDM_ERR("can't dump %c%c%c%c buffer", FOURCC_STR (info.format));
-		TBM_LOG("can't dump\n");
+		TBM_LOG("can't copy %c%c%c%c buffer", FOURCC_STR(info.format));
 		tbm_bo_unmap(buf_info->bo);
 		return;
 	}
@@ -1446,6 +1496,10 @@ tbm_internal_surface_dump_buffer(tbm_surface_h surface, const char *type)
 	tbm_surface_unmap(surface);
 
 	buf_info->dirty = 1;
+
+	if (g_dump_info->count == 1000)
+		g_dump_info->count = 0;
+
 	g_dump_info->link = next_link;
 
 	TBM_LOG("Dump %s \n", buf_info->name);
