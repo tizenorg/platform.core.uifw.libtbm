@@ -50,8 +50,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 typedef struct {
 	struct list_head head;
-	struct list_head tail;
-
 	int count;
 } queue;
 
@@ -132,7 +130,7 @@ _queue_node_delete(queue_node *node)
 static int
 _queue_is_empty(queue *queue)
 {
-	if (queue->head.next == &queue->tail)
+	if (LIST_IS_EMPTY(&queue->head))
 		return 1;
 
 	return 0;
@@ -141,7 +139,7 @@ _queue_is_empty(queue *queue)
 static void
 _queue_node_push_back(queue *queue, queue_node *node)
 {
-	LIST_ADDTAIL(&node->item_link, &queue->tail);
+	LIST_ADDTAIL(&node->item_link, &queue->head);
 	queue->count++;
 }
 
@@ -244,8 +242,7 @@ static void
 _queue_init(queue *queue)
 {
 	LIST_INITHEAD(&queue->head);
-	LIST_INITHEAD(&queue->tail);
-	LIST_ADDTAIL(&queue->head, &queue->tail);
+
 	queue->count = 0;
 }
 
