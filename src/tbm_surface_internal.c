@@ -1265,16 +1265,20 @@ _tbm_surface_internal_dump_file_png(const char *file, const void *data, int widt
 }
 
 void
-tbm_surface_internal_dump_start(char *path, int buffer_size, int count)
+tbm_surface_internal_dump_start(char *path, int w, int h, int count)
 {
 	TBM_RETURN_IF_FAIL(path != NULL);
-	TBM_RETURN_IF_FAIL(buffer_size > 0);
+	TBM_RETURN_IF_FAIL(w > 0);
+	TBM_RETURN_IF_FAIL(h > 0);
 	TBM_RETURN_IF_FAIL(count > 0);
 
 	tbm_surface_dump_buf_info *buf_info = NULL;
 	tbm_surface_dump_buf_info *tmp;
 	tbm_bo bo = NULL;
 	int i;
+	int buffer_size;
+	tbm_surface_h tbm_surface;
+	tbm_surface_info_s info;
 
 	/* check running */
 	if (g_dump_info) {
@@ -1290,6 +1294,12 @@ tbm_surface_internal_dump_start(char *path, int buffer_size, int count)
 	LIST_INITHEAD(&g_dump_info->surface_list);
 	g_dump_info->count = 0;
 	g_dump_info->dump_max = count;
+
+	tbm_surface = tbm_surface_create(w, h, TBM_FORMAT_ARGB8888);
+	tbm_surface_map(tbm_surface, TBM_SURF_OPTION_READ, &info);
+	buffer_size = info.planes[0].stride * h;
+	tbm_surface_unmap(tbm_surface);
+	tbm_surface_destroy(tbm_surface);
 
 	for (i = 0; i < count; i++)	{
 		buf_info = calloc(1, sizeof(tbm_surface_dump_buf_info));
