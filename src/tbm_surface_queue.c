@@ -607,7 +607,7 @@ tbm_surface_queue_add_reset_cb(
 
 	TBM_QUEUE_TRACE("tbm_surface_queue(%p)\n", surface_queue);
 
-	_notify_add(&surface_queue->acquirable_noti, reset_cb, data);
+	_notify_add(&surface_queue->reset_noti, reset_cb, data);
 
 	pthread_mutex_unlock(&surface_queue->lock);
 
