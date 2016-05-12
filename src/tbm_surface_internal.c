@@ -1468,6 +1468,12 @@ tbm_internal_surface_dump_buffer(tbm_surface_h surface, const char *type)
 	ret = tbm_surface_map(surface, TBM_SURF_OPTION_READ|TBM_SURF_OPTION_WRITE, &info);
 	TBM_RETURN_IF_FAIL(ret == TBM_SURFACE_ERROR_NONE);
 
+	if (info.size > buf_info->size) {
+		TBM_LOG("Dump skip. surface over created buffer size(%d, %d)\n", info.size, buf_info->size);
+		tbm_surface_unmap(surface);
+		return;
+	}
+
 	if (info.format == TBM_FORMAT_ARGB8888 || info.format == TBM_FORMAT_XRGB8888)
 		postfix = dump_postfix[0];
 	else
