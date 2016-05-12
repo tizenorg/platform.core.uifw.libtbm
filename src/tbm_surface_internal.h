@@ -401,11 +401,12 @@ int tbm_surface_internal_delete_user_data(tbm_surface_h surface,
  * @brief Start the dump debugging.
  * @since_tizen 3.0
  * @param[in] path The given dump path
- * @param[in] buffer_size the buffer size of a dump image
+ * @param[in] w The width of dump image
+ * @param[in] h The height of dump image
  * @param[in] count The dump count number
  * @see #tdm_helper_dump_stop()
  */
-void tbm_surface_internal_dump_start(char *path, int buffer_size, int count);
+void tbm_surface_internal_dump_start(char *path, int w, int h, int count);
 
 /**
  * @brief End the dump debugging.
