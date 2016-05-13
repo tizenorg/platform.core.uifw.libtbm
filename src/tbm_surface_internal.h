@@ -400,10 +400,10 @@ int tbm_surface_internal_delete_user_data(tbm_surface_h surface,
 /**
  * @brief Start the dump debugging.
  * @since_tizen 3.0
- * @param[in] path The given dump path
- * @param[in] w The width of dump image
- * @param[in] h The height of dump image
- * @param[in] count The dump count number
+ * @param[in] path : the given dump path
+ * @param[in] w : the width of dump image
+ * @param[in] h : the height of dump image
+ * @param[in] count : the dump count number
  * @see #tdm_helper_dump_stop()
  */
 void tbm_surface_internal_dump_start(char *path, int w, int h, int count);
@@ -429,10 +429,10 @@ void tbm_surface_internal_dump_end(void);
  * - TBM_FORMAT_UYVY
  * The filename extension should be "png" for TBM_FORMAT_ARGB8888 and TBM_FORMAT_XRGB8888
  * or "yuv" for YUV formats.
- * @param[in] surface a tbm surface
- * @param[in] type   a string used by a file name.
+ * @param[in] surface : a tbm surface
+ * @param[in] type : a string used by a file name.
  */
-void tbm_internal_surface_dump_buffer(tbm_surface_h surface, const char *type);
+void tbm_surface_internal_dump_buffer(tbm_surface_h surface, const char *type);
 
 /**
  * @brief check valid tbm surface.

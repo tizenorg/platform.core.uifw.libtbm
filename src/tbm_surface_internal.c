@@ -1439,7 +1439,7 @@ tbm_surface_internal_dump_end(void)
 }
 
 void
-tbm_internal_surface_dump_buffer(tbm_surface_h surface, const char *type)
+tbm_surface_internal_dump_buffer(tbm_surface_h surface, const char *type)
 {
 	TBM_RETURN_IF_FAIL(surface != NULL);
 	TBM_RETURN_IF_FAIL(type != NULL);
