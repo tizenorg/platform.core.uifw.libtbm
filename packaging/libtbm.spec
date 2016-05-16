@@ -16,6 +16,7 @@ BuildRequires:  pkgconfig(wayland-client)
 BuildRequires:  pkgconfig(pthread-stubs)
 BuildRequires:  pkgconfig(capi-base-common)
 BuildRequires:  pkgconfig(libpng)
+BuildRequires:  pkgconfig(dlog)
 
 %description
 Description: %{summary}
