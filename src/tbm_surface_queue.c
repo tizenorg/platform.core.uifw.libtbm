@@ -36,12 +36,12 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define DIRTY_QUEUE	2
 #define NODE_LIST	4
 
-#define DEBUG 0
+#define TBM_QUEUE_DEBUG 0
 
-#if DEBUG
+#if TBM_QUEUE_DEBUG
 #define TBM_QUEUE_TRACE(fmt, ...)  fprintf(stderr, "[TBM(%d):%s] " fmt, getpid(), __func__, ##__VA_ARGS__)
-#define TBM_LOCK() TBM_LOG("[LOCK] %s:%d surface:%p\n", __func__, __LINE__, surface_queue)
-#define TBM_UNLOCK() TBM_LOG("[UNLOCK] %s:%d surface:%p\n", __func__, __LINE__, surface_queue)
+#define TBM_LOCK() TBM_LOG_D("[LOCK] %s:%d surface:%p\n", __func__, __LINE__, surface_queue)
+#define TBM_UNLOCK() TBM_LOG_D("[UNLOCK] %s:%d surface:%p\n", __func__, __LINE__, surface_queue)
 #else
 #define TBM_QUEUE_TRACE(fmt, ...)
 #define TBM_LOCK()
@@ -277,7 +277,7 @@ _notify_remove(struct list_head *list,
 		}
 	}
 
-	TBM_LOG("Cannot find notifiy\n");
+	TBM_LOG_E("Cannot find notifiy\n");
 }
 
 static void
@@ -651,7 +651,7 @@ tbm_surface_queue_enqueue(tbm_surface_queue_h
 
 	node = _queue_get_node(surface_queue, 0, surface, &queue_type);
 	if (node == NULL || queue_type != NODE_LIST) {
-		TBM_LOG("tbm_surface_queue_enqueue::Surface exist in free_queue or dirty_queue node:%p, queue:%d\n",
+		TBM_LOG_E("tbm_surface_queue_enqueue::Surface exist in free_queue or dirty_queue node:%p, queue:%d\n",
 			node, queue_type);
 		pthread_mutex_unlock(&surface_queue->lock);
 		return TBM_SURFACE_QUEUE_ERROR_INVALID_SURFACE;
@@ -701,7 +701,7 @@ tbm_surface_queue_dequeue(tbm_surface_queue_h
 
 	if (node->surface == NULL) {
 		*surface = NULL;
-		TBM_LOG("_queue_node_pop_front  failed\n");
+		TBM_LOG_E("_queue_node_pop_front  failed\n");
 		pthread_mutex_unlock(&surface_queue->lock);
 		return TBM_SURFACE_QUEUE_ERROR_INVALID_QUEUE;
 	}
@@ -763,7 +763,7 @@ tbm_surface_queue_release(tbm_surface_queue_h
 
 	node = _queue_get_node(surface_queue, 0, surface, &queue_type);
 	if (node == NULL || queue_type != NODE_LIST) {
-		TBM_LOG("tbm_surface_queue_release::Surface exist in free_queue or dirty_queue node:%p, queue:%d\n",
+		TBM_LOG_E("tbm_surface_queue_release::Surface exist in free_queue or dirty_queue node:%p, queue:%d\n",
 			node, queue_type);
 		pthread_mutex_unlock(&surface_queue->lock);
 		return TBM_SURFACE_QUEUE_ERROR_INVALID_SURFACE;
@@ -813,7 +813,7 @@ tbm_surface_queue_acquire(tbm_surface_queue_h
 
 	if (node->surface == NULL) {
 		*surface = NULL;
-		TBM_LOG("_queue_node_pop_front  failed\n");
+		TBM_LOG_E("_queue_node_pop_front  failed\n");
 		pthread_mutex_unlock(&surface_queue->lock);
 		return TBM_SURFACE_QUEUE_ERROR_INVALID_QUEUE;
 	}

@@ -181,7 +181,7 @@ _tbm_surface_mutex_init(void)
 		return true;
 
 	if (pthread_mutex_init(&tbm_surface_lock, NULL)) {
-		TBM_LOG("[libtbm] fail: tbm_surface mutex init\n");
+		TBM_LOG_E("fail: tbm_surface mutex init\n");
 		return false;
 	}
 
@@ -265,8 +265,7 @@ _tbm_surface_internal_destroy(tbm_surface_h surface)
 	/* destory the user_data_list */
 	if (!LIST_IS_EMPTY(&surface->user_data_list)) {
 		LIST_FOR_EACH_ENTRY_SAFE(old_data, tmp, &surface->user_data_list, item_link) {
-			TBM_LOG("[tbm_surface:%d] free user_data\n",
-				getpid());
+			DBG("free user_data\n");
 			user_data_delete(old_data);
 		}
 	}
@@ -575,9 +574,7 @@ tbm_surface_internal_create_with_flags(int width, int height,
 
 			bo = calloc(1, sizeof(struct _tbm_bo));
 			if (!bo) {
-				TBM_LOG("[libtbm:%d] "
-					"error %s:%d fail to alloc bo struct\n",
-					getpid(), __func__, __LINE__);
+				TBM_LOG_E("fail to alloc bo struct\n");
 				goto alloc_fail;
 			}
 
@@ -587,9 +584,7 @@ tbm_surface_internal_create_with_flags(int width, int height,
 
 			bo_priv = mgr->backend->surface_bo_alloc (bo, width, height, format, flags, i);
 			if (!bo_priv) {
-				TBM_LOG("[libtbm:%d] "
-					"error %s:%d fail to alloc bo priv\n",
-					getpid(), __func__, __LINE__);
+				TBM_LOG_E("fail to alloc bo priv\n");
 				free(bo);
 				pthread_mutex_unlock(&surf->bufmgr->lock);
 				goto alloc_fail;
@@ -612,9 +607,7 @@ tbm_surface_internal_create_with_flags(int width, int height,
 		}
 
 		if (!surf->bos[i]) {
-			TBM_LOG("[libtbm:%d] "
-				"error %s:%d fail to alloc bo\n",
-				getpid(), __func__, __LINE__);
+			TBM_LOG_E("fail to alloc bo idx:%d\n", i);
 			goto alloc_fail;
 		}
 
@@ -1064,9 +1057,7 @@ tbm_surface_internal_add_user_data(tbm_surface_h surface, unsigned long key,
 	/* check if the data according to the key exist if so, return false. */
 	data = user_data_lookup(&surface->user_data_list, key);
 	if (data) {
-		TBM_LOG("[libtbm:%d] "
-			"waring: %s:%d user data already exist. key:%ld\n",
-			getpid(), __func__, __LINE__, key);
+		TBM_LOG_W("waring user data already exist. key:%ld\n", key);
 		return 0;
 	}
 
@@ -1278,9 +1269,7 @@ tbm_surface_internal_dump_start(char *path, int buffer_size, int count)
 
 	/* check running */
 	if (g_dump_info) {
-		TBM_LOG("[libtbm:%d] "
-			"waring: %s:%d already running the tbm_surface_internal_dump.\n",
-			getpid(), __func__, __LINE__);
+		TBM_LOG_W("waring already running the tbm_surface_internal_dump.\n");
 		return;
 	}
 
@@ -1310,7 +1299,7 @@ tbm_surface_internal_dump_start(char *path, int buffer_size, int count)
 	g_dump_info->path = path;
 	g_dump_info->link = &g_dump_info->surface_list;
 
-	TBM_LOG("Dump Start.. path:%s, count:%d\n", g_dump_info->path, count);
+	TBM_LOG_I("Dump Start.. path:%s, count:%d\n", g_dump_info->path, count);
 
 	return;
 fail:
@@ -1322,7 +1311,7 @@ fail:
 		}
 	}
 
-	TBM_LOG("Dump Start fail.. path:%s\n", g_dump_info->path);
+	TBM_LOG_E("Dump Start fail.. path:%s\n", g_dump_info->path);
 
 	free(g_dump_info);
 	g_dump_info = NULL;
@@ -1352,7 +1341,7 @@ tbm_surface_internal_dump_end(void)
 					continue;
 
 				snprintf(file, sizeof(file), "%s/%s", g_dump_info->path, buf_info->name);
-				TBM_LOG("Dump File.. %s generated.\n", file);
+				TBM_LOG_I("Dump File.. %s generated.\n", file);
 
 				switch (buf_info->info.format) {
 				case TBM_FORMAT_ARGB8888:
@@ -1387,7 +1376,7 @@ tbm_surface_internal_dump_end(void)
 									NULL, 0, NULL, 0);
 					break;
 				default:
-					TBM_LOG("can't dump %c%c%c%c buffer", FOURCC_STR(buf_info->info.format));
+					TBM_LOG_E("can't dump %c%c%c%c buffer", FOURCC_STR(buf_info->info.format));
 					tbm_bo_unmap(buf_info->bo);
 					return;
 				}
@@ -1409,7 +1398,7 @@ tbm_surface_internal_dump_end(void)
 	free(g_dump_info);
 	g_dump_info = NULL;
 
-	TBM_LOG("Dump End..\n");
+	TBM_LOG_I("Dump End..\n");
 }
 
 void
@@ -1486,7 +1475,7 @@ tbm_internal_surface_dump_buffer(tbm_surface_h surface, const char *type)
 		memcpy(bo_handle.ptr, info.planes[0].ptr, info.planes[0].stride * info.height);
 		break;
 	default:
-		TBM_LOG("can't copy %c%c%c%c buffer", FOURCC_STR(info.format));
+		TBM_LOG_E("can't copy %c%c%c%c buffer", FOURCC_STR(info.format));
 		tbm_bo_unmap(buf_info->bo);
 		return;
 	}
@@ -1502,6 +1491,6 @@ tbm_internal_surface_dump_buffer(tbm_surface_h surface, const char *type)
 
 	g_dump_info->link = next_link;
 
-	TBM_LOG("Dump %s \n", buf_info->name);
+	TBM_LOG_I("Dump %s \n", buf_info->name);
 }
 

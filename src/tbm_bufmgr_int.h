@@ -51,22 +51,88 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <tbm_bufmgr_backend.h>
 #include <tbm_surface_queue.h>
 
+#define DEBUG
+#ifdef DEBUG
+extern int bDebug;
+
+#define DBG(...) {if (bDebug&0x1) TBM_LOG_D(__VA_ARGS__);}
+#define DBG_LOCK(...) {if (bDebug&0x2) TBM_LOG_D(__VA_ARGS__);}
+#else
+#define DBG(...)
+#define DBG_LOCK(...)
+#endif /* DEBUG */
+
+#ifdef HAVE_DLOG
+#include <dlog.h>
+
+extern int bDlog;
+
+#ifdef LOG_TAG
+#undef LOG_TAG
+#endif
+
+#define LOG_TAG "TBM"
+
+#define TBM_LOG_D(fmt, ...) {\
+	if (bDlog) {\
+		LOGD("[TBM:D] " fmt, ##__VA_ARGS__);\
+	} \
+	else {\
+		fprintf(stderr, "[TBM:D(%d)(%s:%d)] " fmt, getpid(), __func__, __LINE__, ##__VA_ARGS__);\
+	} \
+}
+
+#define TBM_LOG_I(fmt, ...) {\
+	if (bDlog) {\
+		LOGD("[TBM:I] " fmt, ##__VA_ARGS__);\
+	} \
+	else {\
+		fprintf(stderr, "[TBM:I(%d)(%s:%d)] " fmt, getpid(), __func__, __LINE__, ##__VA_ARGS__);\
+	} \
+}
+
+#define TBM_LOG_W(fmt, ...) {\
+	if (bDlog) {\
+		LOGW("[TBM:W] " fmt, ##__VA_ARGS__);\
+	} \
+	else {\
+		fprintf(stderr, "[TBM:W(%d)(%s:%d)] " fmt, getpid(), __func__, __LINE__, ##__VA_ARGS__);\
+	} \
+}
+
+#define TBM_LOG_E(fmt, ...) {\
+	if (bDlog) {\
+		LOGE("[TBM:E] " fmt, ##__VA_ARGS__);\
+	} \
+	else {\
+		fprintf(stderr, "[TBM:E(%d)(%s:%d)] " fmt, getpid(), __func__, __LINE__, ##__VA_ARGS__);\
+	} \
+}
+#else
+#define TBM_LOG_D(fmt, ...)   fprintf(stderr, "[TBM:D(%d)(%s:%d)] " fmt, getpid(), __func__, __LINE__, ##__VA_ARGS__)
+#define TBM_LOG_I(fmt, ...)   fprintf(stderr, "[TBM:I(%d)(%s:%d)] " fmt, getpid(), __func__, __LINE__, ##__VA_ARGS__)
+#define TBM_LOG_W(fmt, ...)   fprintf(stderr, "[TBM:W(%d)(%s:%d)] " fmt, getpid(), __func__, __LINE__, ##__VA_ARGS__)
+#define TBM_LOG_E(fmt, ...)   fprintf(stderr, "[TBM:E(%d)(%s:%d)] " fmt, getpid(), __func__, __LINE__, ##__VA_ARGS__)
+#endif /* HAVE_DLOG */
+
+#define TBM_DEBUG(fmt, ...)   fprintf(stderr, "[TBM:DEBUG(%d)] " fmt, getpid(), ##__VA_ARGS__)
+
 /* check condition */
 #define TBM_RETURN_IF_FAIL(cond) {\
 	if (!(cond)) {\
-		TBM_LOG("[%s] : '%s' failed.\n", __func__, #cond);\
+		TBM_LOG_E("'%s' failed.\n", #cond);\
 		return;\
 	} \
 }
 #define TBM_RETURN_VAL_IF_FAIL(cond, val) {\
 	if (!(cond)) {\
-		TBM_LOG("[%s] : '%s' failed.\n", __func__, #cond);\
+		TBM_LOG_E("'%s' failed.\n", #cond);\
 		return val;\
 	} \
 }
 #define TBM_GOTO_VAL_IF_FAIL(cond, val) {\
 	if (!(cond)) {\
-		TBM_LOG("[%s] : '%s' failed.\n", __func__, #cond);\
+		TBM_LOG_E("'%s' failed.\n", #cond);\
 		goto val;\
 	} \
 }
@@ -93,9 +159,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 				   TBM_BUFMGR_IS_VALID(surf->bufmgr) && \
 				   surf->item_link.next && \
 				   surf->item_link.next->prev == &surf->item_link)
-
-#define TBM_DEBUG(fmt, ...)   fprintf(stderr, "[TBM:DEBUG(%d)] " fmt, getpid(), ##__VA_ARGS__)
-#define TBM_LOG(fmt, ...)  fprintf(stderr, "[TBM(%d):%s] " fmt, getpid(), __func__, ##__VA_ARGS__)
 
 struct list_head {
 	struct list_head *prev;
