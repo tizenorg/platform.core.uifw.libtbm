@@ -1153,6 +1153,9 @@ struct _tbm_surface_dump_buf_info
 	tbm_bo bo;
 	int size;
 	int dirty;
+	int dirty_shm;
+	int shm_stride;
+	int shm_h;
 	char name[1024];
 
 	tbm_surface_info_s info;
@@ -1368,8 +1371,9 @@ tbm_surface_internal_dump_end(void)
 	/* make files */
 	if (!LIST_IS_EMPTY(&g_dump_info->surface_list)) {
 		LIST_FOR_EACH_ENTRY_SAFE(buf_info, tmp, &g_dump_info->surface_list, link) {
+			char file[2048];
+
 			if (buf_info->dirty) {
-				char file[2048];
 				void *ptr1 = NULL;
 				void *ptr2 = NULL;
 
@@ -1384,7 +1388,7 @@ tbm_surface_internal_dump_end(void)
 				case TBM_FORMAT_ARGB8888:
 				case TBM_FORMAT_XRGB8888:
 					_tbm_surface_internal_dump_file_png(file, bo_handle.ptr,
-											buf_info->info.planes[0].stride >> 2, buf_info->info.height);
+									buf_info->info.planes[0].stride >> 2, buf_info->info.height);
 					break;
 				case TBM_FORMAT_YVU420:
 				case TBM_FORMAT_YUV420:
@@ -1417,6 +1421,18 @@ tbm_surface_internal_dump_end(void)
 					tbm_bo_unmap(buf_info->bo);
 					return;
 				}
+
+				tbm_bo_unmap(buf_info->bo);
+			} else if (buf_info->dirty_shm) {
+				bo_handle = tbm_bo_map(buf_info->bo, TBM_DEVICE_CPU, TBM_OPTION_READ);
+				if (bo_handle.ptr == NULL)
+					continue;
+
+				snprintf(file, sizeof(file), "%s/%s", g_dump_info->path, buf_info->name);
+				TBM_LOG("Dump File.. %s generated.\n", file);
+
+				_tbm_surface_internal_dump_file_png(file, bo_handle.ptr,
+								buf_info->shm_stride >> 2, buf_info->shm_h);
 
 				tbm_bo_unmap(buf_info->bo);
 			}
@@ -1528,6 +1544,62 @@ tbm_surface_internal_dump_buffer(tbm_surface_h surface, const char *type)
 	tbm_surface_unmap(surface);
 
 	buf_info->dirty = 1;
+	buf_info->dirty_shm = 0;
+
+	if (g_dump_info->count == 1000)
+		g_dump_info->count = 0;
+
+	g_dump_info->link = next_link;
+
+	TBM_LOG("Dump %s \n", buf_info->name);
+}
+
+void tbm_surface_internal_dump_shm_buffer(void *ptr, int stride, int h, const char *type)
+{
+	TBM_RETURN_IF_FAIL(ptr != NULL);
+	TBM_RETURN_IF_FAIL(stride > 0);
+	TBM_RETURN_IF_FAIL(h > 0);
+	TBM_RETURN_IF_FAIL(type != NULL);
+
+	tbm_surface_dump_buf_info *buf_info;
+	struct list_head *next_link;
+	tbm_bo_handle bo_handle;
+
+    if (!g_dump_info)
+		return;
+
+	next_link = g_dump_info->link->next;
+	TBM_RETURN_IF_FAIL(next_link != NULL);
+
+	if (next_link == &g_dump_info->surface_list) {
+		next_link = next_link->next;
+		TBM_RETURN_IF_FAIL(next_link != NULL);
+	}
+
+	buf_info = LIST_ENTRY(tbm_surface_dump_buf_info, next_link, link);
+	TBM_RETURN_IF_FAIL(buf_info != NULL);
+
+	if (stride * h > buf_info->size) {
+		TBM_LOG("Dump skip. shm buffer over created buffer size(%d, %d)\n", stride * h, buf_info->size);
+		return;
+	}
+
+	/* dump */
+	bo_handle = tbm_bo_map(buf_info->bo, TBM_DEVICE_CPU, TBM_OPTION_WRITE);
+	TBM_RETURN_IF_FAIL(bo_handle.ptr != NULL);
+	memset(bo_handle.ptr, 0x00, buf_info->size);
+	memset(&buf_info->info, 0x00, sizeof(tbm_surface_info_s));
+
+
+	snprintf(buf_info->name, sizeof(buf_info->name), "%03d-%s.%s", g_dump_info->count++, type, dump_postfix[0]);
+	memcpy(bo_handle.ptr, ptr, stride * h);
+
+	tbm_bo_unmap(buf_info->bo);
+
+	buf_info->dirty = 0;
+	buf_info->dirty_shm = 1;
+	buf_info->shm_stride = stride;
+	buf_info->shm_h = h;
 
 	if (g_dump_info->count == 1000)
 		g_dump_info->count = 0;
