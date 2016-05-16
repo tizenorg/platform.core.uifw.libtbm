@@ -430,9 +430,21 @@ void tbm_surface_internal_dump_end(void);
  * The filename extension should be "png" for TBM_FORMAT_ARGB8888 and TBM_FORMAT_XRGB8888
  * or "yuv" for YUV formats.
  * @param[in] surface : a tbm surface
- * @param[in] type : a string used by a file name.
+ * @param[in] type : a string used by a file name
  */
 void tbm_surface_internal_dump_buffer(tbm_surface_h surface, const char *type);
+
+/**
+ * @brief Dump a shared memory buffer
+ * @details
+ * This function supports shared memory buffer dump.
+ * @param[in] ptr : a pointer of dump buffer
+ * @param[in] w : a width of dump buffer
+ * @param[in] h : a height of dump buffer
+ * @param[in] stride : a stride of dump buffer
+ * @param[in] type : a string used by a file name
+ */
+void tbm_surface_internal_dump_shm_buffer(void *ptr, int w, int h, int stride, const char *type);
 
 /**
  * @brief check valid tbm surface.
