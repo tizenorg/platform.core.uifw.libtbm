@@ -60,16 +60,12 @@ void tbm_backend_free(tbm_bufmgr_backend backend)
 int tbm_backend_init(tbm_bufmgr bufmgr, tbm_bufmgr_backend backend)
 {
 	if (!bufmgr) {
-		TBM_LOG("[libtbm:%d] "
-			"error (%s): fail to init tbm backend... bufmgr is null\n", getpid(),
-			__func__);
+		TBM_LOG_E("error: fail to init tbm backend... bufmgr is null\n");
 		return 0;
 	}
 
 	if (!backend) {
-		TBM_LOG("[libtbm:%d] "
-			"error (%s): fail to init tbm backend... backend is null\n", getpid(),
-			__func__);
+		TBM_LOG_E("error: fail to init tbm backend... backend is null\n");
 		return 0;
 	}
 
