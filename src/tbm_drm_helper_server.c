@@ -75,7 +75,7 @@ _send_server_auth_info(struct wayland_tbm_drm_auth_server *tbm_drm_auth_srv,
 	}
 
 	if (fd < 0) {
-		TBM_LOG("failed to open drm : device_name, %s\n", tbm_drm_auth_srv->device_name);
+		TBM_LOG_E("failed to open drm : device_name, %s\n", tbm_drm_auth_srv->device_name);
 
 		wl_resource_post_error(resource, WL_TBM_DRM_AUTH_ERROR_AUTHENTICATE_FAIL,
 				       "authenicate failed::open_drm");
@@ -84,7 +84,7 @@ _send_server_auth_info(struct wayland_tbm_drm_auth_server *tbm_drm_auth_srv,
 
 	if (drmGetMagic(fd, &magic) < 0) {
 		if (errno != EACCES) {
-			TBM_LOG("failed to get magic\n");
+			TBM_LOG_E("failed to get magic\n");
 
 			wl_resource_post_error(resource, WL_TBM_DRM_AUTH_ERROR_AUTHENTICATE_FAIL,
 					       "authenicate failed::get_magic");
@@ -93,7 +93,7 @@ _send_server_auth_info(struct wayland_tbm_drm_auth_server *tbm_drm_auth_srv,
 	}
 
 	if (drmAuthMagic(tbm_drm_auth_srv->fd, magic) < 0) {
-		TBM_LOG("failed to authenticate magic\n");
+		TBM_LOG_E("failed to authenticate magic\n");
 
 		wl_resource_post_error(resource, WL_TBM_DRM_AUTH_ERROR_AUTHENTICATE_FAIL,
 				       "authenicate failed::auth_magic");
@@ -164,7 +164,7 @@ tbm_drm_helper_wl_auth_server_init(void *wl_display,   int fd, const char *devic
 		tbm_drm_auth_srv->flags = flags;
 
 		if(wl_display_add_socket(tbm_drm_auth_srv->display, "tbm-drm-auth")) {
-			TBM_LOG("[TBM_DRM] fail to add socket\n");
+			TBM_LOG_E("[TBM_DRM] fail to add socket\n");
 
 			if (tbm_drm_auth_srv->device_name)
 				free(tbm_drm_auth_srv->device_name);
@@ -212,23 +212,23 @@ tbm_drm_helper_get_master_fd(void)
     if (ret <= 0)
         return -1;
 
-    TBM_LOG("TDM_DRM_MASTER_FD: %d\n", fd);
+    TBM_LOG_I("TDM_DRM_MASTER_FD: %d\n", fd);
 
     flags = fcntl(fd, F_GETFD);
     if (flags == -1) {
-        TBM_LOG("fcntl failed: %m");
+        TBM_LOG_E("fcntl failed: %m");
         return -1;
     }
 
     new_fd = dup(fd);
     if (new_fd < 0) {
-        TBM_LOG("dup failed: %m");
+        TBM_LOG_E("dup failed: %m");
         return -1;
     }
 
     fcntl(new_fd, F_SETFD, flags|FD_CLOEXEC);
 
-    TBM_LOG("Return MASTER_FD: %d\n", new_fd);
+    TBM_LOG_I("Return MASTER_FD: %d\n", new_fd);
 
     return new_fd;
 }
@@ -244,11 +244,11 @@ tbm_drm_helper_set_tbm_master_fd(int fd)
     ret = setenv("TBM_DRM_MASTER_FD", (const char*)buf, 1);
     if (ret)
     {
-        TBM_LOG("failed to set TIZEN_DRM_MASTER_FD to %d", fd);
+        TBM_LOG_E("failed to set TIZEN_DRM_MASTER_FD to %d", fd);
         return;
     }
 
-    TBM_LOG("TBM_DRM_MASTER_FD: %d\n", fd);
+    TBM_LOG_I("TBM_DRM_MASTER_FD: %d\n", fd);
 }
 
 void
@@ -259,7 +259,7 @@ tbm_drm_helper_unset_tbm_master_fd(void)
     ret = unsetenv("TBM_DRM_MASTER_FD");
     if (ret)
     {
-        TBM_LOG("failed to unset TBM_DRM_MASTER_FD");
+        TBM_LOG_E("failed to unset TBM_DRM_MASTER_FD");
         return;
     }
 }

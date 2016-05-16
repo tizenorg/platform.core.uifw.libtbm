@@ -98,7 +98,7 @@ tbm_drm_helper_get_auth_info(int *auth_fd, char **device, uint32_t *capabilities
 
 	display = wl_display_connect("tbm-drm-auth");
 	if (!display) {
-		TBM_LOG("Failed to connect display\n");
+		TBM_LOG_E("Failed to connect display\n");
 		free(tbm_drm_client);
 
 		return 0;
@@ -108,7 +108,7 @@ tbm_drm_helper_get_auth_info(int *auth_fd, char **device, uint32_t *capabilities
 
 	wl_registry = wl_display_get_registry(display);
 	if (!wl_registry) {
-		TBM_LOG("Failed to get registry\n");
+		TBM_LOG_E("Failed to get registry\n");
 		wl_display_disconnect(display);
 		free(tbm_drm_client);
 
@@ -119,7 +119,7 @@ tbm_drm_helper_get_auth_info(int *auth_fd, char **device, uint32_t *capabilities
 	wl_display_roundtrip(display); //For Gloabl registry
 
 	if (!tbm_drm_client->wl_tbm_drm_auth) {
-		TBM_LOG("Failed to get wl_tbm_drm_auth interface\n");
+		TBM_LOG_E("Failed to get wl_tbm_drm_auth interface\n");
 		wl_registry_destroy(wl_registry);
 		wl_display_disconnect(display);
 		free(tbm_drm_client);
@@ -131,7 +131,7 @@ tbm_drm_helper_get_auth_info(int *auth_fd, char **device, uint32_t *capabilities
 	wl_display_roundtrip(display);
 
 	if (tbm_drm_client->auth_fd < 0) {
-		TBM_LOG("Failed to get auth info\n");
+		TBM_LOG_E("Failed to get auth info\n");
 		wl_tbm_drm_auth_set_user_data(tbm_drm_client->wl_tbm_drm_auth, NULL);
 		wl_tbm_drm_auth_destroy(tbm_drm_client->wl_tbm_drm_auth);
 		wl_registry_destroy(wl_registry);
