@@ -1227,7 +1227,7 @@ _tbm_surface_internal_dump_file_png(const char *file, const void *data, int widt
 
 	const int pixel_size = 4;	// RGBA
 	png_bytep *row_pointers =
-	        png_malloc(pPngStruct, height * sizeof(png_byte *));
+			png_malloc(pPngStruct, height * sizeof(png_byte *));
 
 	unsigned int *blocks = (unsigned int *)data;
 	int y = 0;
@@ -1291,14 +1291,14 @@ tbm_surface_internal_dump_start(char *path, int w, int h, int count)
 	/* get buffer size */
 	tbm_surface = tbm_surface_create(w, h, TBM_FORMAT_ARGB8888);
 	if (tbm_surface == NULL) {
-		TBM_LOG("tbm_surface_create fail\n");
+		TBM_LOG_E("tbm_surface_create fail\n");
 		free(g_dump_info);
 		g_dump_info = NULL;
 		return;
 	}
 	err = tbm_surface_map(tbm_surface, TBM_SURF_OPTION_READ, &info);
 	if (err != TBM_SURFACE_ERROR_NONE) {
-		TBM_LOG("tbm_surface_map fail\n");
+		TBM_LOG_E("tbm_surface_map fail\n");
 		tbm_surface_destroy(tbm_surface);
 		free(g_dump_info);
 		g_dump_info = NULL;
@@ -1354,7 +1354,7 @@ tbm_surface_internal_dump_end(void)
 	tbm_surface_dump_buf_info *buf_info, *tmp;
 	tbm_bo_handle bo_handle;
 
-    if (!g_dump_info)
+	if (!g_dump_info)
 		return;
 
 	/* make files */
@@ -1418,7 +1418,7 @@ tbm_surface_internal_dump_end(void)
 					continue;
 
 				snprintf(file, sizeof(file), "%s/%s", g_dump_info->path, buf_info->name);
-				TBM_LOG("Dump File.. %s generated.\n", file);
+				TBM_LOG_I("Dump File.. %s generated.\n", file);
 
 				_tbm_surface_internal_dump_file_png(file, bo_handle.ptr,
 								buf_info->shm_stride >> 2, buf_info->shm_h);
@@ -1432,7 +1432,7 @@ tbm_surface_internal_dump_end(void)
 	/* free resources */
 	if (!LIST_IS_EMPTY(&g_dump_info->surface_list)) {
 		LIST_FOR_EACH_ENTRY_SAFE(buf_info, tmp, &g_dump_info->surface_list, link) {
-        	tbm_bo_unref(buf_info->bo);
+			tbm_bo_unref(buf_info->bo);
 			free(buf_info);
 		}
 	}
@@ -1456,7 +1456,7 @@ tbm_surface_internal_dump_buffer(tbm_surface_h surface, const char *type)
 	int ret;
 	const char *postfix;
 
-    if (!g_dump_info)
+	if (!g_dump_info)
 		return;
 
 	next_link = g_dump_info->link->next;
@@ -1474,7 +1474,7 @@ tbm_surface_internal_dump_buffer(tbm_surface_h surface, const char *type)
 	TBM_RETURN_IF_FAIL(ret == TBM_SURFACE_ERROR_NONE);
 
 	if (info.size > buf_info->size) {
-		TBM_LOG("Dump skip. surface over created buffer size(%d, %d)\n", info.size, buf_info->size);
+		TBM_LOG_W("Dump skip. surface over created buffer size(%d, %d)\n", info.size, buf_info->size);
 		tbm_surface_unmap(surface);
 		return;
 	}
@@ -1540,7 +1540,7 @@ tbm_surface_internal_dump_buffer(tbm_surface_h surface, const char *type)
 
 	g_dump_info->link = next_link;
 
-	TBM_LOG("Dump %s \n", buf_info->name);
+	TBM_LOG_I("Dump %s \n", buf_info->name);
 }
 
 void tbm_surface_internal_dump_shm_buffer(void *ptr, int w, int h, int  stride, const char *type)
@@ -1570,7 +1570,7 @@ void tbm_surface_internal_dump_shm_buffer(void *ptr, int w, int h, int  stride, 
 	TBM_RETURN_IF_FAIL(buf_info != NULL);
 
 	if (stride * h > buf_info->size) {
-		TBM_LOG("Dump skip. shm buffer over created buffer size(%d, %d)\n", stride * h, buf_info->size);
+		TBM_LOG_W("Dump skip. shm buffer over created buffer size(%d, %d)\n", stride * h, buf_info->size);
 		return;
 	}
 
