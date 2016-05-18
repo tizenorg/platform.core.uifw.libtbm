@@ -597,6 +597,12 @@ tbm_bufmgr_deinit(tbm_bufmgr bufmgr)
 
 	pthread_mutex_lock(&gLock);
 
+	if (!gBufMgr) {
+		TBM_LOG_E("gBufmgr already destroy: bufmgr:%p\n", bufmgr);
+		pthread_mutex_unlock(&gLock);
+		return;
+	}
+
 	bufmgr->ref_count--;
 	if (bufmgr->ref_count > 0) {
 		DBG("tizen bufmgr destroy: bufmgr:%p, ref_count:%d\n",
