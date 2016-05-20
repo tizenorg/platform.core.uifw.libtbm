@@ -37,6 +37,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <sys/types.h>
 #include "tbm_bufmgr_int.h"
 
+/* LCOV_EXCL_START */
 tbm_bufmgr_backend tbm_backend_alloc(void)
 {
 	tbm_bufmgr_backend bufmgr_backend;
@@ -108,3 +109,4 @@ int tbm_backend_is_display_server(void)
 
 	return 1;
 }
+/* LCOV_EXCL_STOP */

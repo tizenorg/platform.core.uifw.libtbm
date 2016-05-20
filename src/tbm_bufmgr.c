@@ -77,6 +77,7 @@ _tbm_set_last_result(tbm_error_e err)
 	tbm_last_error = err;
 }
 
+/* LCOV_EXCL_START */
 static void
 _tbm_util_get_appname_brief(char *brief)
 {
@@ -128,6 +129,7 @@ _tbm_util_get_appname_from_pid(long pid, char *str)
 
 	snprintf(str, sizeof(cmdline), "%s", cmdline);
 }
+/* LCOV_EXCL_STOP */
 
 tbm_user_data
 *user_data_lookup(struct list_head *user_data_list, unsigned long key)
@@ -347,6 +349,7 @@ _tbm_bo_unref(tbm_bo bo)
 
 }
 
+/* LCOV_EXCL_START */
 static int
 _check_version(TBMModuleVersionInfo *data)
 {
@@ -479,6 +482,7 @@ _tbm_load_module(tbm_bufmgr bufmgr, int fd)
 
 	return ret;
 }
+/* LCOV_EXCL_STOP */
 
 tbm_bufmgr
 tbm_bufmgr_init(int fd)
@@ -487,6 +491,7 @@ tbm_bufmgr_init(int fd)
 
 	pthread_mutex_lock(&gLock);
 
+	/* LCOV_EXCL_START */
 #ifdef HAVE_DLOG
 	env = getenv("TBM_DLOG");
 	if (env) {
@@ -506,6 +511,7 @@ tbm_bufmgr_init(int fd)
 		bDebug = 0;
 	}
 #endif
+	/* LCOV_EXCL_STOP */
 
 	/* initialize buffer manager */
 	if (gBufMgr) {
@@ -531,6 +537,7 @@ tbm_bufmgr_init(int fd)
 
 	/* load bufmgr priv from env */
 	if (!_tbm_load_module(gBufMgr, gBufMgr->fd)) {
+		/* LCOV_EXCL_START */
 		_tbm_set_last_result(TBM_BO_ERROR_LOAD_MODULE_FAILED);
 		TBM_LOG_E("error : Fail to load bufmgr backend\n");
 
@@ -538,6 +545,7 @@ tbm_bufmgr_init(int fd)
 		gBufMgr = NULL;
 		pthread_mutex_unlock(&gLock);
 		return NULL;
+		/* LCOV_EXCL_STOP */
 	}
 
 	/* log for tbm backend_flag */
@@ -550,6 +558,7 @@ tbm_bufmgr_init(int fd)
 	    gBufMgr, gBufMgr->ref_count);
 
 	if (pthread_mutex_init(&gBufMgr->lock, NULL) != 0) {
+		/* LCOV_EXCL_START */
 		_tbm_set_last_result(TBM_BO_ERROR_THREAD_INIT_FAILED);
 		gBufMgr->backend->bufmgr_deinit(gBufMgr->backend->priv);
 		tbm_backend_free(gBufMgr->backend);
@@ -558,6 +567,7 @@ tbm_bufmgr_init(int fd)
 		gBufMgr = NULL;
 		pthread_mutex_unlock(&gLock);
 		return NULL;
+		/* LCOV_EXCL_STOP */
 	}
 
 	/* setup the lock_type */
@@ -1128,12 +1138,6 @@ tbm_bo_delete_user_data(tbm_bo bo, unsigned long key)
 	return 1;
 }
 
-tbm_error_e
-tbm_get_last_error(void)
-{
-	return tbm_last_error;
-}
-
 unsigned int
 tbm_bufmgr_get_capability(tbm_bufmgr bufmgr)
 {
@@ -1156,6 +1160,13 @@ tbm_bo_get_flags(tbm_bo bo)
 	TBM_RETURN_VAL_IF_FAIL(_tbm_bo_is_valid(bo), 0);
 
 	return bo->flags;
+}
+
+/* LCOV_EXCL_START */
+tbm_error_e
+tbm_get_last_error(void)
+{
+	return tbm_last_error;
 }
 
 void
@@ -1291,4 +1302,4 @@ tbm_bufmgr_bind_native_display(tbm_bufmgr bufmgr, void *NativeDisplay)
 
 	return 1;
 }
-
+/* LCOV_EXCL_STOP */

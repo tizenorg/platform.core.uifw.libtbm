@@ -109,6 +109,7 @@ struct _tbm_surface_queue {
 	void *alloc_cb_data;
 };
 
+/* LCOV_EXCL_START */
 static queue_node *
 _queue_node_create(void)
 {
@@ -1184,3 +1185,4 @@ tbm_surface_queue_sequence_create(int queue_size, int width,
 
 	return surface_queue;
 }
+/* LCOV_EXCL_STOP */

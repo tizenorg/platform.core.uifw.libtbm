@@ -45,6 +45,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 static tbm_bufmgr g_surface_bufmgr;
 static pthread_mutex_t tbm_surface_lock;
 
+/* LCOV_EXCL_START */
 char *
 _tbm_surface_internal_format_to_str(tbm_format format)
 {
@@ -171,6 +172,7 @@ _tbm_surface_internal_format_to_str(tbm_format format)
 		return "unknwon";
 	}
 }
+/* LCOV_EXCL_STOP */
 
 static bool
 _tbm_surface_mutex_init(void)
@@ -568,7 +570,7 @@ tbm_surface_internal_create_with_flags(int width, int height,
 		}
 
 		if (mgr->backend->surface_bo_alloc) {
-
+			/* LCOV_EXCL_START */
 			tbm_bo bo = NULL;
 			void *bo_priv = NULL;
 
@@ -601,7 +603,7 @@ tbm_surface_internal_create_with_flags(int width, int height,
 			pthread_mutex_unlock(&surf->bufmgr->lock);
 
 			surf->bos[i] = bo;
-
+			/* LCOV_EXCL_STOP */
 		} else {
 			surf->bos[i] = tbm_bo_alloc(mgr, bo_size, flags);
 		}
@@ -1030,22 +1032,6 @@ tbm_surface_internal_get_plane_bo_idx(tbm_surface_h surface, int plane_idx)
 	return bo_idx;
 }
 
-unsigned int
-_tbm_surface_internal_get_debug_pid(tbm_surface_h surface)
-{
-	TBM_RETURN_VAL_IF_FAIL(surface, 0);
-
-	return surface->debug_pid;
-}
-
-void
-tbm_surface_internal_set_debug_pid(tbm_surface_h surface, unsigned int pid)
-{
-	TBM_RETURN_IF_FAIL(tbm_surface_internal_is_valid(surface));
-
-	surface->debug_pid = pid;
-}
-
 int
 tbm_surface_internal_add_user_data(tbm_surface_h surface, unsigned long key,
 				   tbm_data_free data_free_func)
@@ -1133,6 +1119,23 @@ tbm_surface_internal_delete_user_data(tbm_surface_h surface,
 	user_data_delete(old_data);
 
 	return 1;
+}
+
+/* LCOV_EXCL_START */
+unsigned int
+_tbm_surface_internal_get_debug_pid(tbm_surface_h surface)
+{
+	TBM_RETURN_VAL_IF_FAIL(surface, 0);
+
+	return surface->debug_pid;
+}
+
+void
+tbm_surface_internal_set_debug_pid(tbm_surface_h surface, unsigned int pid)
+{
+	TBM_RETURN_IF_FAIL(tbm_surface_internal_is_valid(surface));
+
+	surface->debug_pid = pid;
 }
 
 typedef struct _tbm_surface_dump_info tbm_surface_dump_info;
@@ -1598,4 +1601,4 @@ void tbm_surface_internal_dump_shm_buffer(void *ptr, int w, int h, int  stride, 
 
 	TBM_LOG_I("Dump %s \n", buf_info->name);
 }
-
+/*LCOV_EXCL_STOP*/
