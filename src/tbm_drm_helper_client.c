@@ -50,6 +50,7 @@ struct wayland_tbm_drm_auth_client {
 	uint32_t capabilities;
 };
 
+/* LCOV_EXCL_START */
 static void
 handle_tbm_drm_authentication_info(void *data, struct wl_tbm_drm_auth *wl_tbm_drm_auth, const char *device_name, uint32_t capabilities, int32_t auth_fd)
 {
@@ -169,3 +170,4 @@ tbm_drm_helper_get_auth_info(int *auth_fd, char **device, uint32_t *capabilities
 
 	return 1;
 }
+/* LCOV_EXCL_STOP */

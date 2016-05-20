@@ -58,6 +58,7 @@ struct wayland_tbm_drm_auth_server {
 
 struct wayland_tbm_drm_auth_server *tbm_drm_auth_srv;
 
+/* LCOV_EXCL_START */
 static void
 _send_server_auth_info(struct wayland_tbm_drm_auth_server *tbm_drm_auth_srv,
 		       struct wl_resource *resource)
@@ -263,4 +264,4 @@ tbm_drm_helper_unset_tbm_master_fd(void)
         return;
     }
 }
-
+/* LCOV_EXCL_STOP */
