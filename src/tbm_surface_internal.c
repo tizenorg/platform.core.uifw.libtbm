@@ -36,11 +36,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "list.h"
 #include <png.h>
 
-#define C(b,m)              (((b) >> (m)) & 0xFF)
-#define B(c,s)              ((((unsigned int)(c)) & 0xff) << (s))
-#define FOURCC(a,b,c,d)     (B(d,24) | B(c,16) | B(b,8) | B(a,0))
-#define FOURCC_STR(id)      C(id,0), C(id,8), C(id,16), C(id,24)
-#define FOURCC_ID(str)      FOURCC(((char*)str)[0],((char*)str)[1],((char*)str)[2],((char*)str)[3])
+#define C(b, m)              (((b) >> (m)) & 0xFF)
+#define B(c, s)              ((((unsigned int)(c)) & 0xff) << (s))
+#define FOURCC(a, b, c, d)     (B(d, 24) | B(c, 16) | B(b, 8) | B(a, 0))
+#define FOURCC_STR(id)      C(id, 0), C(id, 8), C(id, 16), C(id, 24)
+#define FOURCC_ID(str)      FOURCC(((char*)str)[0], ((char*)str)[1], ((char*)str)[2], ((char*)str)[3])
 
 static tbm_bufmgr g_surface_bufmgr;
 static pthread_mutex_t tbm_surface_lock;
@@ -584,7 +584,7 @@ tbm_surface_internal_create_with_flags(int width, int height,
 
 			pthread_mutex_lock(&surf->bufmgr->lock);
 
-			bo_priv = mgr->backend->surface_bo_alloc (bo, width, height, format, flags, i);
+			bo_priv = mgr->backend->surface_bo_alloc(bo, width, height, format, flags, i);
 			if (!bo_priv) {
 				TBM_LOG_E("fail to alloc bo priv\n");
 				free(bo);
@@ -1141,8 +1141,7 @@ tbm_surface_internal_set_debug_pid(tbm_surface_h surface, unsigned int pid)
 typedef struct _tbm_surface_dump_info tbm_surface_dump_info;
 typedef struct _tbm_surface_dump_buf_info tbm_surface_dump_buf_info;
 
-struct _tbm_surface_dump_buf_info
-{
+struct _tbm_surface_dump_buf_info {
 	int index;
 	tbm_bo bo;
 	int size;
@@ -1157,8 +1156,7 @@ struct _tbm_surface_dump_buf_info
 	struct list_head link;
 };
 
-struct _tbm_surface_dump_info
-{
+struct _tbm_surface_dump_info {
 	char *path;  // copy???
 	int dump_max;
 	int count;
@@ -1171,7 +1169,7 @@ static const char *dump_postfix[2] = {"png", "yuv"};
 
 static void
 _tbm_surface_internal_dump_file_raw(const char *file, void *data1, int size1, void *data2,
-                     int size2, void *data3, int size3)
+		int size2, void *data3, int size3)
 {
 	unsigned int *blocks;
 	FILE *fp = fopen(file, "w+");
@@ -1195,14 +1193,14 @@ _tbm_surface_internal_dump_file_raw(const char *file, void *data1, int size1, vo
 
 static void
 _tbm_surface_internal_dump_file_png(const char *file, const void *data, int width,
-                     int height)
+		int height)
 {
 	FILE *fp = fopen(file, "wb");
 	TBM_RETURN_IF_FAIL(fp != NULL);
 	int depth = 8;
 
 	png_structp pPngStruct =
-	        png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+		png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 	if (!pPngStruct) {
 		fclose(fp);
 		return;
@@ -1217,13 +1215,13 @@ _tbm_surface_internal_dump_file_png(const char *file, const void *data, int widt
 
 	png_init_io(pPngStruct, fp);
 	png_set_IHDR(pPngStruct,
-	             pPngInfo,
-	             width,
-	             height,
-	             depth,
-	             PNG_COLOR_TYPE_RGBA,
-	             PNG_INTERLACE_NONE,
-	             PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
+			pPngInfo,
+			width,
+			height,
+			depth,
+			PNG_COLOR_TYPE_RGBA,
+			PNG_INTERLACE_NONE,
+			PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
 
 	png_set_bgr(pPngStruct);
 	png_write_info(pPngStruct, pPngInfo);
@@ -1238,7 +1236,7 @@ _tbm_surface_internal_dump_file_png(const char *file, const void *data, int widt
 
 	for (; y < height; ++y) {
 		png_bytep row =
-		        png_malloc(pPngStruct, sizeof(png_byte) * width * pixel_size);
+			png_malloc(pPngStruct, sizeof(png_byte) * width * pixel_size);
 		row_pointers[y] = (png_bytep)row;
 		for (x = 0; x < width; ++x) {
 			unsigned int curBlock = blocks[y * width + x];
@@ -1284,7 +1282,7 @@ tbm_surface_internal_dump_start(char *path, int w, int h, int count)
 		return;
 	}
 
-	g_dump_info = calloc(1, sizeof (struct _tbm_surface_dump_info));
+	g_dump_info = calloc(1, sizeof(struct _tbm_surface_dump_info));
 	TBM_RETURN_IF_FAIL(g_dump_info);
 
 	LIST_INITHEAD(&g_dump_info->surface_list);

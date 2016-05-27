@@ -64,7 +64,7 @@ handle_tbm_drm_authentication_info(void *data, struct wl_tbm_drm_auth *wl_tbm_dr
 }
 
 static const struct wl_tbm_drm_auth_listener wl_tbm_drm_auth_client_listener = {
-    handle_tbm_drm_authentication_info
+	handle_tbm_drm_authentication_info
 };
 
 static void
@@ -81,8 +81,8 @@ _wayland_tbm_drm_auth_client_registry_handle_global(void *data, struct wl_regist
 }
 
 static const struct wl_registry_listener registry_listener = {
-    _wayland_tbm_drm_auth_client_registry_handle_global,
-    NULL
+	_wayland_tbm_drm_auth_client_registry_handle_global,
+	NULL
 };
 
 int
@@ -171,3 +171,4 @@ tbm_drm_helper_get_auth_info(int *auth_fd, char **device, uint32_t *capabilities
 	return 1;
 }
 /* LCOV_EXCL_STOP */
+
