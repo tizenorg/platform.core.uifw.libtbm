@@ -127,6 +127,10 @@ tbm_surface_queue_error_e tbm_surface_queue_set_alloc_cb(
 	tbm_surface_free_cb free_cb,
 	void *data);
 
+tbm_surface_queue_error_e tbm_surface_queue_get_surfaces(
+	tbm_surface_queue_h surface_queue,
+	tbm_surface_h *surfaces, int *num);
+
 /*The functions of queue factory*/
 tbm_surface_queue_h tbm_surface_queue_create(int queue_size, int width,
 		int height, int format, int flags);
