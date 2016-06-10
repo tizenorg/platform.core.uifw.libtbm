@@ -955,6 +955,33 @@ tbm_surface_queue_flush(tbm_surface_queue_h surface_queue)
 	return TBM_SURFACE_QUEUE_ERROR_NONE;
 }
 
+tbm_surface_queue_error_e
+tbm_surface_queue_get_buffers(tbm_surface_queue_h surface_queue,
+							  tbm_surface_h *buffers, int *num)
+{
+	TBM_RETURN_VAL_IF_FAIL(surface_queue != NULL,
+			       TBM_SURFACE_QUEUE_ERROR_INVALID_QUEUE);
+	TBM_RETURN_VAL_IF_FAIL(num != NULL,
+			       TBM_SURFACE_QUEUE_ERROR_INVALID_PARAMETER);
+
+	queue_node *node = NULL;
+	queue_node *tmp = NULL;
+
+	pthread_mutex_lock(&surface_queue->lock);
+
+	*num = 0;
+	LIST_FOR_EACH_ENTRY_SAFE(node, tmp, &surface_queue->list, link) {
+		if (buffers) {
+			buffers[*num] = node->surface;
+		}
+		*num = *num + 1;
+	}
+
+	pthread_mutex_unlock(&surface_queue->lock);
+
+	return TBM_SURFACE_QUEUE_ERROR_NONE;
+}
+
 typedef struct {
 	int queue_size;
 	int num_attached;
