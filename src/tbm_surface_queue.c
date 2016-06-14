@@ -971,9 +971,9 @@ tbm_surface_queue_get_surfaces(tbm_surface_queue_h surface_queue,
 
 	*num = 0;
 	LIST_FOR_EACH_ENTRY_SAFE(node, tmp, &surface_queue->list, link) {
-		if (surfaces) {
+		if (surfaces)
 			surfaces[*num] = node->surface;
-		}
+
 		*num = *num + 1;
 	}
 

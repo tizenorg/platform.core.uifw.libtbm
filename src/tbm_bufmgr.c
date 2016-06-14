@@ -182,11 +182,10 @@ _bo_lock(tbm_bo bo, int device, int opt)
 	tbm_bufmgr bufmgr = bo->bufmgr;
 	int ret = 0;
 
-	if (bufmgr->backend->bo_lock) {
+	if (bufmgr->backend->bo_lock)
 		ret = bufmgr->backend->bo_lock(bo, device, opt);
-	} else {
+	else
 		ret = 1;
-	}
 
 	return ret;
 }
@@ -196,9 +195,8 @@ _bo_unlock(tbm_bo bo)
 {
 	tbm_bufmgr bufmgr = bo->bufmgr;
 
-	if (bufmgr->backend->bo_unlock) {
+	if (bufmgr->backend->bo_unlock)
 		bufmgr->backend->bo_unlock(bo);
-	}
 }
 
 static int

@@ -472,14 +472,14 @@ extern "C" {
    uint32_t *formats;
    uint32_t format_num;
    int ret, i;
+   tbm_surface_error_e tse;
 
-   if (tbm_surface_query_formats (&formats, &format_num))
+   tse = tbm_surface_query_formats (&formats, &format_num))
+
+   for( i = 0 ; i < format_num ; i++)
    {
-       for( i = 0 ; i < format_num ; i++)
+       if (formats[i] == TBM_FORMAT_RGB332)
        {
-           if (formats[i] == TBM_FORMAT_RGB332)
-           {
-
    ....
 
    free (formats);
