@@ -111,7 +111,7 @@ extern int bDlog;
 
 #define TBM_DEBUG(fmt, ...) {\
 	if (bDlog) {\
-		LOGD("[TBM_DEBUG] " fmt, ##__VA_ARGS__);\
+		LOGE("[TBM_DEBUG] " fmt, ##__VA_ARGS__);\
 	} \
 	else {\
 		fprintf(stderr, "[TBM:DEBUG(%d)] " fmt, getpid(), ##__VA_ARGS__);\
