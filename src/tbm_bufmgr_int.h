@@ -108,14 +108,22 @@ extern int bDlog;
 		fprintf(stderr, "[TBM:E(%d)(%s:%d)] " fmt, getpid(), __func__, __LINE__, ##__VA_ARGS__);\
 	} \
 }
+
+#define TBM_DEBUG(fmt, ...) {\
+	if (bDlog) {\
+		LOGD("[TBM_DEBUG] " fmt, ##__VA_ARGS__);\
+	} \
+	else {\
+		fprintf(stderr, "[TBM:DEBUG(%d)] " fmt, getpid(), ##__VA_ARGS__);\
+	} \
+}
 #else
 #define TBM_LOG_D(fmt, ...)   fprintf(stderr, "[TBM:D(%d)(%s:%d)] " fmt, getpid(), __func__, __LINE__, ##__VA_ARGS__)
 #define TBM_LOG_I(fmt, ...)   fprintf(stderr, "[TBM:I(%d)(%s:%d)] " fmt, getpid(), __func__, __LINE__, ##__VA_ARGS__)
 #define TBM_LOG_W(fmt, ...)   fprintf(stderr, "[TBM:W(%d)(%s:%d)] " fmt, getpid(), __func__, __LINE__, ##__VA_ARGS__)
 #define TBM_LOG_E(fmt, ...)   fprintf(stderr, "[TBM:E(%d)(%s:%d)] " fmt, getpid(), __func__, __LINE__, ##__VA_ARGS__)
-#endif /* HAVE_DLOG */
-
 #define TBM_DEBUG(fmt, ...)   fprintf(stderr, "[TBM:DEBUG(%d)] " fmt, getpid(), ##__VA_ARGS__)
+#endif /* HAVE_DLOG */
 
 /* check condition */
 #define TBM_RETURN_IF_FAIL(cond) {\

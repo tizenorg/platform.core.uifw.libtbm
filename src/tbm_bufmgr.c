@@ -496,7 +496,7 @@ tbm_bufmgr_init(int fd)
 		bDlog = atoi(env);
 		TBM_LOG_D("TBM_DLOG=%s\n", env);
 	} else {
-		bDlog = 0;
+		bDlog = 1;
 	}
 #endif
 
