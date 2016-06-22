@@ -1352,7 +1352,7 @@ fail:
 void
 tbm_surface_internal_dump_end(void)
 {
-	tbm_surface_dump_buf_info *buf_info, *tmp;
+	tbm_surface_dump_buf_info *buf_info = NULL, *tmp = NULL;
 	tbm_bo_handle bo_handle;
 
 	if (!g_dump_info)
