@@ -13,7 +13,6 @@ Source1001:		%name.manifest
 BuildRequires:  pkgconfig(libdrm)
 BuildRequires:  pkgconfig(wayland-server)
 BuildRequires:  pkgconfig(wayland-client)
-BuildRequires:  pkgconfig(pthread-stubs)
 BuildRequires:  pkgconfig(capi-base-common)
 BuildRequires:  pkgconfig(libpng)
 BuildRequires:  pkgconfig(dlog)
