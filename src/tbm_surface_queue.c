@@ -862,14 +862,14 @@ tbm_surface_queue_destroy(tbm_surface_queue_h surface_queue)
 
 	TBM_QUEUE_TRACE("tbm_surface_queue(%p)\n", surface_queue);
 
+	LIST_FOR_EACH_ENTRY_SAFE(node, tmp, &surface_queue->list, link) {
+		_queue_delete_node(surface_queue, node);
+	}
+
 	_notify_emit(surface_queue, &surface_queue->destory_noti);
 
 	if (surface_queue->impl && surface_queue->impl->destroy)
 		surface_queue->impl->destroy(surface_queue);
-
-	LIST_FOR_EACH_ENTRY_SAFE(node, tmp, &surface_queue->list, link) {
-		_queue_delete_node(surface_queue, node);
-	}
 
 	_notify_remove_all(&surface_queue->destory_noti);
 	_notify_remove_all(&surface_queue->acquirable_noti);
