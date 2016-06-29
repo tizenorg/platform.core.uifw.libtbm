@@ -556,8 +556,8 @@ tbm_surface_internal_create_with_flags(int width, int height,
 	for (i = 0; i < surf->info.num_planes; i++) {
 		surf->info.size += surf->info.planes[i].size;
 
-		if (surf->num_bos -1 > surf->planes_bo_idx[i])
-			surf->num_bos = surf->planes_bo_idx[i]++;
+		if (surf->num_bos < surf->planes_bo_idx[i] + 1)
+			surf->num_bos = surf->planes_bo_idx[i] + 1;
 	}
 
 	surf->flags = flags;
