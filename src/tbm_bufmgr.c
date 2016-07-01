@@ -40,6 +40,10 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 int bDebug;
 #endif
 
+#ifdef TRACE
+int bTrace;
+#endif
+
 #ifdef HAVE_DLOG
 int bDlog;
 #endif
@@ -509,11 +513,23 @@ tbm_bufmgr_init(int fd)
 		bDebug = 0;
 	}
 #endif
+
+#ifdef TRACE
+	env = getenv("TBM_TRACE");
+	if (env) {
+		bTrace = atoi(env);
+		TBM_LOG_D("TBM_TRACE=%s\n", env);
+	} else {
+		bTrace = 0;
+	}
+#endif
 	/* LCOV_EXCL_STOP */
 
 	/* initialize buffer manager */
 	if (gBufMgr) {
 		gBufMgr->ref_count++;
+
+		TBM_TRACE("tbm_bufmgr(%p) ref_count(%d)\n", gBufMgr, gBufMgr->ref_count);
 
 		DBG("bufmgr:%p ref: fd=%d, ref_count:%d\n",
 		    gBufMgr, gBufMgr->fd, gBufMgr->ref_count);
@@ -530,6 +546,8 @@ tbm_bufmgr_init(int fd)
 		pthread_mutex_unlock(&gLock);
 		return NULL;
 	}
+
+	TBM_TRACE("tbm_bufmgr(%p) ref_count(%d)\n", gBufMgr, gBufMgr->ref_count);
 
 	gBufMgr->fd = fd;
 
@@ -605,6 +623,8 @@ tbm_bufmgr_deinit(tbm_bufmgr bufmgr)
 
 	pthread_mutex_lock(&gLock);
 
+	TBM_TRACE("tbm_bufmgr(%p) ref_count(%d)\n", gBufMgr, gBufMgr ? gBufMgr->ref_count : 0);
+
 	if (!gBufMgr) {
 		TBM_LOG_E("gBufmgr already destroy: bufmgr:%p\n", bufmgr);
 		pthread_mutex_unlock(&gLock);
@@ -671,6 +691,8 @@ tbm_bo_size(tbm_bo bo)
 
 	pthread_mutex_lock(&bufmgr->lock);
 
+	TBM_TRACE("tbm_bo(%p)\n", bo);
+
 	size = bufmgr->backend->bo_size(bo);
 
 	pthread_mutex_unlock(&bufmgr->lock);
@@ -687,6 +709,8 @@ tbm_bo_ref(tbm_bo bo)
 
 	pthread_mutex_lock(&bufmgr->lock);
 
+	TBM_TRACE("tbm_bo(%p) ref_cnt(%d)\n", bo, bo->ref_cnt);
+
 	_tbm_bo_ref(bo);
 
 	pthread_mutex_unlock(&bufmgr->lock);
@@ -702,6 +726,8 @@ tbm_bo_unref(tbm_bo bo)
 	tbm_bufmgr bufmgr = bo->bufmgr;
 
 	pthread_mutex_lock(&bufmgr->lock);
+
+	TBM_TRACE("tbm_bo(%p) ref_cnt(%d)\n", bo, bo->ref_cnt);
 
 	_tbm_bo_unref(bo);
 
@@ -725,6 +751,8 @@ tbm_bo_alloc(tbm_bufmgr bufmgr, int size, int flags)
 	bo->bufmgr = bufmgr;
 
 	pthread_mutex_lock(&bufmgr->lock);
+
+	TBM_TRACE("tbm_bo(%p)\n", bo);
 
 	bo_priv = bufmgr->backend->bo_alloc(bo, size, flags);
 	if (!bo_priv) {
@@ -764,6 +792,8 @@ tbm_bo_import(tbm_bufmgr bufmgr, unsigned int key)
 		pthread_mutex_unlock(&bufmgr->lock);
 		return NULL;
 	}
+
+	TBM_TRACE("tbm_bo(%p)\n", bo);
 
 	bo->bufmgr = bufmgr;
 
@@ -824,6 +854,8 @@ tbm_bo_import_fd(tbm_bufmgr bufmgr, tbm_fd fd)
 		return NULL;
 	}
 
+	TBM_TRACE("tbm_bo(%p)\n", bo);
+
 	bo->bufmgr = bufmgr;
 
 	bo_priv = bufmgr->backend->bo_import_fd(bo, fd);
@@ -876,6 +908,9 @@ tbm_bo_export(tbm_bo bo)
 	bufmgr = bo->bufmgr;
 
 	pthread_mutex_lock(&bufmgr->lock);
+
+	TBM_TRACE("tbm_bo(%p)\n", bo);
+
 	ret = bufmgr->backend->bo_export(bo);
 	if (!ret) {
 		_tbm_set_last_result(TBM_BO_ERROR_EXPORT_FAILED);
@@ -898,6 +933,9 @@ tbm_bo_export_fd(tbm_bo bo)
 	bufmgr = bo->bufmgr;
 
 	pthread_mutex_lock(&bufmgr->lock);
+
+	TBM_TRACE("tbm_bo(%p)\n", bo);
+
 	ret = bufmgr->backend->bo_export_fd(bo);
 	if (ret < 0) {
 		_tbm_set_last_result(TBM_BO_ERROR_EXPORT_FD_FAILED);
@@ -920,6 +958,9 @@ tbm_bo_get_handle(tbm_bo bo, int device)
 	bufmgr = bo->bufmgr;
 
 	pthread_mutex_lock(&bufmgr->lock);
+
+	TBM_TRACE("tbm_bo(%p)\n", bo);
+
 	bo_handle = bufmgr->backend->bo_get_handle(bo, device);
 	if (bo_handle.ptr == NULL) {
 		_tbm_set_last_result(TBM_BO_ERROR_GET_HANDLE_FAILED);
@@ -965,6 +1006,8 @@ tbm_bo_map(tbm_bo bo, int device, int opt)
 	/* increase the map_count */
 	bo->map_cnt++;
 
+	TBM_TRACE("tbm_bo(%p) map_cnt(%d)\n", bo, bo->map_cnt);
+
 	pthread_mutex_unlock(&bufmgr->lock);
 
 	return bo_handle;
@@ -993,6 +1036,8 @@ tbm_bo_unmap(tbm_bo bo)
 	/* decrease the map_count */
 	bo->map_cnt--;
 
+	TBM_TRACE("tbm_bo(%p) map_cnt(%d)\n", bo, bo->map_cnt);
+
 	_tbm_bo_unlock(bo);
 
 	pthread_mutex_unlock(&bufmgr->lock);
@@ -1009,6 +1054,8 @@ tbm_bo_swap(tbm_bo bo1, tbm_bo bo2)
 	void *temp;
 
 	pthread_mutex_lock(&bo1->bufmgr->lock);
+
+	TBM_TRACE("tbm_bo1(%p) tbm_bo2(%p)\n", bo1, bo2);
 
 	if (bo1->bufmgr->backend->bo_size(bo1) != bo2->bufmgr->backend->bo_size(bo2)) {
 		_tbm_set_last_result(TBM_BO_ERROR_SWAP_FAILED);
@@ -1039,6 +1086,8 @@ tbm_bo_locked(tbm_bo bo)
 
 	pthread_mutex_lock(&bufmgr->lock);
 
+	TBM_TRACE("tbm_bo(%p) lock_cnt(%d)\n", bo, bo->lock_cnt);
+
 	if (bo->lock_cnt > 0) {
 		pthread_mutex_unlock(&bufmgr->lock);
 		return 1;
@@ -1056,6 +1105,8 @@ tbm_bo_add_user_data(tbm_bo bo, unsigned long key,
 	TBM_RETURN_VAL_IF_FAIL(_tbm_bo_is_valid(bo), 0);
 
 	tbm_user_data *data;
+
+	TBM_TRACE("tbm_bo(%p) key(%lu)\n", bo, key);
 
 	/* check if the data according to the key exist if so, return false. */
 	data = user_data_lookup(&bo->user_data_list, key);
@@ -1081,6 +1132,8 @@ tbm_bo_set_user_data(tbm_bo bo, unsigned long key, void *data)
 
 	tbm_user_data *old_data;
 
+	TBM_TRACE("tbm_bo(%p) key(%lu)\n", bo, key);
+
 	if (LIST_IS_EMPTY(&bo->user_data_list))
 		return 0;
 
@@ -1103,6 +1156,8 @@ tbm_bo_get_user_data(tbm_bo bo, unsigned long key, void **data)
 
 	tbm_user_data *old_data;
 
+	TBM_TRACE("tbm_bo(%p) key(%lu)\n", bo, key);
+
 	if (!data || LIST_IS_EMPTY(&bo->user_data_list))
 		return 0;
 
@@ -1124,6 +1179,8 @@ tbm_bo_delete_user_data(tbm_bo bo, unsigned long key)
 
 	tbm_user_data *old_data = (void *)0;
 
+	TBM_TRACE("tbm_bo(%p) key(%lu)\n", bo, key);
+
 	if (LIST_IS_EMPTY(&bo->user_data_list))
 		return 0;
 
@@ -1141,6 +1198,8 @@ tbm_bufmgr_get_capability(tbm_bufmgr bufmgr)
 {
 	TBM_RETURN_VAL_IF_FAIL(TBM_BUFMGR_IS_VALID(bufmgr), 0);
 
+	TBM_TRACE("tbm_bufmgr(%p)\n", bufmgr);
+
 	unsigned int capability = TBM_BUFMGR_CAPABILITY_NONE;
 
 	if (bufmgr->backend->bo_import && bufmgr->backend->bo_export)
@@ -1156,6 +1215,8 @@ int
 tbm_bo_get_flags(tbm_bo bo)
 {
 	TBM_RETURN_VAL_IF_FAIL(_tbm_bo_is_valid(bo), 0);
+
+	TBM_TRACE("tbm_bo(%p)\n", bo);
 
 	return bo->flags;
 }
@@ -1261,8 +1322,10 @@ tbm_bufmgr_debug_show(tbm_bufmgr bufmgr)
 void
 tbm_bufmgr_debug_trace(tbm_bufmgr bufmgr, int onoff)
 {
+#ifdef TRACE
 	TBM_LOG_D("bufmgr=%p onoff=%d\n", bufmgr, onoff);
-	TBM_LOG_D("Not implemented yet.\n");
+	bTrace = onoff;
+#endif
 }
 
 /* internal function */
@@ -1284,6 +1347,8 @@ tbm_bufmgr_bind_native_display(tbm_bufmgr bufmgr, void *NativeDisplay)
 	int ret;
 
 	pthread_mutex_lock(&bufmgr->lock);
+
+	TBM_TRACE("tbm_bufmgr(%p) NativeDisplay(%p)\n", bufmgr, NativeDisplay);
 
 	if (!bufmgr->backend->bufmgr_bind_native_display) {
 		pthread_mutex_unlock(&bufmgr->lock);
