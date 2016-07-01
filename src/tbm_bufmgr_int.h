@@ -62,6 +62,11 @@ extern int bDebug;
 #define DBG_LOCK(...)
 #endif /* DEBUG */
 
+#define TRACE
+#ifdef TRACE
+extern int bTrace;
+#endif /* TRACE */
+
 #ifdef HAVE_DLOG
 #include <dlog.h>
 
@@ -117,12 +122,31 @@ extern int bDlog;
 		fprintf(stderr, "[TBM:DEBUG(%d)] " fmt, getpid(), ##__VA_ARGS__);\
 	} \
 }
+
+#ifdef TRACE
+#define TBM_TRACE(fmt, ...) {\
+	if (bDlog) {\
+		if (bTrace&0x1) LOGE("[TBM:TRACE] " fmt, ##__VA_ARGS__);\
+	} \
+	else {\
+		if (bTrace&0x1) fprintf(stderr, "[TBM:TRACE(%d)(%s:%d)] " fmt, getpid(), __func__, __LINE__, ##__VA_ARGS__);\
+	} \
+}
+#else
+#define TBM_TRACE(fmt, ...)
+#endif /* TRACE */
+
 #else
 #define TBM_LOG_D(fmt, ...)   fprintf(stderr, "[TBM:D(%d)(%s:%d)] " fmt, getpid(), __func__, __LINE__, ##__VA_ARGS__)
 #define TBM_LOG_I(fmt, ...)   fprintf(stderr, "[TBM:I(%d)(%s:%d)] " fmt, getpid(), __func__, __LINE__, ##__VA_ARGS__)
 #define TBM_LOG_W(fmt, ...)   fprintf(stderr, "[TBM:W(%d)(%s:%d)] " fmt, getpid(), __func__, __LINE__, ##__VA_ARGS__)
 #define TBM_LOG_E(fmt, ...)   fprintf(stderr, "[TBM:E(%d)(%s:%d)] " fmt, getpid(), __func__, __LINE__, ##__VA_ARGS__)
 #define TBM_DEBUG(fmt, ...)   fprintf(stderr, "[TBM:DEBUG(%d)] " fmt, getpid(), ##__VA_ARGS__)
+#ifdef TRACE
+#define TBM_TRACE(fmt, ...)   { if (bTrace&0x1) fprintf(stderr, "[TBM:TRACE(%d)(%s:%d)] " fmt, getpid(), __func__, __LINE__, ##__VA_ARGS__); }
+#else
+#define TBM_TRACE(fmt, ...)
+#endif /* TRACE */
 #endif /* HAVE_DLOG */
 
 /* check condition */
