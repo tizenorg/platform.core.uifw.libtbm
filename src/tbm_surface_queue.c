@@ -38,12 +38,16 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #define TBM_QUEUE_DEBUG 0
 
+#ifdef TRACE
+#define TBM_QUEUE_TRACE(fmt, ...)  { if (bTrace&0x1) fprintf(stderr, "[TBM:TRACE(%d)(%s:%d)] " fmt, getpid(), __func__, __LINE__, ##__VA_ARGS__); }
+#else
+#define TBM_QUEUE_TRACE(fmt, ...)
+#endif /* TRACE */
+
 #if TBM_QUEUE_DEBUG
-#define TBM_QUEUE_TRACE(fmt, ...)  fprintf(stderr, "[TBM(%d):%s] " fmt, getpid(), __func__, ##__VA_ARGS__)
 #define TBM_LOCK() TBM_LOG_D("[LOCK] %s:%d surface:%p\n", __func__, __LINE__, surface_queue)
 #define TBM_UNLOCK() TBM_LOG_D("[UNLOCK] %s:%d surface:%p\n", __func__, __LINE__, surface_queue)
 #else
-#define TBM_QUEUE_TRACE(fmt, ...)
 #define TBM_LOCK()
 #define TBM_UNLOCK()
 #endif
