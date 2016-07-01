@@ -288,6 +288,8 @@ tbm_surface_internal_is_valid(tbm_surface_h surface)
 {
 	tbm_surface_h old_data = NULL, tmp = NULL;
 
+	TBM_TRACE("tbm_surface(%p)\n", surface);
+
 	if (surface == NULL || g_surface_bufmgr == NULL)
 		return 0;
 
@@ -308,6 +310,8 @@ tbm_surface_internal_query_supported_formats(uint32_t **formats,
 	int ret = 0;
 
 	_tbm_surface_mutex_lock();
+
+	TBM_TRACE("tbm_bufmgr(%p)\n", g_surface_bufmgr);
 
 	if (!g_surface_bufmgr) {
 		_init_surface_bufmgr();
@@ -332,6 +336,8 @@ int
 tbm_surface_internal_get_num_planes(tbm_format format)
 {
 	int num_planes = 0;
+
+	TBM_TRACE("tbm_bufmgr(%p)\n", g_surface_bufmgr);
 
 	switch (format) {
 	case TBM_FORMAT_C8:
@@ -410,6 +416,9 @@ tbm_surface_internal_get_num_planes(tbm_format format)
 int
 tbm_surface_internal_get_bpp(tbm_format format)
 {
+
+	TBM_TRACE("tbm_bufmgr(%p)\n", g_surface_bufmgr);
+
 	int bpp = 0;
 
 	switch (format) {
@@ -532,6 +541,8 @@ tbm_surface_internal_create_with_flags(int width, int height,
 		_tbm_surface_mutex_unlock();
 		return NULL;
 	}
+
+	TBM_TRACE("tbm_bufmgr(%p) tbm_surface(%p)\n", g_surface_bufmgr, surf);
 
 	surf->bufmgr = mgr;
 	surf->info.width = width;
@@ -674,6 +685,8 @@ tbm_surface_internal_create_with_bos(tbm_surface_info_s *info,
 		return NULL;
 	}
 
+	TBM_TRACE("tbm_bufmgr(%p) tbm_surface(%p)\n", g_surface_bufmgr, surf);
+
 	surf->bufmgr = mgr;
 	surf->info.width = info->width;
 	surf->info.height = info->height;
@@ -754,6 +767,8 @@ tbm_surface_internal_destroy(tbm_surface_h surface)
 
 	_tbm_surface_mutex_lock();
 
+	TBM_TRACE("tbm_surface(%p) refcnt(%d)\n", surface, surface->refcnt);
+
 	surface->refcnt--;
 
 	if (surface->refcnt > 0) {
@@ -774,6 +789,8 @@ tbm_surface_internal_ref(tbm_surface_h surface)
 
 	_tbm_surface_mutex_lock();
 
+	TBM_TRACE("tbm_surface(%p) refcnt(%d)\n", surface, surface->refcnt);
+
 	surface->refcnt++;
 
 	_tbm_surface_mutex_unlock();
@@ -785,6 +802,8 @@ tbm_surface_internal_unref(tbm_surface_h surface)
 	TBM_RETURN_IF_FAIL(tbm_surface_internal_is_valid(surface));
 
 	_tbm_surface_mutex_lock();
+
+	TBM_TRACE("tbm_surface(%p) refcnt(%d)\n", surface, surface->refcnt);
 
 	surface->refcnt--;
 
@@ -809,6 +828,8 @@ tbm_surface_internal_get_num_bos(tbm_surface_h surface)
 
 	_tbm_surface_mutex_lock();
 
+	TBM_TRACE("tbm_surface(%p)\n", surface);
+
 	surf = (struct _tbm_surface *)surface;
 	num = surf->num_bos;
 
@@ -828,6 +849,8 @@ tbm_surface_internal_get_bo(tbm_surface_h surface, int bo_idx)
 
 	_tbm_surface_mutex_lock();
 
+	TBM_TRACE("tbm_surface(%p) bo_idx(%d)\n", surface, bo_idx);
+
 	surf = (struct _tbm_surface *)surface;
 	bo = surf->bos[bo_idx];
 
@@ -845,6 +868,8 @@ tbm_surface_internal_get_size(tbm_surface_h surface)
 	unsigned int size;
 
 	_tbm_surface_mutex_lock();
+
+	TBM_TRACE("tbm_surface(%p)\n", surface);
 
 	surf = (struct _tbm_surface *)surface;
 	size = surf->info.size;
@@ -864,6 +889,8 @@ tbm_surface_internal_get_plane_data(tbm_surface_h surface, int plane_idx,
 	struct _tbm_surface *surf;
 
 	_tbm_surface_mutex_lock();
+
+	TBM_TRACE("tbm_surface(%p) plane_idx(%d)\n", surface, plane_idx);
 
 	surf = (struct _tbm_surface *)surface;
 
@@ -897,6 +924,8 @@ tbm_surface_internal_get_info(tbm_surface_h surface, int opt,
 	int i, j;
 
 	_tbm_surface_mutex_lock();
+
+	TBM_TRACE("tbm_surface(%p)\n", surface);
 
 	memset(bo_handles, 0, sizeof(tbm_bo_handle) * 4);
 
@@ -951,6 +980,8 @@ tbm_surface_internal_unmap(tbm_surface_h surface)
 
 	_tbm_surface_mutex_lock();
 
+	TBM_TRACE("tbm_surface(%p)\n", surface);
+
 	surf = (struct _tbm_surface *)surface;
 
 	for (i = 0; i < surf->num_bos; i++)
@@ -969,6 +1000,8 @@ tbm_surface_internal_get_width(tbm_surface_h surface)
 
 	_tbm_surface_mutex_lock();
 
+	TBM_TRACE("tbm_surface(%p)\n", surface);
+
 	surf = (struct _tbm_surface *)surface;
 	width = surf->info.width;
 
@@ -986,6 +1019,8 @@ tbm_surface_internal_get_height(tbm_surface_h surface)
 	unsigned int height;
 
 	_tbm_surface_mutex_lock();
+
+	TBM_TRACE("tbm_surface(%p)\n", surface);
 
 	surf = (struct _tbm_surface *)surface;
 	height = surf->info.height;
@@ -1006,6 +1041,8 @@ tbm_surface_internal_get_format(tbm_surface_h surface)
 
 	_tbm_surface_mutex_lock();
 
+	TBM_TRACE("tbm_surface(%p)\n", surface);
+
 	surf = (struct _tbm_surface *)surface;
 	format = surf->info.format;
 
@@ -1023,6 +1060,8 @@ tbm_surface_internal_get_plane_bo_idx(tbm_surface_h surface, int plane_idx)
 	int bo_idx;
 
 	_tbm_surface_mutex_lock();
+
+	TBM_TRACE("tbm_surface(%p) plane_idx(%d) \n", surface, plane_idx);
 
 	surf = (struct _tbm_surface *)surface;
 	bo_idx = surf->planes_bo_idx[plane_idx];
@@ -1047,9 +1086,12 @@ tbm_surface_internal_add_user_data(tbm_surface_h surface, unsigned long key,
 		return 0;
 	}
 
+	TBM_TRACE("tbm_surface(%p) key(%lu)\n", surface, key);
+
 	data = user_data_create(key, data_free_func);
 	if (!data)
 		return 0;
+
 
 	LIST_ADD(&data->item_link, &surface->user_data_list);
 
@@ -1063,6 +1105,8 @@ tbm_surface_internal_set_user_data(tbm_surface_h surface, unsigned long key,
 	TBM_RETURN_VAL_IF_FAIL(tbm_surface_internal_is_valid(surface), 0);
 
 	tbm_user_data *old_data;
+
+	TBM_TRACE("tbm_surface(%p) key(%lu)\n", surface, key);
 
 	if (LIST_IS_EMPTY(&surface->user_data_list))
 		return 0;
@@ -1087,6 +1131,8 @@ tbm_surface_internal_get_user_data(tbm_surface_h surface, unsigned long key,
 
 	tbm_user_data *old_data;
 
+	TBM_TRACE("tbm_surface(%p) key(%lu)\n", surface, key);
+
 	if (!data || LIST_IS_EMPTY(&surface->user_data_list))
 		return 0;
 
@@ -1108,6 +1154,8 @@ tbm_surface_internal_delete_user_data(tbm_surface_h surface,
 	TBM_RETURN_VAL_IF_FAIL(tbm_surface_internal_is_valid(surface), 0);
 
 	tbm_user_data *old_data = (void *)0;
+
+	TBM_TRACE("tbm_surface(%p) key(%lu)\n", surface, key);
 
 	if (LIST_IS_EMPTY(&surface->user_data_list))
 		return 0;
