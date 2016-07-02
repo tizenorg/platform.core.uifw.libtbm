@@ -78,6 +78,19 @@ _tbm_set_last_result(tbm_error_e err)
 }
 
 /* LCOV_EXCL_START */
+static int last_chk_bo_cnt = 0;
+static void
+_tbm_util_check_bo_cnt(tbm_bufmgr bufmgr)
+{
+	if (bufmgr->bo_cnt >= 500 && ((bufmgr->bo_cnt % 20) == 0)) {
+		if (bufmgr->bo_cnt > last_chk_bo_cnt) {
+			TBM_DEBUG("============TBM BO CNT DEBUG: bo_cnt=%d\n", bufmgr->bo_cnt);
+			tbm_bufmgr_debug_show(bufmgr);
+			last_chk_bo_cnt = bufmgr->bo_cnt;
+		}
+	}
+}
+
 static void
 _tbm_util_get_appname_brief(char *brief)
 {
@@ -343,6 +356,8 @@ _tbm_bo_unref(tbm_bo bo)
 		LIST_DEL(&bo->item_link);
 		free(bo);
 		bo = NULL;
+
+		bufmgr->bo_cnt--;
 	}
 
 }
@@ -722,6 +737,9 @@ tbm_bo_alloc(tbm_bufmgr bufmgr, int size, int flags)
 		return NULL;
 	}
 
+	_tbm_util_check_bo_cnt(bufmgr);
+	bufmgr->bo_cnt++;
+
 	bo->bufmgr = bufmgr;
 
 	pthread_mutex_lock(&bufmgr->lock);
@@ -757,6 +775,8 @@ tbm_bo_import(tbm_bufmgr bufmgr, unsigned int key)
 	tbm_bo tmp = NULL;
 	void *bo_priv = NULL;
 
+	_tbm_util_check_bo_cnt(bufmgr);
+
 	pthread_mutex_lock(&bufmgr->lock);
 
 	bo = calloc(1, sizeof(struct _tbm_bo));
@@ -764,6 +784,8 @@ tbm_bo_import(tbm_bufmgr bufmgr, unsigned int key)
 		pthread_mutex_unlock(&bufmgr->lock);
 		return NULL;
 	}
+
+	bufmgr->bo_cnt++;
 
 	bo->bufmgr = bufmgr;
 
@@ -816,6 +838,8 @@ tbm_bo_import_fd(tbm_bufmgr bufmgr, tbm_fd fd)
 	tbm_bo tmp = NULL;
 	void *bo_priv = NULL;
 
+	_tbm_util_check_bo_cnt(bufmgr);
+
 	pthread_mutex_lock(&bufmgr->lock);
 
 	bo = calloc(1, sizeof(struct _tbm_bo));
@@ -823,6 +847,8 @@ tbm_bo_import_fd(tbm_bufmgr bufmgr, tbm_fd fd)
 		pthread_mutex_unlock(&bufmgr->lock);
 		return NULL;
 	}
+
+	bufmgr->bo_cnt++;
 
 	bo->bufmgr = bufmgr;
 
