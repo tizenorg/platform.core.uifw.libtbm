@@ -30,6 +30,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **************************************************************************/
 
 #include "config.h"
+#include <stdio.h>
+#include <time.h>
+#include <sys/time.h>
 #include "tbm_bufmgr.h"
 #include "tbm_bufmgr_int.h"
 #include "tbm_surface_internal.h"
@@ -46,6 +49,17 @@ static tbm_bufmgr g_surface_bufmgr;
 static pthread_mutex_t tbm_surface_lock;
 
 /* LCOV_EXCL_START */
+
+static unsigned long
+_get_time_in_millis(void)
+{
+	struct timeval tv;
+
+	gettimeofday(&tv, NULL);
+
+	return (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
+}
+
 char *
 _tbm_surface_internal_format_to_str(tbm_format format)
 {
@@ -1496,7 +1510,7 @@ tbm_surface_internal_dump_buffer(tbm_surface_h surface, const char *type)
 	switch (info.format) {
 	case TBM_FORMAT_ARGB8888:
 	case TBM_FORMAT_XRGB8888:
-		snprintf(buf_info->name, sizeof(buf_info->name), "%03d-%s.%s", g_dump_info->count++, type, postfix);
+		snprintf(buf_info->name, sizeof(buf_info->name), "[%.3f](%03d:%p)-%s.%s", _get_time_in_millis() / 1000.0, g_dump_info->count++, surface, type, postfix);
 		memcpy(bo_handle.ptr, info.planes[0].ptr, info.size);
 		break;
 	case TBM_FORMAT_YVU420:
