@@ -1510,7 +1510,7 @@ tbm_surface_internal_dump_buffer(tbm_surface_h surface, const char *type)
 	switch (info.format) {
 	case TBM_FORMAT_ARGB8888:
 	case TBM_FORMAT_XRGB8888:
-		snprintf(buf_info->name, sizeof(buf_info->name), "[%.3f](%03d:%p)-%s.%s", _get_time_in_millis() / 1000.0, g_dump_info->count++, surface, type, postfix);
+		snprintf(buf_info->name, sizeof(buf_info->name), "%.3f_%03d_%p-%s.%s", _get_time_in_millis() / 1000.0, g_dump_info->count++, surface, type, postfix);
 		memcpy(bo_handle.ptr, info.planes[0].ptr, info.size);
 		break;
 	case TBM_FORMAT_YVU420:
