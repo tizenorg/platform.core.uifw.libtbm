@@ -3,6 +3,7 @@ Description= tbm-drm-auth setup service
 
 [Service]
 Type=oneshot
+SmackProcessLabel=System
 ExecStart=/usr/bin/chmod g+w /run/tbm-drm-auth
 ExecStart=/usr/bin/chgrp display /run/tbm-drm-auth
 ExecStart=/usr/bin/chsmack -a User /run/tbm-drm-auth
