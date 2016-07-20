@@ -294,6 +294,8 @@ tbm_format tbm_surface_internal_get_format(tbm_surface_h surface);
 unsigned int _tbm_surface_internal_get_debug_pid(tbm_surface_h surface);
 char *_tbm_surface_internal_format_to_str(tbm_format format);
 
+int _tbm_surface_internal_is_dump_enable(tbm_surface_dump_type type);
+
 tbm_user_data *user_data_lookup(struct list_head *user_data_list,
 				unsigned long key);
 tbm_user_data *user_data_create(unsigned long key,
