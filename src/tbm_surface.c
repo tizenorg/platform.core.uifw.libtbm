@@ -96,6 +96,9 @@ tbm_surface_map(tbm_surface_h surface, int opt, tbm_surface_info_s *info)
 
 	int ret = 0;
 
+	if (_tbm_surface_internal_is_dump_enable(TBM_SURFACE_DUMP_TYPE_MAP))
+		tbm_surface_internal_dump_buffer(surface, "map");
+
 	ret = tbm_surface_internal_get_info(surface, opt, info, 1);
 	if (ret == 0)
 		return TBM_SURFACE_ERROR_INVALID_OPERATION;
@@ -109,6 +112,9 @@ tbm_surface_unmap(tbm_surface_h surface)
 	TBM_TRACE("tbm_surface(%p)\n", surface);
 
 	TBM_RETURN_VAL_IF_FAIL(tbm_surface_internal_is_valid(surface), TBM_SURFACE_ERROR_INVALID_PARAMETER);
+
+	if (_tbm_surface_internal_is_dump_enable(TBM_SURFACE_DUMP_TYPE_MAP))
+		tbm_surface_internal_dump_buffer(surface, "unmap");
 
 	tbm_surface_internal_unmap(surface);
 

@@ -35,6 +35,12 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <tbm_bufmgr.h>
 
+typedef enum {
+	TBM_SURFACE_DUMP_TYPE_REF	= 0x01,
+	TBM_SURFACE_DUMP_TYPE_MAP	= 0x02,
+	TBM_SURFACE_DUMP_TYPE_QUEUE	= 0x04
+} tbm_surface_dump_type;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -451,6 +457,15 @@ void tbm_surface_internal_dump_shm_buffer(void *ptr, int w, int h, int stride, c
  * @param[in] path : the given dump path
  */
 void tbm_surface_internal_dump_all(char *path);
+
+/**
+ * @brief Start the dump debugging.
+ * @since_tizen 3.0
+ * @param[in] path : the given dump path
+ * @param[in] count : the dump count number
+ * @param[in] type : type of inner dump
+ */
+void tbm_surface_internal_dump_start_with_type(char *path, int count, tbm_surface_dump_type type);
 
 /**
  * @brief check valid tbm surface.
