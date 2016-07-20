@@ -650,6 +650,9 @@ tbm_surface_queue_enqueue(tbm_surface_queue_h
 	TBM_RETURN_VAL_IF_FAIL(surface != NULL,
 			       TBM_SURFACE_QUEUE_ERROR_INVALID_SURFACE);
 
+	if (_tbm_surface_internal_is_dump_enable(TBM_SURFACE_DUMP_TYPE_QUEUE))
+		tbm_surface_internal_dump_buffer(surface, "enqueue");
+
 	pthread_mutex_lock(&surface_queue->lock);
 
 	TBM_QUEUE_TRACE("tbm_surface_queue(%p) tbm_surface(%p)\n", surface_queue, surface);
@@ -717,6 +720,9 @@ tbm_surface_queue_dequeue(tbm_surface_queue_h
 
 	pthread_mutex_unlock(&surface_queue->lock);
 
+	if (_tbm_surface_internal_is_dump_enable(TBM_SURFACE_DUMP_TYPE_QUEUE))
+		tbm_surface_internal_dump_buffer(*surface, "dequeue");
+
 	return TBM_SURFACE_QUEUE_ERROR_NONE;
 }
 
@@ -763,6 +769,9 @@ tbm_surface_queue_release(tbm_surface_queue_h
 			       TBM_SURFACE_QUEUE_ERROR_INVALID_SURFACE);
 
 	pthread_mutex_lock(&surface_queue->lock);
+
+	if (_tbm_surface_internal_is_dump_enable(TBM_SURFACE_DUMP_TYPE_QUEUE))
+		tbm_surface_internal_dump_buffer(surface, "release");
 
 	TBM_QUEUE_TRACE("tbm_surface_queue(%p) tbm_surface(%p)\n", surface_queue, surface);
 
@@ -828,6 +837,9 @@ tbm_surface_queue_acquire(tbm_surface_queue_h
 	TBM_QUEUE_TRACE("tbm_surface_queue(%p) tbm_surface(%p)\n", surface_queue, *surface);
 
 	pthread_mutex_unlock(&surface_queue->lock);
+
+	if (_tbm_surface_internal_is_dump_enable(TBM_SURFACE_DUMP_TYPE_QUEUE))
+		tbm_surface_internal_dump_buffer(*surface, "acquire");
 
 	return TBM_SURFACE_QUEUE_ERROR_NONE;
 }
