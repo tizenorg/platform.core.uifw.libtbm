@@ -81,7 +81,8 @@ _tbm_set_last_result(tbm_error_e err)
 	tbm_last_error = err;
 }
 
-char * tbm_flag_to_str(int f) {
+char * tbm_flag_to_str(int f)
+{
 	static char str[255];
 	int c = 0;
 	if (f == TBM_BO_DEFAULT)
@@ -859,7 +860,7 @@ tbm_bo_import(tbm_bufmgr bufmgr, unsigned int key)
 		bo->flags = TBM_BO_DEFAULT;
 
 	TBM_TRACE("import new bo(%p) ref(%d) key(%d) flag(%s) in list\n",
-	 			bo, bo->ref_cnt, key, tbm_flag_to_str(bo->flags));
+			  bo, bo->ref_cnt, key, tbm_flag_to_str(bo->flags));
 
 	LIST_INITHEAD(&bo->user_data_list);
 
