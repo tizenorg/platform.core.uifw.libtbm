@@ -52,6 +52,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define TBM_UNLOCK()
 #endif
 
+typedef enum _queue_node_type {
+	QUEUE_NODE_TYPE_NONE,
+	QUEUE_NODE_TYPE_DEQUEUE,
+	QUEUE_NODE_TYPE_ENQUEUE,
+	QUEUE_NODE_TYPE_ACQUIRE,
+	QUEUE_NODE_TYPE_RELEASE
+} Queue_Node_Type;
+
 typedef struct {
 	struct list_head head;
 	int count;
@@ -62,6 +70,8 @@ typedef struct {
 
 	struct list_head item_link;
 	struct list_head link;
+
+	Queue_Node_Type type;
 
 	unsigned int priv_flags;	/*for each queue*/
 } queue_node;
@@ -175,6 +185,20 @@ _queue_node_pop(queue *queue, queue_node *node)
 	queue->count--;
 
 	return node;
+}
+
+static int
+_queue_has_node_type(tbm_surface_queue_h surface_queue, Queue_Node_Type type)
+{
+	queue_node *node = NULL;
+	queue_node *tmp = NULL;
+
+	LIST_FOR_EACH_ENTRY_SAFE(node, tmp, &surface_queue->list, link) {
+		if (node->type == type)
+			return 1;
+	}
+
+	return 0;
 }
 
 static queue_node *
@@ -672,6 +696,8 @@ tbm_surface_queue_enqueue(tbm_surface_queue_h
 		return TBM_SURFACE_QUEUE_ERROR_NONE;
 	}
 
+	node->type = QUEUE_NODE_TYPE_ENQUEUE;
+
 	pthread_mutex_unlock(&surface_queue->lock);
 	pthread_cond_signal(&surface_queue->dirty_cond);
 
@@ -711,6 +737,7 @@ tbm_surface_queue_dequeue(tbm_surface_queue_h
 		return TBM_SURFACE_QUEUE_ERROR_INVALID_QUEUE;
 	}
 
+	node->type = QUEUE_NODE_TYPE_DEQUEUE;
 	*surface = node->surface;
 
 	TBM_QUEUE_TRACE("tbm_surface_queue(%p) tbm_surface(%p)\n", surface_queue, *surface);
@@ -784,6 +811,8 @@ tbm_surface_queue_release(tbm_surface_queue_h
 		return TBM_SURFACE_QUEUE_ERROR_NONE;
 	}
 
+	node->type = QUEUE_NODE_TYPE_RELEASE;
+
 	pthread_mutex_unlock(&surface_queue->lock);
 	pthread_cond_signal(&surface_queue->free_cond);
 
@@ -823,6 +852,8 @@ tbm_surface_queue_acquire(tbm_surface_queue_h
 		return TBM_SURFACE_QUEUE_ERROR_INVALID_QUEUE;
 	}
 
+	node->type = QUEUE_NODE_TYPE_ACQUIRE;
+
 	*surface = node->surface;
 
 	TBM_QUEUE_TRACE("tbm_surface_queue(%p) tbm_surface(%p)\n", surface_queue, *surface);
@@ -843,6 +874,12 @@ tbm_surface_queue_can_acquire(tbm_surface_queue_h surface_queue, int wait)
 
 	if (_queue_is_empty(&surface_queue->dirty_queue)) {
 		if (wait) {
+			if (!_queue_has_node_type(surface_queue, QUEUE_NODE_TYPE_DEQUEUE)) {
+				TBM_LOG_E("Deosn't have dequeue type node\n");
+				pthread_mutex_unlock(&surface_queue->lock);
+				return 0;
+			}
+
 			pthread_cond_wait(&surface_queue->dirty_cond, &surface_queue->lock);
 			pthread_mutex_unlock(&surface_queue->lock);
 			return 1;
