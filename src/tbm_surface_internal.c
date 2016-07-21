@@ -49,15 +49,22 @@ static tbm_bufmgr g_surface_bufmgr;
 static pthread_mutex_t tbm_surface_lock;
 
 /* LCOV_EXCL_START */
+#define USE_REALTIME 1
 
-static unsigned long
-_get_time_in_millis(void)
+static unsigned int
+_tbm_surface_internal_get_time(void)
 {
-	struct timeval tv;
+	struct timespec tp;
+	unsigned int time;
 
-	gettimeofday(&tv, NULL);
+#if USE_REALTIME
+	clock_gettime(CLOCK_REALTIME, &tp);
+#else /* USE_MONOTONIC */
+	clock_gettime(CLOCK_MONOTONIC, &tp);
+#endif
+	time = (tp.tv_sec * 1000000L) + (tp.tv_nsec / 1000);
 
-	return (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
+	return time;
 }
 
 char *
@@ -1622,13 +1629,16 @@ tbm_surface_internal_dump_buffer(tbm_surface_h surface, const char *type)
 	switch (info.format) {
 	case TBM_FORMAT_ARGB8888:
 	case TBM_FORMAT_XRGB8888:
-		snprintf(buf_info->name, sizeof(buf_info->name), "%.3f_%03d_%p-%s.%s", _get_time_in_millis() / 1000.0, g_dump_info->count++, surface, type, postfix);
+		snprintf(buf_info->name, sizeof(buf_info->name), "%10.3f_%03d_%p-%s.%s",
+				 _tbm_surface_internal_get_time() / 1000.0,
+				 g_dump_info->count++, surface, type, postfix);
 		memcpy(bo_handle.ptr, info.planes[0].ptr, info.size);
 		break;
 	case TBM_FORMAT_YVU420:
 	case TBM_FORMAT_YUV420:
-		snprintf(buf_info->name, sizeof(buf_info->name), "%03d-%s_%dx%d_%c%c%c%c.%s",
-				g_dump_info->count++, type, info.planes[0].stride, info.height, FOURCC_STR(info.format), postfix);
+		snprintf(buf_info->name, sizeof(buf_info->name), "%10.3f_%03d-%s_%dx%d_%c%c%c%c.%s",
+				 _tbm_surface_internal_get_time() / 1000.0,
+				 g_dump_info->count++, type, info.planes[0].stride, info.height, FOURCC_STR(info.format), postfix);
 		memcpy(bo_handle.ptr, info.planes[0].ptr, info.planes[0].stride * info.height);
 		bo_handle.ptr += info.planes[0].stride * info.height;
 		memcpy(bo_handle.ptr, info.planes[1].ptr, info.planes[1].stride * (info.height >> 1));
@@ -1637,16 +1647,18 @@ tbm_surface_internal_dump_buffer(tbm_surface_h surface, const char *type)
 		break;
 	case TBM_FORMAT_NV12:
 	case TBM_FORMAT_NV21:
-		snprintf(buf_info->name, sizeof(buf_info->name), "%03d-%s_%dx%d_%c%c%c%c.%s",
-				g_dump_info->count++, type, info.planes[0].stride, info.height, FOURCC_STR(info.format), postfix);
+		snprintf(buf_info->name, sizeof(buf_info->name), "%10.3f_%03d-%s_%dx%d_%c%c%c%c.%s",
+				 _tbm_surface_internal_get_time() / 1000.0,
+				 g_dump_info->count++, type, info.planes[0].stride, info.height, FOURCC_STR(info.format), postfix);
 		memcpy(bo_handle.ptr, info.planes[0].ptr, info.planes[0].stride * info.height);
 		bo_handle.ptr += info.planes[0].stride * info.height;
 		memcpy(bo_handle.ptr, info.planes[1].ptr, info.planes[1].stride * (info.height >> 1));
 		break;
 	case TBM_FORMAT_YUYV:
 	case TBM_FORMAT_UYVY:
-		snprintf(buf_info->name, sizeof(buf_info->name), "%03d-%s_%dx%d_%c%c%c%c.%s",
-				g_dump_info->count++, type, info.planes[0].stride, info.height, FOURCC_STR(info.format), postfix);
+		snprintf(buf_info->name, sizeof(buf_info->name), "%10.3f_%03d-%s_%dx%d_%c%c%c%c.%s",
+				 _tbm_surface_internal_get_time() / 1000.0,
+				 g_dump_info->count++, type, info.planes[0].stride, info.height, FOURCC_STR(info.format), postfix);
 		memcpy(bo_handle.ptr, info.planes[0].ptr, info.planes[0].stride * info.height);
 		break;
 	default:
@@ -1707,8 +1719,9 @@ void tbm_surface_internal_dump_shm_buffer(void *ptr, int w, int h, int  stride, 
 	memset(bo_handle.ptr, 0x00, buf_info->size);
 	memset(&buf_info->info, 0x00, sizeof(tbm_surface_info_s));
 
-
-	snprintf(buf_info->name, sizeof(buf_info->name), "%03d-%s.%s", g_dump_info->count++, type, dump_postfix[0]);
+	snprintf(buf_info->name, sizeof(buf_info->name), "%10.3f_%03d-%s.%s",
+			 _tbm_surface_internal_get_time() / 1000.0,
+			 g_dump_info->count++, type, dump_postfix[0]);
 	memcpy(bo_handle.ptr, ptr, stride * h);
 
 	tbm_bo_unmap(buf_info->bo);
