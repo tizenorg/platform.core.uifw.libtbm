@@ -39,7 +39,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define TBM_QUEUE_DEBUG 0
 
 #ifdef TRACE
-#define TBM_QUEUE_TRACE(fmt, ...)  { if (bTrace&0x1) fprintf(stderr, "[TBM:TRACE(%d)(%s:%d)] " fmt, getpid(), __func__, __LINE__, ##__VA_ARGS__); }
+#define TBM_QUEUE_TRACE(fmt, ...)  { fprintf(stderr, "[TBM:TRACE(%d)(%s:%d)] " fmt, getpid(), __func__, __LINE__, ##__VA_ARGS__); }
 #else
 #define TBM_QUEUE_TRACE(fmt, ...)
 #endif /* TRACE */

@@ -271,19 +271,19 @@ _tbm_surface_internal_destroy(tbm_surface_h surface)
 	tbm_bufmgr bufmgr = surface->bufmgr;
 	tbm_user_data *old_data = NULL, *tmp = NULL;
 
-	for (i = 0; i < surface->num_bos; i++) {
-		surface->bos[i]->surface = NULL;
-
-		tbm_bo_unref(surface->bos[i]);
-		surface->bos[i] = NULL;
-	}
-
 	/* destory the user_data_list */
 	if (!LIST_IS_EMPTY(&surface->user_data_list)) {
 		LIST_FOR_EACH_ENTRY_SAFE(old_data, tmp, &surface->user_data_list, item_link) {
 			DBG("free user_data\n");
 			user_data_delete(old_data);
 		}
+	}
+
+	for (i = 0; i < surface->num_bos; i++) {
+		surface->bos[i]->surface = NULL;
+
+		tbm_bo_unref(surface->bos[i]);
+		surface->bos[i] = NULL;
 	}
 
 	LIST_DEL(&surface->item_link);
