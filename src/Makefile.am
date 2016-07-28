@@ -17,9 +17,13 @@ libtbm_la_SOURCES = \
 	tbm_surface.c \
 	tbm_surface_queue.c \
 	tbm_bufmgr_backend.c \
-	tbm_bufmgr.c \
+	tbm_bufmgr.c 
+
+if !ANDROID_SUPPORT
+	libtbm_la_SOURCES += \
 	tbm_drm_helper_server.c \
 	tbm_drm_helper_client.c
+endif
 
 nodist_libtbm_la_SOURCES =		\
 	wayland-tbm-drm-auth-server-protocol.h	\
