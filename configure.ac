@@ -44,6 +44,11 @@ m4_ifndef([PKG_PROG_PKG_CONFIG],
   ACLOCAL="aclocal -I/other/macro/dir" before running autoreconf.])])
 PKG_PROG_PKG_CONFIG()
 
+AC_ARG_ENABLE([android-support], AS_HELP_STRING([--enable-android-support], [to build for the Android]),,
+	      enable_android_support=no)
+
+AM_CONDITIONAL([ANDROID_SUPPORT], [test "x$enable_android_support" != "xno"])
+
 # set the dir for the tbm module
 DEFAULT_BUFMGR_MODULE_PATH="${libdir}/bufmgr"
 AC_ARG_WITH(bufmgr-module-path, AS_HELP_STRING([--with-bufmgr-module-path=PATH], [tbm bufmgr module dir]),
@@ -68,7 +73,10 @@ if test x"$capi_0_1_1" = xyes; then
 	AC_DEFINE(HAVE_CAPI_0_1_1,1,[The version of capi-base-common is over 0.1.1])
 fi
 
-PKG_CHECK_MODULES(LIBDRM, libdrm)
+if test "x$android_support" = "xno"; then
+      PKG_CHECK_MODULES(LIBDRM, libdrm)
+fi
+
 PKG_CHECK_MODULES(WL_CLIENT, wayland-client)
 PKG_CHECK_MODULES(WL_SERVER, wayland-server)
 PKG_CHECK_MODULES(WL_SCANNER, wayland-scanner)
